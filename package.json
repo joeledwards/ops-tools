@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "stack:nsq:start": "docker stack deploy --prune -c docker-compose.yml nsq",
+    "stack:nsq:stop": "docker stack rm nsq",
+    "test": "tap tests/unit/*.js"
   },
   "bin": {
     "ops": "bin/ops.js",

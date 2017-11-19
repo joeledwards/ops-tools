@@ -1,0 +1,45 @@
+version: '3.3'
+services:
+  nsqlookupd:
+    image: nsqio/nsq
+    command: /nsqlookupd
+    ports:
+      - "4160"
+      - "4161"
+    deploy:
+      mode: replicated
+      replicas: 2
+  nsqd:
+    image: nsqio/nsq
+    command: /nsqd --lookupd-tcp-address=nsqlookupd:4160
+    depends_on:
+      - nsqlookupd
+    ports:
+      - "4150"
+      - "4151"
+    deploy:
+      mode: replicated
+      replicas: 3
+  nsqadmin:
+    image: nsqio/nsq
+    command: /nsqadmin --lookupd-http-address=nsqlookupd:4161
+    depends_on:
+      - nsqlookupd  
+    ports:
+      - "4171"
+  producer:
+    image: node:8.9.1-alpine
+    command: node /opt/tests/docker/nsq-producer.js
+    volumes:
+      - ./:/opt
+  consumer:
+    image: node:8.9.1-alpine
+    command: node /opt/tests/docker/nsq-consumer.js
+    volumes:
+      - ./:/opt
+  debug:
+    image: node:8.9.1-alpine
+    command: node -e 'setInterval((() => console.log(`[${new Date().toISOString()}]`)), 15000)'
+    volumes:
+      - ./:/opt
+

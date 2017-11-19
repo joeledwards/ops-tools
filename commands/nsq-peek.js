@@ -13,7 +13,7 @@ const args = yargs.env('NSQ')
   .option('lookupd-host', {type: 'array', default: 'localhost:4161'})
   .string('topic').require('topic')
   .string('channel').default('channel', 'buzuli')
-  .string('clientId').default('channel', 'buzuli')
+  .string('clientId').default('clientId', 'buzuli')
   .number('limit').default('limit', 10)
   .boolean('unlimited').default('unlimited', false)
   .argv
