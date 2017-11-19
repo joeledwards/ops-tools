@@ -7,6 +7,6 @@ A suite of tools to help @buzuli be more productive at DevOps.
 
 ## Installing
 ```
-$ npm i -g devops
+$ npm i -g @buzuli/ops-tools
 ```
 
