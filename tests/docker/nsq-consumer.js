@@ -1,4 +1,5 @@
 const chalk = require('chalk')
+const durations = require('durations')
 const nsq = require('nsqjs')
 
 const log = require('../../lib/log')
@@ -14,20 +15,23 @@ const channel = 'consumer'
 let count = 0
 const reader = new nsq.Reader(topic, channel, options)
 
-reader.on('nsqd_connected', () => log('consumer -', green('connected')))
+reader.on('nsqd_connected', () => {
+  log.info('consumer -', green('connected'), `(${watch})`)
+})
 
 reader.on('nsqd_closed', () => {
-  log('consumer -', yellow('disconnected'))
+  log.info('consumer -', yellow('disconnected'), `(${watch})`)
   process.exit(0)
 })
 
-reader.on('error', error => log('consumer -', red('error'), ':', error))
+reader.on('error', error => log.error('consumer -', red('error'), ':', error))
 
 reader.on('message', msg => {
   count++
-  log('consumer -', blue(`received message #${count}`), ':', msg.body)
+  log.info('consumer -', blue(`received message #${count}`), ':', msg.body)
   msg.finish()
 })
 
+const watch = durations.stopwatch().start()
 reader.connect()
 

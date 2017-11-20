@@ -33,12 +33,12 @@ function publish () {
 }
 
 writer.on('ready', () => {
-  log.info('producer -', green(`connected (${watch})`))
+  log.info('producer -', green('connected'), `(${watch})`)
   intervalRef = setInterval(publish, interval)
 })
 
 writer.on('closed', () => {
-  log.info('producer -', yellow(`disconnected (${watch})`))
+  log.info('producer -', yellow('disconnected'), `(${watch})`)
 })
 
 writer.on('error', error => {
