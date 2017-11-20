@@ -39,7 +39,7 @@ services:
       - ./:/opt
   debug:
     image: node:8.9.1-alpine
-    command: node -e 'setInterval((() => console.log(`[${new Date().toISOString()}]`)), 15000)'
+    command: node -e 'setInterval((() => console.log(`[$${new Date().toISOString()}]`)), 15000)'
     volumes:
       - ./:/opt
 

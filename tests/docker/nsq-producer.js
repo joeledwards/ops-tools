@@ -1,2 +1,51 @@
-chalk = require('chalk')
-nsq = require('nsqjs')
+const chalk = require('chalk')
+const durations = require('durations')
+const nsq = require('nsqjs')
+const v1uuid = require('uuid/v1')
+
+const log = require('../../lib/log')
+const {blue, green, red, yellow} = require('../../lib/color')
+
+const interval = 5000
+const host = 'nsqd'
+const port = 4151
+const options = {}
+const topic = 'messages'
+
+let count = 0
+let intervalRef
+const writer = new nsq.Writer(host, port, options)
+
+function publish () {
+  count++
+
+  const message = {
+    index: count,
+    id: v1uuid(),
+    timestamp: new Date().toISOString()
+  }
+
+  log.info(`producer - sending message ${count}`)
+
+  writer.publish(topic, message, () => {
+    log.info('producer -', blue(`message ${count} sent`))
+  })
+}
+
+writer.on('ready', () => {
+  log.info('producer -', green(`connected (${watch})`))
+  intervalRef = setInterval(publish, interval)
+  setInterval(publish, interval)
+})
+
+writer.on('closed', () => {
+  log.info('producer -', yellow(`disconnected (${watch})`))
+})
+
+writer.on('error', error => {
+  log.error('producer -', red('error'), ':', error)
+})
+
+watch = durations.stopwatch().start()
+writer.connect()
+
