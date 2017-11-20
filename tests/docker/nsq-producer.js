@@ -6,7 +6,7 @@ const v1uuid = require('uuid/v1')
 const log = require('../../lib/log')
 const {blue, green, red, yellow} = require('../../lib/color')
 
-const interval = 5000
+const interval = 1000
 const host = 'nsqd'
 const port = 4150
 const options = {}
@@ -35,7 +35,6 @@ function publish () {
 writer.on('ready', () => {
   log.info('producer -', green(`connected (${watch})`))
   intervalRef = setInterval(publish, interval)
-  setInterval(publish, interval)
 })
 
 writer.on('closed', () => {
