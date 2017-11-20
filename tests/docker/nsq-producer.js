@@ -8,7 +8,7 @@ const {blue, green, red, yellow} = require('../../lib/color')
 
 const interval = 5000
 const host = 'nsqd'
-const port = 4151
+const port = 4150
 const options = {}
 const topic = 'messages'
 
@@ -17,18 +17,18 @@ let intervalRef
 const writer = new nsq.Writer(host, port, options)
 
 function publish () {
-  count++
+  let index = count++
 
   const message = {
-    index: count,
+    index,
     id: v1uuid(),
     timestamp: new Date().toISOString()
   }
 
-  log.info(`producer - sending message ${count}`)
+  log.info(`producer - sending message ${index}`)
 
   writer.publish(topic, message, () => {
-    log.info('producer -', blue(`message ${count} sent`))
+    log.info('producer -', blue(`message ${index} sent`))
   })
 }
 
