@@ -3,10 +3,11 @@ const durations = require('durations')
 const nsq = require('nsqjs')
 
 const log = require('../../lib/log')
-const {green, red, yellow} = require('../../lib/color')
+const {blue, green, red, yellow} = require('../../lib/color')
 
 const options = {
-  lookupdHTTPAddresses: ['nsqlookupd:4160']
+  //lookupdHTTPAddresses: ['nsqlookupd:4160']
+  nsqdTCPAddresses: ['nsqd:4150']
 }
 
 const topic = 'messages'
@@ -24,11 +25,18 @@ reader.on('nsqd_closed', () => {
   process.exit(0)
 })
 
-reader.on('error', error => log.error('consumer -', red('error'), ':', error))
+reader.on('error', error => {
+  log.error('consumer -', red('error'), ':', error)
+  process.exit(1)
+})
 
 reader.on('message', msg => {
   count++
-  log.info('consumer -', blue(`received message #${count}`), ':', msg.body)
+  try {
+    log.info('consumer -', blue(`received message #${count}`), ':', msg.json())
+  } catch (error) {
+    log.error('consumer -', red(`error parsing message #${count}`), ':', msg.data)
+  }
   msg.finish()
 })
 

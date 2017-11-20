@@ -6,50 +6,93 @@ const log = require('../lib/log')
 const {blue, green, red, yellow} = require('../lib/color')
 
 const args = yargs.env('NSQ')
-  .option('lookupd-host', {type: 'array', default: 'localhost:4161'})
-  .string('topic').require('topic')
-  .string('channel').default('channel', 'buzuli')
-  .string('clientId').default('clientId', 'buzuli')
+  .boolean('ack').default('ack', true)
+  .string('channel').default('channel', 'buzuli#ephemeral')
+  .string('client-id').default('client-id', 'buzuli')
   .number('limit').default('limit', 10)
+  .option('lookupd-host', {type: 'array'})
+  .option('nsqd-host', {type: 'array'})
+  .number('requeue-delay').default('requeue-delay', 100)
+  .string('topic').require('topic')
   .boolean('unlimited').default('unlimited', false)
   .argv
 
 const {
+  ack,
   channel,
   clientId,
   limit,
   lookupdHost,
+  nsqdHost,
+  requeueDelay,
   topic,
   unlimited
 } = args
 
-log.info(`lookupd hosts: ${lookupdHost}`)
-log.info(`        topic: ${topic}`)
-log.info(`      channel: ${channel}`)
-log.info(`        limit: ${limit}`)
-log.info(`    unlimited: ${unlimited}`)
-log.info(`    client-id: ${clientId}`)
+const options = {clientId}
 
-const options = {
-  lookupdHTTPAddresses: lookupdHost,
-  clientId
+if (nsqdHost) {
+  log.info(`   nsqd hosts: ${nsqdHost}`)
+  options.nsqdTCPAddresses = nsqdHost
+} else if (lookupdHost) {
+  log.info(`lookupd hosts: ${lookupdHost}`)
+  options.lookupdHTTPAddresses = lookupdHost
+} else {
+  log.error(`You must specify at least one host (--nsqdHost > --lookupdHost).`)
+  process.exit(1)
 }
 
+const limitStr = unlimited ? '∞' : `${limit}`
+const progress = () => `${count}/${limitStr}`
+
+log.info(`        topic: ${topic}`)
+log.info(`      channel: ${channel}`)
+log.info(`        limit: ${limitStr}`)
+log.info(`    client-id: ${clientId}`)
+
 let count = 0
+let halting = false
 const reader = new nsq.Reader(topic, channel, options)
+
+// Schedule halt
+function shutdown () {
+  if (!halting) {
+    const delay = 1000
+    const termTime = new Date(new Date().getTime() + delay).toISOString()
+    log.info(yellow(`scheduling connection to terminate at`), termTime)
+    halting = true
+    setTimeout(closer, 1000)
+  }
+}
+
+function closer () {
+  log.info(yellow(`closing connection now`))
+  reader.close()
+}
+
+function messageHandler (msg) {
+  count++
+  log.info(msg.json())
+
+  if (ack) {
+    log.info(blue(`acknowledging message ${progress()}`))
+    msg.finish()
+  } else {
+    log.info(yellow(`re-queueing message ${progress()}`))
+    msg.requeue(requeueDelay)
+  }
+
+  if (!unlimited && count >= limit) {
+    log.info(yellow(`${progress()} messages received; halting`))
+    reader.removeListener('message', messageHandler)
+    setTimeout(shutdown)
+  }
+}
 
 reader.on('nsqd_connected', () => log.info(green('connected')))
 reader.on('nsqd_closed', () => log.info(yellow('disconnected')))
 reader.on('error', error => log.error('error', ':', error))
-reader.on('message', msg => {
-  count++
-  log.info(msg.body)
-  msg.finish()
-
-  if (!unlimited && count >= limit) {
-    reader.close()
-  }
-})
+reader.on('message', messageHandler)
 
 reader.connect()
 

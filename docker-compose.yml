@@ -8,10 +8,10 @@ services:
       - "4161"
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: 1
   nsqd:
     image: nsqio/nsq
-    command: /nsqd --lookupd-tcp-address=nsqlookupd:4160
+    command: /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160
     depends_on:
       - nsqlookupd
     ports:
@@ -19,14 +19,17 @@ services:
       - "4151"
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 1
   nsqadmin:
     image: nsqio/nsq
     command: /nsqadmin --lookupd-http-address=nsqlookupd:4161
     depends_on:
       - nsqlookupd  
     ports:
-      - "4171"
+      - "4171:4171"
+    deploy:
+      mode: replicated
+      replicas: 1
   producer:
     image: node:8.9.1-alpine
     command: node /opt/tests/docker/nsq-producer.js
