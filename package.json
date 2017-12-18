@@ -1,8 +1,7 @@
 {
   "name": "ops-tools",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Miscellaneous ops tools to make my life easier.",
   "scripts": {
     "stack:nsq:start": "docker stack deploy --prune -c docker-compose.yml nsq",
     "stack:nsq:stop": "docker stack rm nsq",
@@ -15,17 +14,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.150.0",
+    "aws-sdk": "^2.171.0",
     "bluebird": "^3.5.1",
     "bole": "^3.0.2",
     "chalk": "^2.3.0",
     "durations": "^3.0.0",
     "ioredis": "^3.2.1",
-    "nsqjs": "^0.9.2",
+    "nsqjs": "^0.10.0",
     "pg": "^7.4.0",
     "ramda": "^0.25.0",
     "shelljs": "^0.7.8",
-    "tap": "^10.7.3",
+    "tap": "^11.0.0",
     "uuid": "^3.1.0",
     "yargs": "^10.0.3"
   }
