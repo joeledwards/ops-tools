@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const cw = require('../lib/cloudwatch')
+const cw = require('../lib/cloudwatch')()
 
 const {red, yellow, green} = chalk
 

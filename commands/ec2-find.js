@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const ec2 = require('../lib/ec2')
+const ec2 = require('../lib/ec2')()
 
 const {
   compose, filter, head, map, path, pathEq, values
