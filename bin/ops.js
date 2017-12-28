@@ -1,5 +1,10 @@
 #!/usr/bin/env node
-require('yargs')
-.commandDir('../commands')
-.showHelp()
-.argv
+const yargs = require('yargs')
+
+function run () {
+  return yargs
+  .commandDir('../commands')
+  .argv
+}
+
+run()

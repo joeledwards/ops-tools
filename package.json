@@ -5,6 +5,9 @@
   "scripts": {
     "stack:nsq:start": "docker stack deploy --prune -c docker-compose.yml nsq",
     "stack:nsq:stop": "docker stack rm nsq",
+    "lint": "standard",
+    "lint:fix": "standard --fix",
+    "pretest": "standard",
     "test": "tap tests/unit/*.js"
   },
   "bin": {
@@ -14,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@buzuli/color": "^1.1.1",
     "async": "^2.6.0",
     "aws-sdk": "^2.171.0",
     "bluebird": "^3.5.1",
@@ -25,8 +29,11 @@
     "pg": "^7.4.0",
     "ramda": "^0.25.0",
     "shelljs": "^0.7.8",
-    "tap": "^11.0.0",
     "uuid": "^3.1.0",
     "yargs": "^10.0.3"
+  },
+  "devDependencies": {
+    "standard": "^10.0.3",
+    "tap": "^11.0.0"
   }
 }

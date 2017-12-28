@@ -1,10 +1,9 @@
-const chalk = require('chalk')
 const nsq = require('nsqjs')
 const {isNil} = require('ramda')
 const yargs = require('yargs')
+const {blue, green, yellow} = require('@buzuli/color')
 
 const log = require('../lib/log')
-const {blue, green, red, yellow} = require('../lib/color')
 
 const args = yargs.env('NSQ')
   .boolean('ack').default('ack', true)
@@ -119,4 +118,3 @@ reader.on('error', error => log.error('error', ':', error))
 reader.on('message', messageHandler)
 
 reader.connect()
-

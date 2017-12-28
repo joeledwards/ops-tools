@@ -10,10 +10,10 @@ const options = {
   MinCount: 1,
   MaxCount: 1,
   SecurityGroups: [
-      "git-deploy"
-    , "corporate"
-    , "default"
-    , "fastly"
+    'git-deploy',
+    'corporate',
+    'default',
+    'fastly'
   ],
   Placement: {
     AvailabilityZone: 'us-west-2a'
@@ -59,4 +59,3 @@ launchInstances(options)
   ))
   process.exit(1)
 })
-

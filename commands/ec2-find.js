@@ -2,7 +2,7 @@ const chalk = require('chalk')
 const ec2 = require('../lib/ec2')()
 
 const {
-  compose, filter, head, map, path, pathEq, values
+  compose, filter, head, map, match, path, pathEq
 } = require('ramda')
 
 const {red, yellow, green} = chalk
@@ -16,13 +16,12 @@ const findName = instance => {
 }
 
 ec2.findInstances({
-  //instanceFilter: instance => true,
   instanceFilter: instance => {
     return compose(
       head,
       match(/frontdoor-19/),
       path(['Value']),
-      pathEq(['Key'], 'Name'),
+      pathEq(['Key'], 'Name')
     )(instance.Tags)
   },
   fieldExtractor: instance => {
@@ -34,7 +33,9 @@ ec2.findInstances({
     } = instance
 
     return {
-      id, sshKey, name: findName(instance),
+      id,
+      sshKey,
+      name: findName(instance),
       network: {
         privateIp, publicIp
       }
@@ -56,4 +57,3 @@ ec2.findInstances({
   ))
   process.exit(1)
 })
-

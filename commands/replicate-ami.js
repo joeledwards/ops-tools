@@ -1,10 +1,11 @@
+const async = require('async')
 const {red, yellow, green} = require('chalk')
-const {head, join, tail} = require('ramda')
+const {head} = require('ramda')
 const newEc2 = require('../lib/ec2')
 const regions = require('../lib/aws-regions')
 
 // Copy an AMI from another region to the current region.
-function copyImage({ec2, srcRegion, srcAmi, amiName, amiDesc}) {
+function copyImage ({ec2, srcRegion, srcAmi, amiName, amiDesc}) {
   return new Promise((resolve, reject) => {
     const options = {
       SourceRegion: srcRegion,
@@ -25,13 +26,12 @@ function copyImage({ec2, srcRegion, srcAmi, amiName, amiDesc}) {
   })
 }
 
-function publishImage({ec2, ami}) {
+function publishImage ({ec2, ami}) {
   return new Promise((resolve, reject) => {
-    //process.env.AWS_REGION = region // Shouldn't be necessary here
-
     // Make the image public.
+    const region = ec2.aws.region
     const options = {
-      ImageId: ami, 
+      ImageId: ami,
       Attribute: 'launchPermission',
       LaunchPermission: {
         Add: [{Group: 'all'}]
@@ -52,7 +52,7 @@ function publishImage({ec2, ami}) {
 
         resolve({
           ami,
-          region: ec2.aws.region,
+          region,
           published: true
         })
       }
@@ -60,13 +60,15 @@ function publishImage({ec2, ami}) {
   })
 }
 
-function replicateImage({srcRegion, srcAmi, dstRegion, amiName, amiDesc, publish}) {
+function replicateImage ({srcRegion, srcAmi, dstRegion, amiName, amiDesc, publish}) {
   const ec2 = newEc2({region: dstRegion})
 
-  getAmiName(srcRegion, srcAmi)
+  getImageInfo({srcRegion, srcAmi})
   .then(({name, description}) => {
     return copyImage({
-      ec2, dstRegion, srcAmi,
+      ec2,
+      dstRegion,
+      srcAmi,
       amiName: amiName || name,
       amiDesc: amiDesc || description
     })
@@ -84,31 +86,12 @@ function replicateImage({srcRegion, srcAmi, dstRegion, amiName, amiDesc, publish
   })
 }
 
-function getImageInfo({srcRegion, srcAmi}) {
+function getImageInfo ({srcRegion, srcAmi}) {
   return new Promise((resolve, reject) => {
     const ec2 = newEc2({region: srcRegion})
 
-    /*
     const options = {
-      ImageId: srcAmi,
-      Attribute: 'description',
-    }
-
-    ec2.api.describeImageAttribute(options, (error, data) => {
-      if (error) {
-        reject(error)
-      } else {
-        console.log(data)
-        resolve({
-          name: data.Name,
-          description: data.Description.Value
-        })
-      }
-    })
-    */
-
-    const options = {
-      ImageIds: [srcAmi],
+      ImageIds: [srcAmi]
     }
 
     ec2.api.describeImages(options, (error, data) => {
@@ -127,7 +110,7 @@ function getImageInfo({srcRegion, srcAmi}) {
 }
 
 // Run through all regions
-function run() {
+function run () {
   const publish = true // defaults to true
   let srcRegion // Required
   let srcAmi // Required
@@ -149,17 +132,5 @@ function run() {
   })
 }
 
-// Example
-function imgInfo() {
-  const srcRegion = 'us-west-2'
-  const srcAmi = 'ami-5ef1693e'
-
-  getImageInfo({srcRegion, srcAmi})
-  .then(({name, description}) => {
-    console.log(`Image ${yellow(srcAmi)} from region ${yellow(srcRegion)}:\n[${name}] ${description}`)
-  })
-  .catch(console.error)
-}
-
-// TODO: export
-
+// TODO: export instead of run
+run()

@@ -1,12 +1,10 @@
-const chalk = require('chalk')
 const durations = require('durations')
 const nsq = require('nsqjs')
+const {blue, green, red, yellow} = require('@buzuli/color')
 
 const log = require('../../lib/log')
-const {blue, green, red, yellow} = require('../../lib/color')
 
 const options = {
-  //lookupdHTTPAddresses: ['nsqlookupd:4160']
   nsqdTCPAddresses: ['nsqd:4150']
 }
 
@@ -42,4 +40,3 @@ reader.on('message', msg => {
 
 const watch = durations.stopwatch().start()
 reader.connect()
-
