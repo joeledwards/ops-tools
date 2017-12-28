@@ -8,6 +8,7 @@
     "lint": "standard",
     "lint:fix": "standard --fix",
     "pretest": "standard",
+    "start": "node bin/ops.js",
     "test": "tap tests/unit/*.js"
   },
   "bin": {
@@ -22,7 +23,6 @@
     "aws-sdk": "^2.171.0",
     "bluebird": "^3.5.1",
     "bole": "^3.0.2",
-    "chalk": "^2.3.0",
     "durations": "^3.0.0",
     "ioredis": "^3.2.1",
     "nsqjs": "^0.10.0",

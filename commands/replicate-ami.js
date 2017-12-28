@@ -1,5 +1,5 @@
 const async = require('async')
-const {red, yellow, green} = require('chalk')
+const {red, yellow, green} = require('@buzuli/color')
 const {head} = require('ramda')
 const newEc2 = require('../lib/ec2')
 const regions = require('../lib/aws-regions')
@@ -63,7 +63,7 @@ function publishImage ({ec2, ami}) {
 function replicateImage ({srcRegion, srcAmi, dstRegion, amiName, amiDesc, publish}) {
   const ec2 = newEc2({region: dstRegion})
 
-  getImageInfo({srcRegion, srcAmi})
+  return getImageInfo({srcRegion, srcAmi})
   .then(({name, description}) => {
     return copyImage({
       ec2,
@@ -110,7 +110,7 @@ function getImageInfo ({srcRegion, srcAmi}) {
 }
 
 // Run through all regions
-function run () {
+function handler (argv) {
   const publish = true // defaults to true
   let srcRegion // Required
   let srcAmi // Required
@@ -132,5 +132,21 @@ function run () {
   })
 }
 
-// TODO: export instead of run
-run()
+function builder (yargs) {
+  return yargs
+    .option('name', {
+      type: 'string',
+      desc: 'AMI name (defaults to that of the source AMI)'
+    })
+    .option('description', {
+      type: 'string',
+      desc: 'AMI description (defaults to that of the source AMI)'
+    })
+}
+
+module.exports = {
+  command: 'replicate-ami <src-region> <src-ami>',
+  desc: 'replicate an AMI from one region to all others',
+  builder,
+  handler
+}
