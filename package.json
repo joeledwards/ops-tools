@@ -1,5 +1,5 @@
 {
-  "name": "ops-tools",
+  "name": "@buzuli/ops-tools",
   "version": "1.0.0",
   "description": "Miscellaneous ops tools to make my life easier.",
   "scripts": {

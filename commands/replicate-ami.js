@@ -218,11 +218,15 @@ function replicateImage (options) {
 
 // Run through all regions
 function handler (argv) {
-  const {srcRegion, srcAmi, simulate} = argv
-
+  const {srcRegion, srcAmi, simulate, publish, name, description} = argv
   setSimulate(simulate)
 
-  log.info(yellow('Configuration:'), argv)
+  log.info(`Replicating image ${blue(srcAmi)} from ${yellow(srcRegion)} to all regions`)
+  log.info(`   visibility: ${publish ? 'public' : 'private'}`)
+  log.info(`   simulation: ${simulate}`)
+  log.info(`         name: ${description ? name : 'use source AMI name'}`)
+  log.info(`  description: ${description ? description : 'use source AMI description'}`)
+  log.info()
 
   // Map each region to a replicator function.
   const actions = regions.general
