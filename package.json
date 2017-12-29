@@ -9,7 +9,7 @@
     "lint:fix": "standard --fix",
     "pretest": "standard",
     "start": "node bin/ops.js",
-    "test": "tap tests/unit/*.js"
+    "test": "nyc tap tests/unit/*.js"
   },
   "bin": {
     "ops": "bin/ops.js",

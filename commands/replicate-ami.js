@@ -30,7 +30,7 @@ let log = {
   warn: logWarp(console.warn.bind(console))
 }
 
-function isDryRunError(error) {
+function isDryRunError (error) {
   return error.code === 'DryRunOperation'
 }
 
@@ -63,7 +63,7 @@ function pollAmiReady (options) {
         if (value.state === 'available') {
           log.info(emoji.inject(`Image ${yellow(region)}:${green(ami)} is available :tada:`))
           return false
-        } else if (value.state == 'pending') {
+        } else if (value.state === 'pending') {
           log.info(`Image ${yellow(region)}:${green(ami)} is not ready [state=${red(value.state)}]`)
         } else {
           log.error(`Bad state (${red(value.state)}) for image ${yellow(region)}:${green(ami)}`)
@@ -129,16 +129,15 @@ function publishImage ({ec2, ami, simulate}) {
         published: true
       })
     } else {
-
       ec2.api.modifyImageAttribute(options, (error, data) => {
         if (error) {
-            log.error(error)
-            log.error(
-              red(`Error publishing image ${yellow(ami)} in region ${yellow(region)}.`),
-              emoji.inject(`Details above :point_up:`)
-            )
+          log.error(error)
+          log.error(
+            red(`Error publishing image ${yellow(ami)} in region ${yellow(region)}.`),
+            emoji.inject(`Details above :point_up:`)
+          )
 
-            reject(error)
+          reject(error)
         } else {
           log.debug(data)
           log.debug(green(`Updated image ${yellow(ami)} in region ${yellow(region)}`))
@@ -182,7 +181,7 @@ function getImageInfo ({region, ami, simulate}) {
           description: img.Description,
           name: img.Name,
           public: img.Public,
-          state: imag.State
+          state: img.State
         })
       }
     })
@@ -195,27 +194,26 @@ function replicateImage (options) {
   const ec2 = newEc2({region: dstRegion})
 
   return getImageInfo({region: srcRegion, ami: srcAmi, simulate})
-  .then(({name, description}) => {
-
-    return copyImage({
-      ...options,
-      ec2,
-      amiName: amiName || name,
-      amiDesc: amiDesc || description
+    .then(({name, description}) => {
+      return copyImage({
+        ...options,
+        ec2,
+        amiName: amiName || name,
+        amiDesc: amiDesc || description
+      })
     })
-  })
-  .then(({ami}) => {
-    if (publish) {
-      return pollAmiReady({region: dstRegion, ami, simulate})
-        .then(() => publishImage({ec2, ami, simulate}))
-    } else {
-      return {
-        ami,
-        region: ec2.aws.region,
-        published: false
+    .then(({ami}) => {
+      if (publish) {
+        return pollAmiReady({region: dstRegion, ami, simulate})
+          .then(() => publishImage({ec2, ami, simulate}))
+      } else {
+        return {
+          ami,
+          region: ec2.aws.region,
+          published: false
+        }
       }
-    }
-  })
+    })
 }
 
 // Run through all regions
@@ -255,7 +253,6 @@ function handler (argv) {
     })
 
   // Process the regions in sequence.
-  //*
   async.series(actions, error => {
     if (error) {
       log.error(error)
@@ -267,7 +264,6 @@ function handler (argv) {
       log.info(green('AMI replicated to all target regions'))
     }
   })
-  //*/
 }
 
 function builder (yargs) {
