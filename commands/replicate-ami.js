@@ -2,22 +2,17 @@ const async = require('async')
 const {red, yellow, green, blue, purple, emoji} = require('@buzuli/color')
 const {head} = require('ramda')
 const poller = require('promise-poller').default
-const mem = require('mem')
-const newEc2 = mem(require('../lib/ec2'))
+const newEc2 = require('../lib/ec2')
 const random = require('../lib/random')
 const regions = require('../lib/aws-regions')
 
 let sim
 const setSimulate = simulate => {
-  sim = (simulate === true) ? `[${purple('SIMULATE')}] ` : null
+  sim = (simulate === true) ? `[${purple('SIMULATE')}]` : null
 }
 const logWarp = logFunc => (...args) => {
   if (sim) {
-    if (typeof args[0] === 'string') {
-      args[0] = `${sim}${args[0]}`
-    } else {
-      args.unshift(sim)
-    }
+    args.unshift(sim)
   }
 
   logFunc(...args)
