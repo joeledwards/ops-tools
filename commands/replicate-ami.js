@@ -1,6 +1,7 @@
 const async = require('async')
 const {red, yellow, green, blue, purple, emoji} = require('@buzuli/color')
 const {head} = require('ramda')
+const poller = require('promise-poller').default
 const mem = require('mem')
 const newEc2 = mem(require('../lib/ec2'))
 const random = require('../lib/random')
@@ -35,8 +36,45 @@ function isDryRunError(error) {
 
 // Poll an AMI to determine when it is available
 function pollAmiReady (options) {
-  return new Promise((resolve, reject) => {
-    getImageInfo(options)
+  const {region, ami, simulate} = options
+
+  let bail = false
+  let failures = 1
+  const taskFn = () => {
+    if (bail) {
+      return false
+    } else if (simulate && failures-- > 0) {
+      return Promise.resolve({
+        state: 'pending'
+      })
+    } else {
+      return getImageInfo(options)
+    }
+  }
+
+  return poller({
+    interval: 5000,
+    timeout: 5000,
+    retries: 30,
+    shouldContinue: (cause, value) => {
+      if (cause) {
+        log.error(red(`Error polling state of ${yellow(ami)} :`), `${cause}`)
+      } else {
+        if (value.state === 'available') {
+          log.info(emoji.inject(`Image ${yellow(region)}:${green(ami)} is available :tada:`))
+          return false
+        } else if (value.state == 'pending') {
+          log.info(`Image ${yellow(region)}:${green(ami)} is not ready [state=${red(value.state)}]`)
+        } else {
+          log.error(`Bad state (${red(value.state)}) for image ${yellow(region)}:${green(ami)}`)
+          bail = true
+          return true
+        }
+      }
+
+      return true
+    },
+    taskFn
   })
 }
 
@@ -168,7 +206,8 @@ function replicateImage (options) {
   })
   .then(({ami}) => {
     if (publish) {
-      return publishImage({ec2, region: dstRegion, ami, simulate})
+      return pollAmiReady({region: dstRegion, ami, simulate})
+        .then(() => publishImage({ec2, ami, simulate}))
     } else {
       return {
         ami,
@@ -220,9 +259,10 @@ function handler (argv) {
   async.series(actions, error => {
     if (error) {
       log.error(error)
-      log.error(red(
-        `Error replicating image ${srcRegion}:${srcAmi} :`
-      ), 'details above')
+      log.error(
+        red(`Error replicating image ${srcRegion}:${srcAmi}.`),
+        emoji.inject('Details above :point_up:')
+      )
     } else {
       log.info(green('AMI replicated to all target regions'))
     }
