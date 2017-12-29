@@ -4,19 +4,30 @@ const {head} = require('ramda')
 const newEc2 = require('../lib/ec2')
 const regions = require('../lib/aws-regions')
 
+function isDryRunError(error) {
+  return error.code === 'DryRunOperation'
+}
+
 // Copy an AMI from another region to the current region.
-function copyImage ({ec2, srcRegion, srcAmi, amiName, amiDesc}) {
+function copyImage ({ec2, srcRegion, srcAmi, amiName, amiDesc, simulate}) {
   return new Promise((resolve, reject) => {
     const options = {
+      DryRun: simulate,
       SourceRegion: srcRegion,
-      SourceAmi: srcAmi,
+      SourceImageId: srcAmi,
       Name: amiName,
       Description: amiDesc
     }
 
     ec2.api.copyImage(options, (error, data) => {
       if (error) {
-        reject(error)
+        if (simulate && isDryRunError(error)) {
+          resolve({
+            ami: 'sim-ami'
+          })
+        } else {
+          reject(error)
+        }
       } else {
         resolve({
           ami: data.ImageId
@@ -26,11 +37,13 @@ function copyImage ({ec2, srcRegion, srcAmi, amiName, amiDesc}) {
   })
 }
 
-function publishImage ({ec2, ami}) {
+// Make an AMI public
+function publishImage ({ec2, ami, simulate}) {
   return new Promise((resolve, reject) => {
     // Make the image public.
     const region = ec2.aws.region
     const options = {
+      DryRun: simulate,
       ImageId: ami,
       Attribute: 'launchPermission',
       LaunchPermission: {
@@ -40,12 +53,23 @@ function publishImage ({ec2, ami}) {
 
     ec2.api.modifyImageAttribute(options, (error, data) => {
       if (error) {
-        console.error(error)
-        console.error(red(
-          `Error updating image ${yellow(ami)} in region ${yellow(region)} : details above`
-        ))
+        if (simulate && isDryRunError(error)) {
+          resolve({
+            ami,
+            region,
+            published: true
+          })
+          console.log(green(
+            `[SIMULATED] Updated image ${yellow(ami)} in region ${yellow(region)}`
+          ))
+        } else {
+          console.error(error)
+          console.error(red(
+            `Error updating image ${yellow(ami)} in region ${yellow(region)} : details above`
+          ))
 
-        reject(error)
+          reject(error)
+        }
       } else {
         console.log(data)
         console.log(green(`Updated image ${yellow(ami)} in region ${yellow(region)}`))
@@ -60,15 +84,49 @@ function publishImage ({ec2, ami}) {
   })
 }
 
-function replicateImage ({srcRegion, srcAmi, dstRegion, amiName, amiDesc, publish}) {
+// Fetch AMI details
+function getImageInfo ({srcRegion, srcAmi, simulate}) {
+  return new Promise((resolve, reject) => {
+    const ec2 = newEc2({region: srcRegion})
+
+    const options = {
+      DryRun: simulate,
+      ImageIds: [srcAmi]
+    }
+
+    ec2.api.describeImages(options, (error, data) => {
+      if (error) {
+        if (simulate && isDryRunError(error)) {
+          resolve({
+            name: 'sim-ami-name',
+            description: 'sim ami description',
+            public: true
+          })
+        } else {
+          reject(error)
+        }
+      } else {
+        const img = head(data.Images)
+        resolve({
+          name: img.Name,
+          description: img.Description,
+          public: img.Public
+        })
+      }
+    })
+  })
+}
+
+// Copy, update, and optionally publish an AMI
+function replicateImage (options) {
+  const {dstRegion, amiName, amiDesc, publish} = options
   const ec2 = newEc2({region: dstRegion})
 
-  return getImageInfo({srcRegion, srcAmi})
+  return getImageInfo(options)
   .then(({name, description}) => {
     return copyImage({
+      ...options,
       ec2,
-      dstRegion,
-      srcAmi,
       amiName: amiName || name,
       amiDesc: amiDesc || description
     })
@@ -86,61 +144,57 @@ function replicateImage ({srcRegion, srcAmi, dstRegion, amiName, amiDesc, publis
   })
 }
 
-function getImageInfo ({srcRegion, srcAmi}) {
-  return new Promise((resolve, reject) => {
-    const ec2 = newEc2({region: srcRegion})
-
-    const options = {
-      ImageIds: [srcAmi]
-    }
-
-    ec2.api.describeImages(options, (error, data) => {
-      if (error) {
-        reject(error)
-      } else {
-        const img = head(data.Images)
-        resolve({
-          name: img.Name,
-          description: img.Description,
-          public: img.Public
-        })
-      }
-    })
-  })
-}
-
 // Run through all regions
 function handler (argv) {
-  const publish = true // defaults to true
-  let srcRegion // Required
-  let srcAmi // Required
-  let amiName // Should pull name from source image if the name is not supplied
-  let amiDesc // Should pull name from source image if the name is not supplied
+  console.log(yellow('Configuration:'), argv)
+  const {srcRegion, srcAmi} = argv
 
   // Map each region to a replicator function.
-  const actions = regions.general.map(dstRegion => {
-    return next => {
-      replicateImage({srcRegion, srcAmi, dstRegion, amiName, amiDesc, publish})
-      .then(next, next)
-    }
-  })
+  const actions = regions.general
+    .filter(region => region === srcRegion)
+    .map(dstRegion => {
+      return next => {
+        replicateImage({...argv, dstRegion})
+        .then(() => next(), next)
+      }
+    })
 
   // Process the regions in sequence.
+  //*
   async.series(actions, error => {
-    console.error(error)
-    console.error(red(`Error replicating image ${srcRegion}:${srcAmi} :`), 'details above')
+    if (error) {
+      console.error(error)
+      console.error(red(
+        `Error replicating image ${srcRegion}:${srcAmi} :`
+      ), 'details above')
+    } else {
+      console.log(green('AMI replicated to all target regions'))
+    }
   })
+  //*/
 }
 
 function builder (yargs) {
   return yargs
+    .option('description', {
+      aliases: ['ami-desc'],
+      type: 'string',
+      desc: 'AMI description (defaults to that of the source AMI)'
+    })
     .option('name', {
+      aliases: ['ami-name'],
       type: 'string',
       desc: 'AMI name (defaults to that of the source AMI)'
     })
-    .option('description', {
-      type: 'string',
-      desc: 'AMI description (defaults to that of the source AMI)'
+    .option('publish', {
+      type: 'boolean',
+      default: false,
+      desc: 'make the AMI publicly available'
+    })
+    .option('simulate', {
+      type: 'boolean',
+      default: false,
+      desc: 'perform a dry run of the operation'
     })
 }
 
