@@ -2,7 +2,7 @@ const axios = require('axios')
 const follow = require('follow')
 const {red, orange, yellow, blue, emoji} = require('@buzuli/color')
 
-const throttle = require('../lib/throttle')
+const throttle = require('@buzuli/throttle')
 
 module.exports = {
   command: 'couch-offset <leader-url>',
