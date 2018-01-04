@@ -66,7 +66,7 @@ function handler (argv) {
     reportFunc: () => {
       console.log(`[${blue(new Date().toISOString())}] Leader sequence is ${yellow(leaderSeq)}`)
     },
-    minDelay: 250,
+    minDelay: 1000,
     maxDelay: 15000
   })
 
