@@ -1,4 +1,4 @@
-const {red, yellow, green, emoji} = require('@buzuli/color')
+const {red, green, emoji} = require('@buzuli/color')
 const {compose, map, sortBy} = require('ramda')
 
 const health = require('../lib/aws-health')({region: 'us-east-1'})
@@ -9,7 +9,7 @@ module.exports = {
   handler
 }
 
-function handler() {
+function handler () {
   health.listEvents()
   .then(data => {
     compose(
@@ -27,7 +27,7 @@ function handler() {
     console.log(green(`Successfully fetched AWS health events.`))
   })
   .catch(error => {
-    if (error instanceof SubscriptionRequiredException) {
+    if (error instanceof health.aws.SubscriptionRequiredException) {
       console.error(`Health API is only available for accounts with a support contract.`)
     } else {
       console.error(error)

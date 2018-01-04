@@ -219,8 +219,8 @@ function handler (argv) {
   log.info(`Replicating image ${blue(srcAmi)} from ${yellow(srcRegion)} to all regions`)
   log.info(`   visibility: ${publish ? 'public' : 'private'}`)
   log.info(`   simulation: ${simulate}`)
-  log.info(`         name: ${description ? name : 'use source AMI name'}`)
-  log.info(`  description: ${description ? description : 'use source AMI description'}`)
+  log.info(`         name: ${name || 'use source AMI name'}`)
+  log.info(`  description: ${description || 'use source AMI description'}`)
   log.info()
 
   // Map each region to a replicator function.
