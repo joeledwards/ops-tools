@@ -2,7 +2,7 @@ const newEc2 = require('../lib/ec2')
 const {compose, filter, flatten, head, join, map, sortBy, toLower} = require('ramda')
 const durations = require('durations')
 const moment = require('moment')
-const {blue, orange, purple, yellow, green} = require('@buzuli/color')
+const {red, blue, orange, purple, yellow, green} = require('@buzuli/color')
 
 const ec2 = newEc2()
 const region = ec2.aws.region
@@ -17,19 +17,16 @@ function handler () {
   ec2.listInstances()
   .then(({Reservations}) => {
     const now = moment()
-    console.log(join('\n')(compose(
-      map(
-        ({id, name, created, age}) => {
-          return `[${purple(created)} | ${orange(age)}] ${green(region)} ${yellow(id)} (${blue(name)})`
-        }
-      ),
-      sortBy(({created, name}) => [created, name]),
-      map(({
+
+    const fieldExtractor = ({
         InstanceId: id,
         InstaceType: type,
         Tags: tags,
-        LaunchTime: launchTime
-      }) => {
+        LaunchTime: launchTime,
+        State: {
+          Name: state
+        }
+    }) => {
         const name = head(compose(
           map(({Value}) => Value),
           filter(({Key}) => toLower(Key) === 'name')
@@ -37,11 +34,22 @@ function handler () {
         const age = durations.millis(now.diff(moment(launchTime)))
         const created = launchTime.toISOString()
 
-        return {id, name, type, created, age}
-      }),
-      flatten,
-      map(({Instances}) => Instances)
-    )(Reservations)))
+        return {id, name, type, created, age, state}
+    }
+
+    const summarizer = ({id, name, created, age, state}) => {
+      return `[${purple(created)} | ${orange(age)}] ${yellow(id)} [${(state == 'running') ? green(state) : red(state)}] (${blue(name)})`
+    }
+
+    const instances = map(flatten, map(({Instances: is}) => is))(Reservations)
+    const summaries = compose(
+      map(summarizer),
+      sortBy(({created, name}) => [created, name]),
+      map(fieldExtractor)
+    )(instances)
+
+    console.log(join('\n')(summaries))
+    console.log(`${orange(instances.length)} instances from region ${blue(region)}`)
   })
   .catch(error => {
     console.error(error)
