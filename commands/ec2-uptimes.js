@@ -1,10 +1,12 @@
 const async = require('async')
-const {red, blue, orange, purple, yellow, green} = require('@buzuli/color')
+const {
+  red, blue, orange, purple, yellow, green
+} = require('@buzuli/color')
 const durations = require('durations')
 const moment = require('moment')
 const SSH = require('node-ssh')
 const path = require('path')
-const {compose, filter, flatten, head, join, map, sortBy, toLower} = require('ramda')
+const r = require('ramda')
 const read = require('read')
 
 const newEc2 = require('../lib/ec2')
@@ -13,19 +15,28 @@ const ec2 = newEc2()
 const region = ec2.aws.region
 
 async function checkUptime ({
+  id,
+  name,
   host,
   username = 'ubuntu',
   privateKey = path.resolve(process.env.HOME, '.ssh', 'id_rsa'),
   passphrase
 }) {
-  console.log(`Checking ${host}`)
-  const ssh = new SSH()
-  await ssh.connect({host, username, privateKey, passphrase})
-  const bootTime = moment(await ssh.execCommand('uptime -s'))
-  const now = moment()
-  const uptime = now.diff(bootTime)
-  ssh.dispose()
-  return uptime
+  try {
+    console.log(`Checking uptime of ${yellow(id)} (${blue(name)})`)
+    const ssh = new SSH()
+    await ssh.connect({host, username, privateKey, passphrase})
+    const {stdout: uptimeString} = await ssh.execCommand('uptime -s')
+    const bootTime = moment.utc(uptimeString)
+    const now = moment.utc()
+    const uptime = now.diff(bootTime)
+    ssh.dispose()
+    console.log(`Instance ${yellow(id)} has been up since ${orange(bootTime.toISOString())}`)
+    return uptime
+  } catch (error) {
+    console.error(`Error fetching uptime of ${blue(host)} (${yellow(id)})`, error)
+    return null
+  }
 }
 
 module.exports = {
@@ -60,58 +71,56 @@ function handler () {
   .then(({Reservations}) => {
     const fieldExtractor = ({
       InstanceId: id,
-      InstaceType: type,
+      InstanceType: type,
       Tags: tags,
       PublicIpAddress: ip,
       State: {
         Name: state
       }
     }) => {
-      const name = head(compose(
-        map(({Value}) => Value),
-        filter(({Key}) => toLower(Key) === 'name')
+      const name = r.head(r.compose(
+        r.map(({Value}) => Value),
+        r.filter(({Key}) => r.toLower(Key) === 'name')
       )(tags))
 
       return {id, name, type, state, ip}
     }
 
     const summarizer = ({id, name, type, uptime, state}) => {
-      const ut = durations.millis(uptime)
+      const ut = (uptime === null) ? "unknown" : durations.millis(uptime)
       return `[${orange(ut)}] ${green(region)} ${yellow(id)} [${(state == 'running') ? green(state) : red(state)}] (${blue(name)})`
     }
 
-    const instances = compose(
-      flatten,
-      map(({Instances}) => Instances)
+    const instances = r.compose(
+      r.flatten,
+      r.map(({Instances}) => Instances)
     )(Reservations)
 
     const results = []
-    const uptimeTasks = compose(
-      map(info => {
+    const uptimeTasks = r.compose(
+      r.map(info => {
         return next => {
-          return checkUptime({host: info.ip, passphrase})
-            .then(({uptime}) => ({...info, uptime}))
+          return checkUptime({id: info.id, name: info.name,  host: info.ip, passphrase})
+            .then(uptime => ({...info, uptime}))
             .then(r => results.push(r))
             .then(() => next(), next)
         }
       }),
-      map(fieldExtractor)
+      r.map(fieldExtractor)
     )(instances)
 
     async.series(uptimeTasks, error => {
       if (error) {
         console.error(`Error checking uptimes:`, error)
       } else {
-        console.log(`results:`, results)
-        console.log(`wrapped up all ${uptimeTasks.length} tasks`)
-
-        const summaries = compose(
-          map(summarizer),
-          sortBy(({uptime}) => uptime),
-        )(instances)
+        const summaries = r.compose(
+          r.reverse,
+          r.map(summarizer),
+          r.sortBy(({uptime}) => uptime),
+        )(results)
 
         console.log(join('\n')(summaries))
-        console.log(`${orange(instances.length)} instances from region ${blue(region)}`)
+        console.log(`Checked uptime for ${orange(instances.length)} instances in ${blue(region)}`)
       }
     })
   })
