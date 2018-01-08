@@ -1,8 +1,14 @@
 const {red, yellow, green} = require('@buzuli/color')
-const cw = require('../lib/cloudwatch')()
+const cw = require('../lib/aws').cloudwatch()
 
-function handler (options = {}) {
-  cw.listAlarms(options)
+module.exports = {
+  command: 'alarms',
+  desc: 'list configured cloudwatch alarms',
+  handler
+}
+
+function handler () {
+  cw.listAlarms()
   .then(result => {
     const {MetricAlarms: alarms} = result
 
@@ -20,10 +26,4 @@ function handler (options = {}) {
     ))
     process.exit(1)
   })
-}
-
-module.exports = {
-  command: 'alarms',
-  desc: 'list configured cloudwatch alarms',
-  handler
 }

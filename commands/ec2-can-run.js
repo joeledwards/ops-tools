@@ -1,5 +1,5 @@
 const {red, yellow, green} = require('@buzuli/color')
-const ec2 = require('../lib/ec2')()
+const ec2 = require('../lib/aws').ec2()
 
 function handler (argv) {
   const options = {

@@ -1,7 +1,7 @@
 const {red, green, emoji} = require('@buzuli/color')
 const {compose, map, sortBy} = require('ramda')
 
-const health = require('../lib/aws-health')({region: 'us-east-1'})
+const health = require('../lib/aws').health()
 
 module.exports = {
   command: 'aws-health',

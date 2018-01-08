@@ -9,7 +9,7 @@ const path = require('path')
 const r = require('ramda')
 const read = require('read')
 
-const newEc2 = require('../lib/ec2')
+const newEc2 = require('../lib/aws').ec2
 
 const ec2 = newEc2()
 const region = ec2.aws.region

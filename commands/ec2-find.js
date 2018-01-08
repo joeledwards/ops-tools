@@ -3,7 +3,7 @@ const {
   compose, filter, head, map, match, path, pathEq
 } = require('ramda')
 
-const ec2 = require('../lib/ec2')()
+const ec2 = require('../lib/aws').ec2()
 
 function handler () {
   const findName = instance => {

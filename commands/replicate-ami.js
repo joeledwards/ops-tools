@@ -2,9 +2,8 @@ const async = require('async')
 const {red, yellow, green, blue, purple, emoji} = require('@buzuli/color')
 const {head} = require('ramda')
 const poller = require('promise-poller').default
-const newEc2 = require('../lib/ec2')
 const random = require('../lib/random')
-const regions = require('../lib/aws-regions')
+const {regions, ec2: newEc2} = require('../lib/aws')
 
 let sim
 const setSimulate = simulate => {

@@ -1,4 +1,4 @@
-const newEc2 = require('../lib/ec2')
+const newEc2 = require('../lib/aws').ec2
 const {compose, filter, flatten, head, join, map, sortBy, toLower} = require('ramda')
 const durations = require('durations')
 const moment = require('moment')

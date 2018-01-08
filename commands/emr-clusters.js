@@ -4,7 +4,7 @@ const async = require('async')
 const moment = require('moment')
 const {map} = require('ramda')
 
-const emr = require('../lib/emr')()
+const emr = require('../lib/aws').emr()
 const region = emr.aws.region
 
 module.exports = {
