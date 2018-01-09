@@ -28,6 +28,7 @@
     "durations": "^3.3.0",
     "follow": "^1.0.0",
     "ioredis": "^3.2.2",
+    "log-a-log": "^3.3.2",
     "mem": "^3.0.0",
     "moment": "^2.20.1",
     "node-ssh": "^5.0.0",
