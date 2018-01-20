@@ -1,12 +1,3 @@
-const newEc2 = require('../lib/aws').ec2
-const {compose, filter, flatten, head, join, map, sortBy, toLower} = require('ramda')
-const durations = require('durations')
-const moment = require('moment')
-const {red, blue, orange, purple, yellow, green, gray} = require('@buzuli/color')
-
-const ec2 = newEc2()
-const region = ec2.aws.region
-
 module.exports = {
   command: 'ec2-by-age',
   desc: 'list all AWS instances in a region by age',
@@ -14,6 +5,15 @@ module.exports = {
 }
 
 function handler () {
+  const newEc2 = require('../lib/aws').ec2
+  const {compose, filter, flatten, head, join, map, sortBy, toLower} = require('ramda')
+  const durations = require('durations')
+  const moment = require('moment')
+  const {red, blue, orange, purple, yellow, green, gray} = require('@buzuli/color')
+
+  const ec2 = newEc2()
+  const region = ec2.aws.region
+
   ec2.listInstances()
   .then(({Reservations}) => {
     const now = moment()

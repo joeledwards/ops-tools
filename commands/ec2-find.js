@@ -1,11 +1,17 @@
-const {red, yellow, green} = require('@buzuli/color')
-const {
-  compose, filter, head, map, match, path, pathEq
-} = require('ramda')
-
-const ec2 = require('../lib/aws').ec2()
+module.exports = {
+  command: 'ec2-find',
+  desc: 'find an EC2 instance',
+  handler
+}
 
 function handler () {
+  const {red, yellow, green} = require('@buzuli/color')
+  const {
+    compose, filter, head, map, match, path, pathEq
+  } = require('ramda')
+
+  const ec2 = require('../lib/aws').ec2()
+
   const findName = instance => {
     return compose(
       head,
@@ -56,10 +62,4 @@ function handler () {
     ))
     process.exit(1)
   })
-}
-
-module.exports = {
-  command: 'ec2-find',
-  desc: 'find an EC2 instance',
-  handler
 }

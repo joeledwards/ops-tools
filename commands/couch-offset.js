@@ -1,9 +1,3 @@
-const axios = require('axios')
-const follow = require('follow')
-const {red, orange, yellow, blue, emoji} = require('@buzuli/color')
-
-const throttle = require('@buzuli/throttle')
-
 module.exports = {
   command: 'couch-offset <leader-url>',
   desc: 'track a CouchDB and the offset of its follower(s)',
@@ -20,44 +14,16 @@ function builder (yargs) {
     })
 }
 
-function latestSeq (url) {
-  return axios
-    .get(url)
-    .then(({data}) => data.update_seq)
-}
 
-// Track the latest sequence for a URL
-function trackSeq (url, handler) {
-  const notify = throttle({minDelay: 1000, maxDelay: null})
-  const reportError = (error) => {
-    notify(() => {
-      console.error(error)
-      console.error(
-        red(`Error tracking offset from leader ${blue(url)}.`),
-        emoji.inject('Details above :point_up:')
-      )
-    })
-  }
-
-  // Get the initial sequence
-  latestSeq(url)
-  .then(seq => {
-    handler(seq)
-
-    // Now follow all sequence changes
-    follow({db: url, since: 'now'}, (error, change) => {
-      if (error) {
-        reportError(error)
-      } else {
-        handler(change.seq)
-      }
-    })
-  })
-  .catch(error => reportError(error))
-}
-
-let leaderSeq = 0
 function handler (argv) {
+  const axios = require('axios')
+  const follow = require('follow')
+  const {red, orange, yellow, blue, emoji} = require('@buzuli/color')
+
+  const throttle = require('@buzuli/throttle')
+
+  let leaderSeq = 0
+
   const {leaderUrl, followerUrl: followers} = argv
   console.log(`leader: ${blue(leaderUrl)}`)
   console.log(`followers: ${orange(followers)}`)
@@ -74,4 +40,40 @@ function handler (argv) {
     leaderSeq = seq
     notify()
   })
+
+  function latestSeq (url) {
+    return axios
+      .get(url)
+      .then(({data}) => data.update_seq)
+  }
+
+  // Track the latest sequence for a URL
+  function trackSeq (url, handler) {
+    const notify = throttle({minDelay: 1000, maxDelay: null})
+    const reportError = (error) => {
+      notify(() => {
+        console.error(error)
+        console.error(
+          red(`Error tracking offset from leader ${blue(url)}.`),
+          emoji.inject('Details above :point_up:')
+        )
+      })
+    }
+
+    // Get the initial sequence
+    latestSeq(url)
+    .then(seq => {
+      handler(seq)
+
+      // Now follow all sequence changes
+      follow({db: url, since: 'now'}, (error, change) => {
+        if (error) {
+          reportError(error)
+        } else {
+          handler(change.seq)
+        }
+      })
+    })
+    .catch(error => reportError(error))
+  }
 }

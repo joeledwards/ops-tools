@@ -1,7 +1,13 @@
-const {red, yellow, green} = require('@buzuli/color')
-const ec2 = require('../lib/aws').ec2()
+module.exports = {
+  command: 'ec2-can-run',
+  desc: 'test if a particular EC2 configuration will run',
+  handler
+}
 
 function handler (argv) {
+  const {red, yellow, green} = require('@buzuli/color')
+  const ec2 = require('../lib/aws').ec2()
+
   const options = {
     ImageId: 'ami-4f41a537',
     InstanceType: 'c3.xlarge',
@@ -58,10 +64,4 @@ function handler (argv) {
     ))
     process.exit(1)
   })
-}
-
-module.exports = {
-  command: 'ec2-can-run',
-  desc: 'test if a particular EC2 configuration will run',
-  handler
 }

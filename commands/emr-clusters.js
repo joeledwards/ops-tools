@@ -1,28 +1,19 @@
-const {blue, emoji, green, orange, red, yellow} = require('@buzuli/color')
-const durations = require('durations')
-const async = require('async')
-const moment = require('moment')
-const {map} = require('ramda')
-
-const emr = require('../lib/aws').emr()
-const region = emr.aws.region
-
 module.exports = {
   command: 'emr-clusters',
   desc: 'List out EMR clusters for a region',
   handler
 }
 
-function stateColor (state) {
-  return ('RUNNING' == state ? green : (
-    'TERMINATED_WITH_ERRORS' == state ? red : (
-        'TERMINATED' == state ? yellow : orange
-      )
-    )
-  )(state)
-}
-
 function handler () {
+  const {blue, emoji, green, orange, red, yellow} = require('@buzuli/color')
+  const durations = require('durations')
+  const async = require('async')
+  const moment = require('moment')
+  const {map} = require('ramda')
+
+  const emr = require('../lib/aws').emr()
+  const region = emr.aws.region
+
   emr.listClusters({
     ClusterStates: [
       'STARTING', 'BOOTSTRAPPING', 'RUNNING',
@@ -104,4 +95,13 @@ function handler () {
     )
     process.exit(1)
   })
+
+  function stateColor (state) {
+    return ('RUNNING' == state ? green : (
+      'TERMINATED_WITH_ERRORS' == state ? red : (
+          'TERMINATED' == state ? yellow : orange
+        )
+      )
+    )(state)
+  }
 }

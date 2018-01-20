@@ -1,8 +1,9 @@
-const nsq = require('nsqjs')
-const {endsWith, isNil} = require('ramda')
-const {blue, green, yellow} = require('@buzuli/color')
-
-const log = require('../lib/log')
+module.exports = {
+  command: 'nsq-peek <topic>',
+  desc: 'peek at messages in the named topic',
+  builder,
+  handler
+}
 
 function builder (yargs) {
   return yargs
@@ -59,6 +60,12 @@ function builder (yargs) {
 }
 
 function handler (argv) {
+  const nsq = require('nsqjs')
+  const {endsWith, isNil} = require('ramda')
+  const {blue, green, yellow} = require('@buzuli/color')
+
+  const log = require('../lib/log')
+
   const {
     ack,
     allowNonEphemeral,
@@ -122,6 +129,13 @@ function handler (argv) {
   let halting = false
   const reader = new nsq.Reader(topic, channel, options)
 
+  reader.on('nsqd_connected', () => log.info(green('connected')))
+  reader.on('nsqd_closed', () => log.info(yellow('disconnected')))
+  reader.on('error', error => log.error('error', ':', error))
+  reader.on('message', messageHandler)
+
+  reader.connect()
+
   // Schedule halt
   function shutdown () {
     if (!halting) {
@@ -156,18 +170,4 @@ function handler (argv) {
       setTimeout(shutdown)
     }
   }
-
-  reader.on('nsqd_connected', () => log.info(green('connected')))
-  reader.on('nsqd_closed', () => log.info(yellow('disconnected')))
-  reader.on('error', error => log.error('error', ':', error))
-  reader.on('message', messageHandler)
-
-  reader.connect()
-}
-
-module.exports = {
-  command: 'nsq-peek <topic>',
-  desc: 'peek at messages in the named topic',
-  builder,
-  handler
 }

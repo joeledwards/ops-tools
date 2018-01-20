@@ -1,8 +1,3 @@
-const {red, green, emoji} = require('@buzuli/color')
-const {compose, map, sortBy} = require('ramda')
-
-const health = require('../lib/aws').health()
-
 module.exports = {
   command: 'aws-health',
   desc: 'list aws health events',
@@ -10,6 +5,11 @@ module.exports = {
 }
 
 function handler () {
+  const {red, green, emoji} = require('@buzuli/color')
+  const {compose, map, sortBy} = require('ramda')
+
+  const health = require('../lib/aws').health()
+
   health.listEvents()
   .then(data => {
     compose(

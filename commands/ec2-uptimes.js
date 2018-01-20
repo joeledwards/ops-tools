@@ -1,66 +1,26 @@
-const async = require('async')
-const {
-  red, blue, orange, purple, yellow, green
-} = require('@buzuli/color')
-const durations = require('durations')
-const moment = require('moment')
-const SSH = require('node-ssh')
-const path = require('path')
-const r = require('ramda')
-const read = require('read')
-
-const newEc2 = require('../lib/aws').ec2
-
-const ec2 = newEc2()
-const region = ec2.aws.region
-
-async function checkUptime ({
-  id,
-  name,
-  host,
-  username = 'ubuntu',
-  privateKey = path.resolve(process.env.HOME, '.ssh', 'id_rsa'),
-  passphrase
-}) {
-  try {
-    console.log(`Checking uptime of ${yellow(id)} (${blue(name)})`)
-    const ssh = new SSH()
-    await ssh.connect({host, username, privateKey, passphrase})
-    const {stdout: uptimeString} = await ssh.execCommand('uptime -s')
-    const bootTime = moment.utc(uptimeString)
-    const now = moment.utc()
-    const uptime = now.diff(bootTime)
-    ssh.dispose()
-    console.log(`Instance ${yellow(id)} has been up since ${orange(bootTime.toISOString())}`)
-    return uptime
-  } catch (error) {
-    console.error(`Error fetching uptime of ${blue(host)} (${yellow(id)})`, error)
-    return null
-  }
-}
-
 module.exports = {
   command: 'ec2-uptimes',
   desc: 'list AWS instances in a region by uptime',
   handler
 }
 
-function passphrasePrompt () {
-  return new Promise((resolve, reject) => {
-    read({
-      prompt: 'Passphrase for SSH key: ',
-      silent: true
-    }, (error, value) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve(value)
-      }
-    })
-  })
-}
-
 function handler () {
+  const async = require('async')
+  const {
+    red, blue, orange, purple, yellow, green
+  } = require('@buzuli/color')
+  const durations = require('durations')
+  const moment = require('moment')
+  const SSH = require('node-ssh')
+  const path = require('path')
+  const r = require('ramda')
+  const read = require('read')
+
+  const newEc2 = require('../lib/aws').ec2
+
+  const ec2 = newEc2()
+  const region = ec2.aws.region
+
   let passphrase
 
   passphrasePrompt()
@@ -128,4 +88,44 @@ function handler () {
     console.error(error)
     process.exit(1)
   })
+
+  async function checkUptime ({
+    id,
+    name,
+    host,
+    username = 'ubuntu',
+    privateKey = path.resolve(process.env.HOME, '.ssh', 'id_rsa'),
+    passphrase
+  }) {
+    try {
+      console.log(`Checking uptime of ${yellow(id)} (${blue(name)})`)
+      const ssh = new SSH()
+      await ssh.connect({host, username, privateKey, passphrase})
+      const {stdout: uptimeString} = await ssh.execCommand('uptime -s')
+      const bootTime = moment.utc(uptimeString)
+      const now = moment.utc()
+      const uptime = now.diff(bootTime)
+      ssh.dispose()
+      console.log(`Instance ${yellow(id)} has been up since ${orange(bootTime.toISOString())}`)
+      return uptime
+    } catch (error) {
+      console.error(`Error fetching uptime of ${blue(host)} (${yellow(id)})`, error)
+      return null
+    }
+  }
+
+  function passphrasePrompt () {
+    return new Promise((resolve, reject) => {
+      read({
+        prompt: 'Passphrase for SSH key: ',
+        silent: true
+      }, (error, value) => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve(value)
+        }
+      })
+    })
+  }
 }
