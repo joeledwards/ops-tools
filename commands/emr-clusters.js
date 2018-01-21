@@ -97,9 +97,9 @@ function handler () {
   })
 
   function stateColor (state) {
-    return ('RUNNING' == state ? green : (
-      'TERMINATED_WITH_ERRORS' == state ? red : (
-          'TERMINATED' == state ? yellow : orange
+    return (state === 'RUNNING' ? green : (
+      state === 'TERMINATED_WITH_ERRORS' ? red : (
+          state === 'TERMINATED' ? yellow : orange
         )
       )
     )(state)

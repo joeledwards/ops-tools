@@ -11,7 +11,7 @@ function builder (yargs) {
 function handler ({url}) {
   require('log-a-log')
 
-  const httpProxy = require('http-proxy')
+  // const httpProxy = require('http-proxy')
 
   console.log('Not implemented yet. Check back later!')
 }

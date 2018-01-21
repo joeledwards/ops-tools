@@ -9,7 +9,7 @@
     "lint:fix": "standard --fix",
     "pretest": "standard",
     "start": "node bin/ops.js",
-    "test": "nyc tap tests/unit/*.js"
+    "test": "tap tests/unit/*.js"
   },
   "bin": {
     "ops": "bin/ops.js",
@@ -25,7 +25,7 @@
     "axios": "^0.17.1",
     "bluebird": "^3.5.1",
     "bole": "^3.0.2",
-    "durations": "^3.3.0",
+    "durations": "^3.4.1",
     "follow": "^1.0.0",
     "http-proxy": "^1.16.2",
     "ioredis": "^3.2.2",

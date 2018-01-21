@@ -32,7 +32,7 @@ function handler ({url}) {
 
     axios.get(url, options)
     .then(({status, data}) => {
-      if (status == 200) {
+      if (status === 200) {
         console.log(
           `[${colorCode(status)}]`,
           'Site is online',
@@ -63,4 +63,3 @@ function handler ({url}) {
     .then(() => setTimeout(() => pollStatus(url), 15000))
   }
 }
-

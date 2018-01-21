@@ -29,18 +29,18 @@ function handler () {
         Hypervisor: hv,
         VirtualizationType: vt
     }) => {
-        const name = head(compose(
-          map(({Value}) => Value),
-          filter(({Key}) => toLower(Key) === 'name')
-        )(tags))
-        const age = durations.millis(now.diff(moment(launchTime)))
-        const created = launchTime.toISOString()
+      const name = head(compose(
+        map(({Value}) => Value),
+        filter(({Key}) => toLower(Key) === 'name')
+      )(tags))
+      const age = durations.millis(now.diff(moment(launchTime)))
+      const created = launchTime.toISOString()
 
-        return {id, name, type, created, age, state, hv, vt}
+      return {id, name, type, created, age, state, hv, vt}
     }
 
     const summarizer = ({id, name, created, age, state, hv, vt}) => {
-      return `[${purple(created)} | ${orange(age)}] ${yellow(id)} ${gray(hv + ':' + vt)} [${(state == 'running') ? green(state) : red(state)}] (${blue(name)})`
+      return `[${purple(created)} | ${orange(age)}] ${yellow(id)} ${gray(hv + ':' + vt)} [${(state === 'running') ? green(state) : red(state)}] (${blue(name)})`
     }
 
     const instances = map(flatten, map(({Instances: is}) => is))(Reservations)

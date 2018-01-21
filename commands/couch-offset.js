@@ -14,7 +14,6 @@ function builder (yargs) {
     })
 }
 
-
 function handler (argv) {
   const axios = require('axios')
   const follow = require('follow')

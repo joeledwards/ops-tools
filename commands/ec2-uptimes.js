@@ -7,7 +7,7 @@ module.exports = {
 function handler () {
   const async = require('async')
   const {
-    red, blue, orange, purple, yellow, green
+    red, blue, orange, yellow, green
   } = require('@buzuli/color')
   const durations = require('durations')
   const moment = require('moment')
@@ -47,8 +47,8 @@ function handler () {
     }
 
     const summarizer = ({id, name, type, uptime, state}) => {
-      const ut = (uptime === null) ? "unknown" : durations.millis(uptime)
-      return `[${orange(ut)}] ${green(region)} ${yellow(id)} [${(state == 'running') ? green(state) : red(state)}] (${blue(name)})`
+      const ut = (uptime === null) ? 'unknown' : durations.millis(uptime)
+      return `[${orange(ut)}] ${green(region)} ${yellow(id)} [${(state === 'running') ? green(state) : red(state)}] (${blue(name)})`
     }
 
     const instances = r.compose(
@@ -60,7 +60,7 @@ function handler () {
     const uptimeTasks = r.compose(
       r.map(info => {
         return next => {
-          return checkUptime({id: info.id, name: info.name,  host: info.ip, passphrase})
+          return checkUptime({id: info.id, name: info.name, host: info.ip, passphrase})
             .then(uptime => ({...info, uptime}))
             .then(r => results.push(r))
             .then(() => next(), next)
@@ -76,10 +76,10 @@ function handler () {
         const summaries = r.compose(
           r.reverse,
           r.map(summarizer),
-          r.sortBy(({uptime}) => uptime),
+          r.sortBy(({uptime}) => uptime)
         )(results)
 
-        console.log(join('\n')(summaries))
+        console.log(r.join('\n')(summaries))
         console.log(`Checked uptime for ${orange(instances.length)} instances in ${blue(region)}`)
       }
     })
