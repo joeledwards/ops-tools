@@ -9,7 +9,7 @@ function builder (yargs) {
 }
 
 function handler ({url}) {
-  require('log-a-log')
+  require('log-a-log')()
 
   // const httpProxy = require('http-proxy')
 

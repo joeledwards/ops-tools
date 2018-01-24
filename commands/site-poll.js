@@ -5,7 +5,7 @@ module.exports = {
 }
 
 function handler ({url}) {
-  require('log-a-log')
+  require('log-a-log')()
 
   const axios = require('axios')
   const {red, yellow, green, blue, purple, emoji} = require('@buzuli/color')
