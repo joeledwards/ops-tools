@@ -1,99 +1,114 @@
 module.exports = {
   command: 'emr-clusters',
   desc: 'List out EMR clusters for a region',
+  builder,
   handler
 }
 
-function handler () {
+const ALL_STATES = [
+  'BOOTSTRAPPING',
+  'RUNNING',
+  'STARTING',
+  'TERMINATED',
+  'TERMINATED_WITH_ERRORS',
+  'TERMINATING',
+  'WAITING'
+]
+
+const DEFAULT_STATES = [
+  'BOOTSTRAPPING',
+  'RUNNING',
+  'STARTING',
+  'TERMINATED_WITH_ERRORS',
+  'TERMINATING',
+  'WAITING'
+]
+
+const DEFAULT_LIMIT = 10
+
+function builder (yargs) {
+  const r = require('ramda')
+
+  yargs
+  .option('all', {
+    type: 'boolean',
+    desc: `show all clusters (normally limited to ${DEFAULT_LIMIT}; overrides --limit)`,
+    default: 'false',
+    alias: ['all-states', 'a']
+  })
+  .option('any', {
+    type: 'boolean',
+    desc: 'show clusters in any state (normally exludes TERMINATED; overrides --state)',
+    default: 'false',
+    alias: ['any-state', 'A']
+  })
+  .option('limit', {
+    type: 'number',
+    desc: 'maximum number of clusters to list',
+    default: DEFAULT_LIMIT,
+    alias: ['l']
+  })
+  .options('state', {
+    type: 'string',
+    desc: 'show clusters with the specified state',
+    coerce: v => (typeof v === 'string') ? r.toUpper(v) : v,
+    choices: ALL_STATES,
+    alias: ['s']
+  })
+}
+
+function handler ({any, all, state, limit}) {
   const {blue, emoji, green, orange, red, yellow} = require('@buzuli/color')
   const durations = require('durations')
   const async = require('async')
   const moment = require('moment')
-  const {map} = require('ramda')
+  const r = require('ramda')
 
   const emr = require('../lib/aws').emr()
   const region = emr.aws.region
 
-  emr.listClusters({
-    ClusterStates: [
-      'STARTING', 'BOOTSTRAPPING', 'RUNNING',
-      'WAITING', 'TERMINATING', 'TERMINATED_WITH_ERRORS']
-  })
+  const ClusterStates = any ? ALL_STATES : (
+    state ? [state] : DEFAULT_STATES
+  )
+  
+  emr.listClusters({ClusterStates})
   .then(({Clusters: clusters}) => {
-    return new Promise((resolve, reject) => {
-      const tasks = map(({Id: id, Name: name, Status: status}) => {
-        return next => {
-          emr.describeCluster({
-            ClusterId: id
-          }).then(info => {
-            const {
-              Cluster: {
-                Name: name,
-                Status: {
-                  State: state,
-                  StateChangeReason: {
-                    Code: stateReason
-                  },
-                  Timeline: {
-                    CreationDateTime: upTime,
-                    ReadyDateTime: readyTime,
-                    EndDateTime: downTime
-                  }
-                },
-                Ec2InstanceAttributes: {
-                  Ec2KeyName: owner,
-                  Ec2AvailabilityZone: zone
-                },
-                AutoTerminate: autoTerminate,
-                Applications: apps,
-                NormalizedInstanceHours: hours
-              }
-            } = info
+    const clusterCount = all ? clusters.length: limit
 
-            const up = upTime ? upTime.toISOString() : 'n/a'
-            const ready = readyTime ? readyTime.toISOString() : 'n/a'
-            const down = downTime ? downTime.toISOString() : 'n/a'
-            const end = moment(downTime || new Date())
-            const age = durations.millis(end.diff(upTime))
+    r.take(clusterCount)(clusters).forEach(cluster => {
+      const {
+        Id: id,
+        Name: name,
+        Status: {
+          State: state,
+          StateChangeReason: {
+            Code: stateReason
+          },
+          Timeline: {
+            CreationDateTime: upTime,
+            ReadyDateTime: readyTime,
+            EndDateTime: downTime
+          }
+        },
+        NormalizedInstanceHours: hours
+      } = cluster
 
-            console.log(`Cluster ${yellow(id)} (${blue(name)})`)
-            console.log(`     zone : ${zone}`)
-            console.log(`    owner : ${owner}`)
-            console.log(`    state : ${stateColor(state)} (${stateReason || 'NORMAL'})`)
-            console.log(`       up : ${up}`)
-            console.log(`    ready : ${ready}`)
-            console.log(`     down : ${down}`)
-            console.log(`      age : ${orange(age)}`)
-            console.log(`    hours : ${hours}`)
-            console.log(`     poof : ${autoTerminate}`)
-            console.log(`     apps :`, apps)
+      const up = upTime ? upTime.toISOString() : 'n/a'
+      const ready = readyTime ? readyTime.toISOString() : 'n/a'
+      const down = downTime ? downTime.toISOString() : 'n/a'
+      const end = moment(downTime || new Date())
+      const age = durations.millis(end.diff(upTime))
 
-            next()
-          })
-          .catch(error => {
-            console.error(`Error describing cluster ${yellow(id)} (${blue(name)}) :`, error)
-            next(error)
-          })
-        }
-      })(clusters)
-
-      async.series(tasks, error => {
-        if (error) {
-          reject(error)
-        } else {
-          console.log(`Found ${tasks.length} EMR cluster(s).`)
-          resolve()
-        }
-      })
+      console.log(`Cluster ${yellow(id)} (${green(name)})`)
+      console.log(`    state : ${stateColor(state)} (${stateReason || 'NORMAL'})`)
+      console.log(`       up : ${blue(up)}`)
+      console.log(`    ready : ${blue(ready)}`)
+      console.log(`     down : ${blue(down)}`)
+      console.log(`      age : ${blue(age)}`)
+      console.log(`    hours : ${orange(hours)}`)
     })
-  })
-  .catch(error => {
-    console.error(error)
-    console.error(
-      `Error listing EMR clusters in region ${yellow(region)}.`,
-      emoji.inject('Details above :point_up:')
-    )
-    process.exit(1)
+
+    console.log(`Listed ${orange(clusterCount)} of ${orange(clusters.length)} clusters.`);
   })
 
   function stateColor (state) {
