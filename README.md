@@ -23,6 +23,8 @@ Commands:
   ops.js aws-health                         list aws health events
   ops.js couch-offset <leader-url>          track a CouchDB and the offset of
                                             its follower(s)
+  ops.js docker-tags <image>                fetch the list of tags for an image
+                                            from docker hub
   ops.js ec2-by-age                         list all AWS instances in a region
                                             by age
   ops.js ec2-can-run                        test if a particular EC2
@@ -30,6 +32,7 @@ Commands:
   ops.js ec2-find                           find an EC2 instance
   ops.js ec2-uptimes                        list AWS instances in a region by
                                             uptime
+  ops.js emr-cluster-info <cluster-id>      Get details on a single EMR cluster
   ops.js emr-clusters                       List out EMR clusters for a region
   ops.js nsq-peek <topic>                   peek at messages in the named topic
   ops.js proxy <url>                        proxies to a remote URL and logs
