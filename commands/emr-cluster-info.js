@@ -73,7 +73,7 @@ function handler ({clusterId: id, json}) {
     const end = moment(downTime || new Date())
     const age = durations.millis(end.diff(upTime))
 
-    if (showJson) {
+    if (json) {
       console.log(JSON.stringify(info, null, 2))
     } else {
       console.log(`Cluster ${yellow(id)} (${green(name)})`)
