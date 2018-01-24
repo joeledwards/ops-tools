@@ -1,5 +1,5 @@
 module.exports = {
-  command: 'emr-cluster <cluster-id>',
+  command: 'emr-cluster-info <cluster-id>',
   desc: 'Get details on a single EMR cluster',
   handler
 }
