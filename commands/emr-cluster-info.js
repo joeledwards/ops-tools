@@ -16,7 +16,7 @@ function builder (yargs) {
 }
 
 function handler ({clusterId: id, json}) {
-  const {blue, emoji, green, orange, red, yellow} = require('@buzuli/color')
+  const {blue, emoji, gray, green, orange, purple, red, yellow} = require('@buzuli/color')
   const durations = require('durations')
   const moment = require('moment')
   const r = require('ramda')
@@ -77,15 +77,15 @@ function handler ({clusterId: id, json}) {
       console.log(JSON.stringify(info, null, 2))
     } else {
       console.log(`Cluster ${yellow(id)} (${green(name)})`)
-      console.log(`     zone : ${zone}`)
-      console.log(`    owner : ${owner}`)
+      console.log(`     zone : ${yellow(zone)}`)
+      console.log(`    owner : ${green(owner)}`)
       console.log(`    state : ${stateColor(state)} (${stateReason || 'NORMAL'})`)
-      console.log(`       up : ${up}`)
-      console.log(`    ready : ${ready}`)
-      console.log(`     down : ${down}`)
+      console.log(`       up : ${blue(up)}`)
+      console.log(`    ready : ${blue(ready)}`)
+      console.log(`     down : ${blue(down)}`)
       console.log(`      age : ${blue(age)}`)
-      console.log(`    hours : ${hours}`)
-      console.log(`     poof : ${autoTerminate}`)
+      console.log(`    hours : ${orange(hours)}`)
+      console.log(`     poof : ${purple(autoTerminate)}`)
       console.log(`     apps :`, apps)
       console.log(`   master : [${yellow(master.id)}] ${green(master.type)} `)
       console.log(`  workers : [${yellow(core.id)}] ${green(core.type)} x ${orange(core.count)}`)
@@ -106,7 +106,7 @@ function handler ({clusterId: id, json}) {
   function stateColor (state) {
     return (state === 'RUNNING' ? green : (
       state === 'TERMINATED_WITH_ERRORS' ? red : (
-          state === 'TERMINATED' ? yellow : orange
+          state === 'TERMINATED' ? gray : yellow
         )
       )
     )(state)

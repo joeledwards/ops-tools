@@ -58,7 +58,7 @@ function builder (yargs) {
 }
 
 function handler ({any, all, state, limit}) {
-  const {blue, emoji, green, orange, red, yellow} = require('@buzuli/color')
+  const {blue, emoji, gray, green, orange, red, yellow} = require('@buzuli/color')
   const durations = require('durations')
   const async = require('async')
   const moment = require('moment')
@@ -114,7 +114,7 @@ function handler ({any, all, state, limit}) {
   function stateColor (state) {
     return (state === 'RUNNING' ? green : (
       state === 'TERMINATED_WITH_ERRORS' ? red : (
-          state === 'TERMINATED' ? yellow : orange
+          state === 'TERMINATED' ? gray : yellow
         )
       )
     )(state)
