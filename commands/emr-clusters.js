@@ -58,9 +58,8 @@ function builder (yargs) {
 }
 
 function handler ({any, all, state, limit}) {
-  const {blue, emoji, gray, green, orange, red, yellow} = require('@buzuli/color')
+  const {blue, gray, green, orange, red, yellow} = require('@buzuli/color')
   const durations = require('durations')
-  const async = require('async')
   const moment = require('moment')
   const r = require('ramda')
 
@@ -100,6 +99,7 @@ function handler ({any, all, state, limit}) {
       const age = durations.millis(end.diff(upTime))
 
       console.log(`Cluster ${yellow(id)} (${green(name)})`)
+      console.log(`   region : ${yellow(region)}`)
       console.log(`    state : ${stateColor(state)} (${stateReason || 'NORMAL'})`)
       console.log(`       up : ${blue(up)}`)
       console.log(`    ready : ${blue(ready)}`)

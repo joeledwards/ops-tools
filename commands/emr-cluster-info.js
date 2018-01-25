@@ -16,13 +16,12 @@ function builder (yargs) {
 }
 
 function handler ({clusterId: id, json}) {
-  const {blue, emoji, gray, green, orange, purple, red, yellow} = require('@buzuli/color')
+  const {blue, gray, green, orange, purple, red, yellow} = require('@buzuli/color')
   const durations = require('durations')
   const moment = require('moment')
   const r = require('ramda')
 
   const emr = require('../lib/aws').emr()
-  const region = emr.aws.region
 
   getClusterInfo(id)
   .then(info => {
@@ -93,7 +92,6 @@ function handler ({clusterId: id, json}) {
   })
   .catch(error => {
     console.error(`Error describing cluster ${yellow(id)} :`, error)
-    next(error)
   })
 
   async function getClusterInfo (ClusterId) {
