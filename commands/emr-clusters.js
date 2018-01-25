@@ -69,10 +69,10 @@ function handler ({any, all, state, limit}) {
   const ClusterStates = any ? ALL_STATES : (
     state ? [state] : DEFAULT_STATES
   )
-  
+
   emr.listClusters({ClusterStates})
   .then(({Clusters: clusters}) => {
-    const clusterCount = all ? clusters.length: limit
+    const clusterCount = all ? clusters.length : limit
 
     r.take(clusterCount)(clusters).forEach(cluster => {
       const {
@@ -108,7 +108,7 @@ function handler ({any, all, state, limit}) {
       console.log(`    hours : ${orange(hours)}`)
     })
 
-    console.log(`Listed ${orange(clusterCount)} of ${orange(clusters.length)} clusters.`);
+    console.log(`Listed ${orange(clusterCount)} of ${orange(clusters.length)} clusters.`)
   })
 
   function stateColor (state) {
