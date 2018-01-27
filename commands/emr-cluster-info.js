@@ -104,6 +104,8 @@ function handler ({clusterId: id, json}) {
       ? green
       : code === 'USER_REQUEST'
       ? yellow
+      : r.startsWith('Running')(message)
+      ? green
       : red
     )(`${message}`)
   }
