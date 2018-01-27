@@ -19,7 +19,6 @@ const DEFAULT_STATES = [
   'BOOTSTRAPPING',
   'RUNNING',
   'STARTING',
-  'TERMINATED_WITH_ERRORS',
   'TERMINATING',
   'WAITING'
 ]
@@ -38,7 +37,7 @@ function builder (yargs) {
   })
   .option('any', {
     type: 'boolean',
-    desc: 'show clusters in any state (normally exludes TERMINATED; overrides --state)',
+    desc: 'show clusters in any state (terminated states exclued by default; overrides --state)',
     default: 'false',
     alias: ['any-state', 'A']
   })
