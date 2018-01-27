@@ -90,6 +90,7 @@ function handler ({clusterId: id, json}) {
   })
   .catch(error => {
     console.error(`Error describing cluster ${yellow(id)} :`, error)
+    process.exit(1)
   })
 
   async function getClusterInfo (ClusterId) {

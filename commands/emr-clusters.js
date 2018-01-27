@@ -63,6 +63,7 @@ function handler ({any, all, state, limit}) {
   const moment = require('moment')
   const r = require('ramda')
 
+  const computeAge = require('../lib/age')
   const emr = require('../lib/aws').emr()
   const region = emr.aws.region
 
@@ -72,7 +73,7 @@ function handler ({any, all, state, limit}) {
 
   emr.listClusters({ClusterStates})
   .then(({Clusters: clusters}) => {
-    const clusterCount = all ? clusters.length : limit
+    const clusterCount = Math.min(clusters.length, all ? clusters.length : limit)
 
     r.take(clusterCount)(clusters).forEach(cluster => {
       const {
@@ -96,8 +97,7 @@ function handler ({any, all, state, limit}) {
       const up = upTime ? upTime.toISOString() : 'n/a'
       const ready = readyTime ? readyTime.toISOString() : 'n/a'
       const down = downTime ? downTime.toISOString() : 'n/a'
-      const end = moment(downTime || new Date())
-      const age = durations.millis(end.diff(upTime))
+      const age = computeAge(upTime, downTime)
 
       console.log(`Cluster ${yellow(id)} (${green(name)})`)
       console.log(`   region : ${yellow(region)}`)
@@ -110,6 +110,10 @@ function handler ({any, all, state, limit}) {
     })
 
     console.log(`Listed ${orange(clusterCount)} of ${orange(clusters.length)} clusters.`)
+  })
+  .catch(error => {
+    console.error(`Error listing EMR clusters:`, error)
+    process.exit(1)
   })
 
   function reasonColor (code, message) {
