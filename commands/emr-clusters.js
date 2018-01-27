@@ -81,7 +81,8 @@ function handler ({any, all, state, limit}) {
         Status: {
           State: state,
           StateChangeReason: {
-            Code: stateReason
+            Code: reasonCode,
+            Message: reasonMessage
           },
           Timeline: {
             CreationDateTime: upTime,
@@ -100,7 +101,7 @@ function handler ({any, all, state, limit}) {
 
       console.log(`Cluster ${yellow(id)} (${green(name)})`)
       console.log(`   region : ${yellow(region)}`)
-      console.log(`    state : ${stateColor(state)} (${stateReason || 'NORMAL'})`)
+      console.log(`    state : ${stateColor(state)} (${reasonColor(reasonCode, reasonMessage)})`)
       console.log(`       up : ${blue(up)}`)
       console.log(`    ready : ${blue(ready)}`)
       console.log(`     down : ${blue(down)}`)
@@ -111,12 +112,23 @@ function handler ({any, all, state, limit}) {
     console.log(`Listed ${orange(clusterCount)} of ${orange(clusters.length)} clusters.`)
   })
 
+  function reasonColor (code, message) {
+    return (code === 'ALL_STEPS_COMPLETED'
+      ? green
+      : code === 'USER_REQUEST'
+      ? yellow
+      : red
+    )(`${message}`)
+  }
+
   function stateColor (state) {
-    return (state === 'RUNNING' ? green : (
-      state === 'TERMINATED_WITH_ERRORS' ? red : (
-          state === 'TERMINATED' ? gray : yellow
-        )
-      )
+    return (state === 'RUNNING'
+      ? green
+      : state === 'TERMINATED_WITH_ERRORS'
+      ? red
+      : state === 'TERMINATED'
+      ? gray
+      : yellow
     )(state)
   }
 }

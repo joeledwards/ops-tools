@@ -170,7 +170,7 @@ function getImageInfo ({region, ami, simulate}) {
           reject(error)
         }
       } else {
-        const img = head(data.Images)
+        const img = head(data.Images) || {}
         resolve({
           description: img.Description,
           name: img.Name,

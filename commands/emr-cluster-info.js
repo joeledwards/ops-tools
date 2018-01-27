@@ -31,7 +31,8 @@ function handler ({clusterId: id, json}) {
         Status: {
           State: state,
           StateChangeReason: {
-            Code: stateReason
+            Code: reasonCode,
+            Message: reasonMessage
           },
           Timeline: {
             CreationDateTime: upTime,
@@ -50,21 +51,17 @@ function handler ({clusterId: id, json}) {
       InstanceGroups: groups
     } = info
 
-    const master = r.compose(
+    const nodes = name => r.compose(
       r.head,
       r.map(({
         Id: id, InstanceType: type, RequestedInstanceCount: count
-      }) => ({id, type, count})),
-      r.filter(({Name: n}) => n === 'MASTER')
-    )(groups)
+      }) => (`[${yellow(id)}] ${green(type)} x ${orange(count)}`)),
+      r.filter(({Name: n}) => n === name)
+    )
 
-    const core = r.compose(
-      r.head,
-      r.map(({
-        Id: id, InstanceType: type, RequestedInstanceCount: count
-      }) => ({id, type, count})),
-      r.filter(({Name: n}) => n === 'CORE')
-    )(groups)
+    const master = nodes('MASTER')(groups) || '--'
+    const core = nodes('CORE')(groups) || '--'
+    const task = nodes('TASK')(groups) || '--'
 
     const up = upTime ? upTime.toISOString() : 'n/a'
     const ready = readyTime ? readyTime.toISOString() : 'n/a'
@@ -78,7 +75,7 @@ function handler ({clusterId: id, json}) {
       console.log(`Cluster ${yellow(id)} (${green(name)})`)
       console.log(`     zone : ${yellow(zone)}`)
       console.log(`    owner : ${green(owner)}`)
-      console.log(`    state : ${stateColor(state)} (${stateReason || 'NORMAL'})`)
+      console.log(`    state : ${stateColor(state)} (${reasonColor(reasonCode, reasonMessage)})`)
       console.log(`       up : ${blue(up)}`)
       console.log(`    ready : ${blue(ready)}`)
       console.log(`     down : ${blue(down)}`)
@@ -86,8 +83,9 @@ function handler ({clusterId: id, json}) {
       console.log(`    hours : ${orange(hours)}`)
       console.log(`     poof : ${purple(autoTerminate)}`)
       console.log(`     apps :`, apps)
-      console.log(`   master : [${yellow(master.id)}] ${green(master.type)} `)
-      console.log(`  workers : [${yellow(core.id)}] ${green(core.type)} x ${orange(core.count)}`)
+      console.log(`   master : ${master}`)
+      console.log(`     core : ${core}`)
+      console.log(`     task : ${task}`)
     }
   })
   .catch(error => {
@@ -101,12 +99,23 @@ function handler ({clusterId: id, json}) {
     return {...cluster, ...groups}
   }
 
+  function reasonColor (code, message) {
+    return (code === 'ALL_STEPS_COMPLETED'
+      ? green
+      : code === 'USER_REQUEST'
+      ? yellow
+      : red
+    )(`${message}`)
+  }
+
   function stateColor (state) {
-    return (state === 'RUNNING' ? green : (
-      state === 'TERMINATED_WITH_ERRORS' ? red : (
-          state === 'TERMINATED' ? gray : yellow
-        )
-      )
+    return (state === 'RUNNING'
+      ? green
+      : state === 'TERMINATED_WITH_ERRORS'
+      ? red
+      : state === 'TERMINATED'
+      ? gray
+      : yellow
     )(state)
   }
 }
