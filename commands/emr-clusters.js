@@ -58,8 +58,6 @@ function builder (yargs) {
 
 function handler ({any, all, state, limit}) {
   const {blue, gray, green, orange, red, yellow} = require('@buzuli/color')
-  const durations = require('durations')
-  const moment = require('moment')
   const r = require('ramda')
 
   const computeAge = require('../lib/age')
