@@ -8,21 +8,12 @@ function handler ({url}) {
   require('log-a-log')()
 
   const axios = require('axios')
-  const {red, yellow, green, blue, purple, emoji} = require('@buzuli/color')
+  const {colorCode} = require('../lib/http')
+  const {red, yellow, blue, emoji} = require('@buzuli/color')
 
   console.log(`Polling status of ${blue(url)}`)
 
   pollStatus(url)
-
-  function colorCode (status) {
-    return (status > 499 ? yellow : (
-      status > 399 ? red : (
-        status > 299 ? purple : (
-          status > 199 ? green : blue
-        )
-      )
-    ))(status)
-  }
 
   function pollStatus (url) {
     const options = {
