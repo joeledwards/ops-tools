@@ -118,7 +118,7 @@ function handler ({any, all, state, limit}) {
       ? green
       : code === 'USER_REQUEST'
       ? yellow
-      : r.startsWith('Running')(message)
+      : r.startsWith('Running')(message || '')
       ? green
       : red
     )(`${message}`)
