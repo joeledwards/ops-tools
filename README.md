@@ -34,11 +34,13 @@ Commands:
                                             uptime
   ops.js emr-cluster-info <cluster-id>      Get details on a single EMR cluster
   ops.js emr-clusters                       List out EMR clusters for a region
+  ops.js http-get <url>                     simple http GET against a URL
   ops.js nsq-peek <topic>                   peek at messages in the named topic
   ops.js proxy <url>                        proxies to a remote URL and logs
                                             traffic for debugging
   ops.js replicate-ami <src-region>         replicate an AMI from one region to
   <src-ami>                                 all others
+  ops.js s3-list <bucket>                   List keys in an s3 bucket
   ops.js site-poll <url>                    Check on the status of a site
 
 Options:
