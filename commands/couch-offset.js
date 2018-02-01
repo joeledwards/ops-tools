@@ -37,7 +37,7 @@ function builder (yargs) {
     .option('max-delay', {
       type: 'number',
       desc: 'maximum delay between reports',
-      default: 5000,
+      default: null,
       alias: ['D']
     })
     .option('since', {
@@ -57,11 +57,11 @@ function builder (yargs) {
 function handler (argv) {
   const axios = require('axios')
   const follow = require('follow')
-  const {red, orange, yellow, blue, emoji} = require('@buzuli/color')
+  const {blue, green, orange, red, yellow, emoji} = require('@buzuli/color')
 
   const throttle = require('@buzuli/throttle')
 
-  let count = 0
+  let lastId = null
   let lastDoc = null 
   let leaderSeq = 0
 
@@ -70,11 +70,11 @@ function handler (argv) {
     followerUrl: followers,
     fullThrottle,
     leaderUrl,
+    limit,
     maxDelay,
     minDelay,
     since,
-    size: reportSize,
-    unlimited
+    size: reportSize
   } = argv
 
   console.log(`leader: ${blue(leaderUrl)}`)
@@ -84,18 +84,27 @@ function handler (argv) {
     reportFunc: () => {
       const ts = `[${blue(new Date().toISOString())}] `
       const seq = `sequence=${yellow(leaderSeq || 0)} `
+      const id = lastId ? `${green(lastId)} ` : ''
       const size = reportSize ? `(${yellow(lastDoc ? Buffer.byteLength(JSON.stringify(lastDoc)) : 0)} bytes)` : ''
       const doc = (completeDoc && lastDoc) ? `\n${JSON.stringify(lastDoc, null, 2)}` : ''
-      console.log(`${ts}${seq}${size}${doc}`)
+      console.log(`${ts}${seq}${id}${size}${doc}`)
     },
     minDelay,
     maxDelay
   })
 
-  trackSeq(leaderUrl, ({seq, doc} = {}) => {
+  let count = 0
+  let stop = () => {}
+  trackSeq(leaderUrl, ({id, seq, doc} = {}) => {
+    count++
+    lastId = id
     leaderSeq = seq || 0
     lastDoc = doc
     notify({force: fullThrottle})
+
+    if (count >= limit) {
+      stop()
+    }
   })
 
   function latestSeq (url) {
@@ -106,9 +115,9 @@ function handler (argv) {
 
   // Track the latest sequence for a URL
   function trackSeq (url, handler) {
-    const notify = throttle({minDelay, maxDelay: null})
+    const errorNotify = throttle({minDelay, maxDelay: null})
     const reportError = (error) => {
-      notify({
+      errorNotify({
         force: fullThrottle,
         reportFunc: () => {
           console.error(error)
@@ -123,20 +132,25 @@ function handler (argv) {
     // Get the initial sequence
     latestSeq(url)
     .then(seq => {
-      handler(seq)
+      handler({seq})
 
-      // Now follow all sequence changes
-      follow({
+      const feed = new follow.Feed({
         db: url,
         since,
-        //include_docs: completeDoc || reportSize
-      }, (error, change) => {
-        if (error) {
-          reportError(error)
-        } else {
-          handler(change)
-        }
+        include_docs: completeDoc || reportSize
       })
+
+      feed.on('change', handler)
+      feed.on('error', reportError)
+      feed.on('stop', () => console.log(`Halted after receiving ${orange(count)} sequences.`))
+
+      feed.follow()
+
+      stop = () => {
+        errorNotify({halt: true})
+        notify({halt: true, force: true})
+        feed.stop()
+      }
     })
     .catch(error => reportError(error))
   }
