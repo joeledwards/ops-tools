@@ -62,7 +62,7 @@ function handler (argv) {
   const throttle = require('@buzuli/throttle')
 
   let lastId = null
-  let lastDoc = null 
+  let lastDoc = null
   let leaderSeq = 0
 
   const {
