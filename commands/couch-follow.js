@@ -1,6 +1,6 @@
 module.exports = {
-  command: 'couch-offset <leader-url>',
-  desc: 'track a CouchDB and the offset of its follower(s)',
+  command: 'couch-follow <url>',
+  desc: 'follow a CouchDB change feed',
   builder,
   handler
 }
@@ -12,11 +12,6 @@ function builder (yargs) {
       desc: 'pull back and render the complete doc on each report (streams ALL content)',
       default: false,
       alias: ['c']
-    })
-    .option('follower-url', {
-      type: 'array',
-      desc: 'url of follower (may supply multiple time)',
-      alias: ['f']
     })
     .option('full-throttle', {
       type: 'boolean',
@@ -67,9 +62,8 @@ function handler (argv) {
 
   const {
     completeDoc,
-    followerUrl: followers,
     fullThrottle,
-    leaderUrl,
+    url,
     limit,
     maxDelay,
     minDelay,
@@ -77,8 +71,7 @@ function handler (argv) {
     size: reportSize
   } = argv
 
-  console.log(`leader: ${blue(leaderUrl)}`)
-  console.log(`followers: ${orange(followers)}`)
+  console.log(`url: ${blue(url)}`)
 
   const notify = throttle({
     reportFunc: () => {
@@ -95,7 +88,7 @@ function handler (argv) {
 
   let count = 0
   let stop = () => {}
-  trackSeq(leaderUrl, ({id, seq, doc} = {}) => {
+  trackSeq(url, ({id, seq, doc} = {}) => {
     count++
     lastId = id
     leaderSeq = seq || 0
