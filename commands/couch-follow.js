@@ -78,7 +78,9 @@ function handler (argv) {
       const ts = `[${blue(new Date().toISOString())}] `
       const seq = `sequence=${yellow(leaderSeq || 0)} `
       const id = lastId ? `${green(lastId)} ` : ''
-      const size = reportSize ? `(${yellow(lastDoc ? Buffer.byteLength(JSON.stringify(lastDoc)) : 0)} bytes)` : ''
+      const pkgSize = lastDoc ? Buffer.byteLength(JSON.stringify(lastDoc)) : 0
+      const pkgSizeColor = pkgSize >= 1000000 ? red : pkgSize >= 100000 ? orange : yellow
+      const size = reportSize ? `(${pkgSizeColor(pkgSize)} bytes)` : ''
       const doc = (completeDoc && lastDoc) ? `\n${JSON.stringify(lastDoc, null, 2)}` : ''
       console.log(`${ts}${seq}${id}${size}${doc}`)
     },
