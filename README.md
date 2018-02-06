@@ -19,29 +19,30 @@ $ ops
 ops <command>
 
 Commands:
-  ops.js alarms                             list configured cloudwatch alarms
-  ops.js aws-health                         list aws health events
-  ops.js couch-offset <leader-url>          track a CouchDB and the offset of
-                                            its follower(s)
-  ops.js docker-tags <image>                fetch the list of tags for an image
+  ops alarms                                list configured cloudwatch alarms
+  ops aws-health                            list aws health events
+  ops couch-follow <url>                    follow a CouchDB change feed
+  ops docker-tags <image>                   fetch the list of tags for an image
                                             from docker hub
-  ops.js ec2-by-age                         list all AWS instances in a region
+  ops ec2-by-age                            list all AWS instances in a region
                                             by age
-  ops.js ec2-can-run                        test if a particular EC2
+  ops ec2-can-run                           test if a particular EC2
                                             configuration will run
-  ops.js ec2-find                           find an EC2 instance
-  ops.js ec2-uptimes                        list AWS instances in a region by
+  ops ec2-find                              find an EC2 instance
+  ops ec2-uptimes                           list AWS instances in a region by
                                             uptime
-  ops.js emr-cluster-info <cluster-id>      Get details on a single EMR cluster
-  ops.js emr-clusters                       List out EMR clusters for a region
-  ops.js http-get <url>                     simple http GET against a URL
-  ops.js nsq-peek <topic>                   peek at messages in the named topic
-  ops.js proxy <url>                        proxies to a remote URL and logs
+  ops emr-cluster-info <cluster-id>         Get details on a single EMR cluster
+  ops emr-clusters                          List out EMR clusters for a region
+  ops http-get <url>                        simple http GET against a URL
+  ops micro-monitor <url>                   check the status of a server running
+                                            micro-monitor
+  ops nsq-peek <topic>                      peek at messages in the named topic
+  ops proxy <url>                           proxies to a remote URL and logs
                                             traffic for debugging
-  ops.js replicate-ami <src-region>         replicate an AMI from one region to
-  <src-ami>                                 all others
-  ops.js s3-list <bucket>                   List keys in an s3 bucket
-  ops.js site-poll <url>                    Check on the status of a site
+  ops replicate-ami <src-region> <src-ami>  replicate an AMI from one region to
+                                            all others
+  ops s3-list <bucket>                      List keys in an s3 bucket
+  ops site-poll <url>                       Check on the status of a site
 
 Options:
   --version  Show version number                                       [boolean]
