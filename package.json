@@ -1,6 +1,6 @@
 {
   "name": "@buzuli/ops-tools",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Miscellaneous ops tools to make my life easier.",
   "scripts": {
     "stack:nsq:start": "docker stack deploy --prune -c docker-compose.yml nsq",
