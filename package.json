@@ -9,6 +9,7 @@
     "lint:fix": "standard --fix",
     "pretest": "standard",
     "start": "node bin/ops.js",
+    "proxy": "nodemon bin/ops.js proxy",
     "test": "tap tests/unit/*.js"
   },
   "bin": {
@@ -45,6 +46,7 @@
     "yargs": "^10.0.3"
   },
   "devDependencies": {
+    "nodemon": "^1.14.12",
     "standard": "^10.0.3",
     "tap": "^11.0.0"
   }
