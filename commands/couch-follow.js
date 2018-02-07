@@ -76,13 +76,15 @@ function handler (argv) {
   const notify = throttle({
     reportFunc: () => {
       const ts = `[${blue(new Date().toISOString())}] `
-      const seq = `sequence=${yellow(leaderSeq || 0)} `
-      const id = lastId ? `${green(lastId)} ` : ''
+      const seq = `sequence=${orange(leaderSeq || 0)} `
+      const id = lastId ? `${yellow(lastId)}` : ''
+      const lastVersion = ((lastDoc || {})['dist-tags'] || {}).latest
+      const version = lastVersion ? `@${green(lastVersion)} ` : ' '
       const pkgSize = lastDoc ? Buffer.byteLength(JSON.stringify(lastDoc)) : 0
       const pkgSizeColor = pkgSize >= 1000000 ? red : pkgSize >= 100000 ? orange : yellow
       const size = reportSize ? `(${pkgSizeColor(pkgSize)} bytes)` : ''
       const doc = (completeDoc && lastDoc) ? `\n${JSON.stringify(lastDoc, null, 2)}` : ''
-      console.log(`${ts}${seq}${id}${size}${doc}`)
+      console.log(`${ts}${seq}${id}${version}${size}${doc}`)
     },
     minDelay,
     maxDelay
@@ -90,7 +92,8 @@ function handler (argv) {
 
   let count = 0
   let stop = () => {}
-  trackSeq(url, ({id, seq, doc} = {}) => {
+  trackSeq(url, (document = {}) => {
+    const {id, seq, doc} = document
     count++
     lastId = id
     leaderSeq = seq || 0
