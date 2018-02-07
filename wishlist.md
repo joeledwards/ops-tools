@@ -1,3 +1,5 @@
 # Wish List
-* [ ] s3-scan : scan content of keys in an S3 bucket (based on prefix, etc.) and stream/filter content
+* [ ] couch-follow : stream document and pull only needed fields and drop heavy parts of the doc
+* [ ] couch-follow : add stream counter to get a faster, more accurate doc size
 * [ ] proxy : finish this feature (HTTP proxy which can inspect traffic)
+* [ ] s3-scan : scan content of keys in an S3 bucket (based on prefix, etc.) and stream/filter content
