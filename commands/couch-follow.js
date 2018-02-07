@@ -18,6 +18,12 @@ function builder (yargs) {
       desc: 'do not limit the report rate (overrides --min-delay and --max-delay)',
       alias: ['F']
     })
+    .option('info', {
+      type: 'boolen',
+      desc: 'report version, size, and age info (streams ALL content)',
+      default: false,
+      alias: ['i']
+    })
     .option('limit', {
       type: 'number',
       desc: 'stop after a fixed number of documents are retrieved',
@@ -41,17 +47,13 @@ function builder (yargs) {
       default: 'now',
       alias: ['s', 'start']
     })
-    .option('size', {
-      type: 'boolen',
-      desc: 'report the estimated size of the document in bytes (streams ALL content)',
-      default: false,
-      alias: ['S']
-    })
 }
 
 function handler (argv) {
   const axios = require('axios')
+  const durations = require('durations')
   const follow = require('follow')
+  const moment = require('moment')
   const {blue, green, orange, red, yellow, emoji} = require('@buzuli/color')
 
   const throttle = require('@buzuli/throttle')
@@ -64,11 +66,11 @@ function handler (argv) {
     completeDoc,
     fullThrottle,
     url,
+    info: reportInfo,
     limit,
     maxDelay,
     minDelay,
-    since,
-    size: reportSize
+    since
   } = argv
 
   console.log(`url: ${blue(url)}`)
@@ -78,13 +80,21 @@ function handler (argv) {
       const ts = `[${blue(new Date().toISOString())}] `
       const seq = `sequence=${orange(leaderSeq || 0)} `
       const id = lastId ? `${yellow(lastId)}` : ''
-      const lastVersion = ((lastDoc || {})['dist-tags'] || {}).latest
-      const version = lastVersion ? `@${green(lastVersion)} ` : ' '
-      const pkgSize = lastDoc ? Buffer.byteLength(JSON.stringify(lastDoc)) : 0
-      const pkgSizeColor = pkgSize >= 1000000 ? red : pkgSize >= 100000 ? orange : yellow
-      const size = reportSize ? `(${pkgSizeColor(pkgSize)} bytes)` : ''
-      const doc = (completeDoc && lastDoc) ? `\n${JSON.stringify(lastDoc, null, 2)}` : ''
-      console.log(`${ts}${seq}${id}${version}${size}${doc}`)
+
+      let docInfo = ''
+      if (lastDoc) {
+        const lastVersion = (lastDoc['dist-tags'] || {}).latest
+        const version = lastVersion ? `@${green(lastVersion)} ` : ' '
+        const pkgSize = Buffer.byteLength(JSON.stringify(lastDoc))
+        const pkgSizeColor = pkgSize >= 1000000 ? red : pkgSize >= 100000 ? orange : yellow
+        const size = reportInfo ? `${pkgSizeColor(pkgSize)} b - ` : ''
+        const lastModified = ((lastDoc.time) || {}).modified
+        const age = lastModified ? blue(durations.millis(moment().diff(moment(lastModified)))) : ''
+        const doc = (completeDoc && lastDoc) ? `\n${JSON.stringify(lastDoc, null, 2)}` : ''
+        docInfo = `${version}(${size}${age})${doc}`
+      }
+
+      console.log(`${ts}${seq}${id}${docInfo}`)
     },
     minDelay,
     maxDelay
@@ -135,7 +145,7 @@ function handler (argv) {
       const feed = new follow.Feed({
         db: url,
         since,
-        include_docs: completeDoc || reportSize
+        include_docs: completeDoc || reportInfo
       })
 
       feed.on('change', handler)
