@@ -42,9 +42,9 @@ function builder (yargs) {
       alias: ['D']
     })
     .option('since', {
-      type: 'string',
-      desc: 'start scanning from this point in time (default is now)',
-      default: 'now',
+      type: 'number',
+      desc: 'start scanning from this sequence (default is latest)',
+      default: -1,
       alias: ['s', 'start']
     })
 }
@@ -138,13 +138,17 @@ function handler (argv) {
     }
 
     // Get the initial sequence
-    latestSeq(url)
+    (
+      since < 0
+      ? latestSeq(url)
+      : Promise.resolve(since)
+    )
     .then(seq => {
       handler({seq})
 
       const feed = new follow.Feed({
         db: url,
-        since,
+        since: seq,
         include_docs: completeDoc || reportInfo
       })
 
