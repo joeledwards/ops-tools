@@ -22,7 +22,7 @@ function builder (yargs) {
 function handler ({bindPort, bindHost, targetUrl}) {
   require('log-a-log')()
 
-  const {blue, gray, green, orange, purpe, red, yellow} = require('@buzuli/color')
+  const {green, orange} = require('@buzuli/color')
   const http = require('http')
   const httpProxy = require('http-proxy')
 
@@ -40,7 +40,7 @@ function handler ({bindPort, bindHost, targetUrl}) {
 
     proxy.web(req, res, {
       target: targetUrl,
-      "start": "node bin/ops.js",
+      start: 'node bin/ops.js'
     })
   })
 
