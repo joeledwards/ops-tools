@@ -54,7 +54,8 @@ function handler (argv) {
   const durations = require('durations')
   const follow = require('follow')
   const moment = require('moment')
-  const {blue, green, orange, red, yellow, emoji} = require('@buzuli/color')
+  const r = require('ramda')
+  const {blue, green, orange, purple, red, yellow, emoji} = require('@buzuli/color')
 
   const throttle = require('@buzuli/throttle')
 
@@ -77,21 +78,35 @@ function handler (argv) {
 
   const notify = throttle({
     reportFunc: () => {
-      const ts = `[${blue(new Date().toISOString())}] `
+      const now = new Date()
+      const ts = `[${blue(now.toISOString())}] `
       const seq = `sequence=${orange(leaderSeq || 0)} `
       const id = lastId ? `${yellow(lastId)}` : ''
 
       let docInfo = ''
       if (lastDoc) {
-        const lastVersion = (lastDoc['dist-tags'] || {}).latest
+        const latestVersion = (lastDoc['dist-tags'] || {}).latest
+        const created = moment(((lastDoc.time) || {}).created)
+        const lastVersion = r.compose(
+          r.head,
+          r.reduce(([accTag, accTime], [nextTag, nextTime]) => {
+            return (nextTime.diff(accTime) > 0) 
+              ? [nextTag, nextTime]
+              : [accTag, accTime]
+          }, [latestVersion, created]),
+          r.filter(([tag, time]) => tag !== 'created' && tag !== 'modified'),
+          r.map(([tag, time]) => [tag, moment(time)]),
+          r.toPairs
+        )(lastDoc.time)
         const version = lastVersion ? `@${green(lastVersion)} ` : ' '
+        const latest = (latestVersion && latestVersion !== lastVersion) ? `[latest:${purple(latestVersion)}] ` : ''
         const pkgSize = Buffer.byteLength(JSON.stringify(lastDoc))
         const pkgSizeColor = pkgSize >= 1000000 ? red : pkgSize >= 100000 ? orange : yellow
         const size = reportInfo ? `${pkgSizeColor(pkgSize)} b - ` : ''
         const lastModified = ((lastDoc.time) || {}).modified
-        const age = lastModified ? blue(durations.millis(moment().diff(moment(lastModified)))) : ''
+        const age = lastModified ? blue(durations.millis(moment(now).diff(moment(lastModified)))) : ''
         const doc = (completeDoc && lastDoc) ? `\n${JSON.stringify(lastDoc, null, 2)}` : ''
-        docInfo = `${version}(${size}${age})${doc}`
+        docInfo = `${version}${latest}(${size}${age})${doc}`
       }
 
       console.log(`${ts}${seq}${id}${docInfo}`)
