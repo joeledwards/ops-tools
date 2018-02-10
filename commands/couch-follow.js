@@ -90,7 +90,7 @@ function handler (argv) {
         const lastVersion = r.compose(
           r.head,
           r.reduce(([accTag, accTime], [nextTag, nextTime]) => {
-            return (nextTime.diff(accTime) > 0) 
+            return (nextTime.diff(accTime) > 0)
               ? [nextTag, nextTime]
               : [accTag, accTime]
           }, [latestVersion, created]),
