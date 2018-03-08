@@ -30,6 +30,12 @@ function builder (yargs) {
     default: 'm4.large',
     alias: ['T']
   })
+  .options('simulate', {
+    tpe: 'boolean',
+    desc: 'simulate the swarm setup without provisioning any resources',
+    default: false,
+    alias: ['s']
+  })
 }
 
 function handler ({
@@ -49,10 +55,11 @@ function handler ({
     yellow,
     emoji
   } = require('@buzuli/color')
-  const ec2 = require('../lib/aws').ec2()
   const r = require('ramda')
   const P = require('bluebird')
   const uuid = require('uuid/v4')
+  const ec2 = require('../lib/aws').ec2()
+  const random = require('../lib/random')
 
   async function run () {
     try {
@@ -68,7 +75,7 @@ function handler ({
 
   async function spawnSwarm () {
     const zones = await ec2.listZones()
-    const swarmId = uuid() 
+    const swarmId = uuid()
     const {primaryInfo: {token, ip}} = await launchManagers({swarmId, zones})
 
     console.info(`All managers launched.`)
@@ -77,7 +84,7 @@ function handler ({
       console.log(`No workers requested.`)
     } else {
       await launchWorkers({primaryIp: ip, token, zones})
-      console.log(`All ${workerCount} workers attached.`)
+      console.log(`All ${orange(workerCount)} workers attached.`)
     }
 
     return {
@@ -109,6 +116,7 @@ function handler ({
     )
   }
 
+  let lastOctet = 2
   async function launchManager ({az, primaryInfo, swarmId}) {
     console.info(`Launching${primaryInfo ? ' primary' : ''} swarm ${yellow(swarmId)} manager in zone ${yellow(az)}`)
 
@@ -123,10 +131,10 @@ function handler ({
       console.info(`Fetching token from primary...`)
     }
 
-    return {
-      id: '',
-      ip: ''
-    }
+    const id = await hex.random()
+    const ip = `10.10.10.${lastOctet++}`
+
+    return {id, ip}
   }
 
   async function launchWorkers ({primaryIp, token, zones}) {
@@ -142,7 +150,7 @@ function handler ({
     instanceOptions()
     console.log(`Launching worker in zone ${yellow(az)}...`)
 
-    const id = ''
+    const id = await hex.random(16)
 
     console.log(`Launched worker ${yellow(id)}`)
   }

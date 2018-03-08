@@ -86,9 +86,12 @@ function copyImage ({ec2, srcRegion, srcAmi, amiName, amiDesc, simulate}) {
     ec2.api.copyImage(options, (error, data) => {
       if (error) {
         if (simulate && isDryRunError(error)) {
-          resolve({
-            ami: `ami-${random.hex(8)}`
-          })
+          resolve(
+            random.hex(8)
+            .then(hex => ({
+              ami: `ami-${random.hex(8)}`
+            }))
+          )
         } else {
           reject(error)
         }
