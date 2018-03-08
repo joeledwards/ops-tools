@@ -110,7 +110,8 @@ function handler ({
         return {
           ip: primaryIp || ip,
           token: primaryToken || token,
-          clusterIps: clusterIps ? [ip, ...clusterIps] : [ip]
+          clusterIps: clusterIps ? [ip, ...clusterIps] : [ip],
+          primaryInfo
         }
       }
     )
@@ -172,4 +173,6 @@ function handler ({
       }
     }
   }
+
+  run()
 }
