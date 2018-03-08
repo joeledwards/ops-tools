@@ -47,10 +47,7 @@ function handler ({
   require('log-a-log')()
 
   const {
-    blue,
-    green,
     orange,
-    purple,
     red,
     yellow,
     emoji
@@ -92,14 +89,14 @@ function handler ({
     }
   }
 
-  async function launchManagers ({swarmid, zones}) {
+  async function launchManagers ({swarmId, zones}) {
     // Split managers evenly between zones (regions too when relevant)
 
     return P.reduce(
       r.take(3)(zones),
-      async (primaryInfo, zone) => {
+      async (primaryInfo, az) => {
         const managerOptions = {az, primaryInfo, swarmId}
-        const {id, ip, token} = await launchManager(managerOptions)
+        const {ip, token} = await launchManager(managerOptions)
         const {
           ip: primaryIp,
           token: primaryToken,
@@ -121,21 +118,22 @@ function handler ({
   async function launchManager ({az, primaryInfo, swarmId}) {
     console.info(`Launching${primaryInfo ? ' primary' : ''} swarm ${yellow(swarmId)} manager in zone ${yellow(az)}`)
 
-    // Always fetch the manager's IP after launch
+    // Always fetch the manager's IP and ID after launch
+    const ip = `10.10.10.${lastOctet++}`
+    const id = await random.hex(16)
 
+    let token
     if (primaryInfo) {
       // If this is not the primary, connect to the primary
       console.info(`Attaching manager to primary...`)
-      const {ip, token} = primaryInfo
+      token = primaryInfo.token
     } else {
       // Otherwise fetch the primary's token
       console.info(`Fetching token from primary...`)
+      token = await random.hex(32)
     }
 
-    const id = await hex.random()
-    const ip = `10.10.10.${lastOctet++}`
-
-    return {id, ip}
+    return {id, ip, token}
   }
 
   async function launchWorkers ({primaryIp, token, zones}) {
@@ -151,7 +149,7 @@ function handler ({
     instanceOptions()
     console.log(`Launching worker in zone ${yellow(az)}...`)
 
-    const id = await hex.random(16)
+    const id = await random.hex(16)
 
     console.log(`Launched worker ${yellow(id)}`)
   }
