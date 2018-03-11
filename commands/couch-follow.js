@@ -102,7 +102,7 @@ function handler (argv) {
         const latest = (latestVersion && latestVersion !== lastVersion) ? `[latest:${purple(latestVersion)}] ` : ''
         const pkgSize = Buffer.byteLength(JSON.stringify(lastDoc))
         const pkgSizeColor = pkgSize >= 1000000 ? red : pkgSize >= 100000 ? orange : yellow
-        const size = reportInfo ? `${pkgSizeColor(pkgSize)} b - ` : ''
+        const size = reportInfo ? `${pkgSizeColor(pkgSize.toLocaleString())} b - ` : ''
         const lastModified = ((lastDoc.time) || {}).modified
         const age = lastModified ? blue(durations.millis(moment(now).diff(moment(lastModified)))) : ''
         const doc = (completeDoc && lastDoc) ? `\n${JSON.stringify(lastDoc, null, 2)}` : ''
