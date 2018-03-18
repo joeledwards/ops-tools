@@ -1,10 +1,33 @@
 module.exports = {
   command: 'site-poll <url>',
   desc: 'Check on the status of a site',
+  builder,
   handler
 }
 
-function handler ({url}) {
+function builder (yargs) {
+  yargs
+  .option('timeout', {
+    type: 'number',
+    desc: 'max duration for a successful request',
+    default: 2500,
+    alias: ['t']
+  })
+  .option('status-code', {
+    type: 'number',
+    desc: 'status code which is considered successful',
+    default: 200,
+    alias: ['c']
+  })
+  .option('poll-interval', {
+    type: 'number',
+    desc: 'delay between request attempts',
+    default: 15000,
+    alias: ['p']
+  })
+}
+
+function handler ({pollInterval, statusCode, timeout, url}) {
   require('log-a-log')()
 
   const axios = require('axios')
@@ -17,13 +40,13 @@ function handler ({url}) {
 
   function pollStatus (url) {
     const options = {
-      timeout: 2500,
+      timeout,
       validateStatus: status => true
     }
 
     axios.get(url, options)
     .then(({status, data}) => {
-      if (status === 200) {
+      if (status === statusCode) {
         console.log(
           `[${colorCode(status)}]`,
           'Site is online',
@@ -51,6 +74,6 @@ function handler ({url}) {
         console.error(error)
       }
     })
-    .then(() => setTimeout(() => pollStatus(url), 15000))
+    .then(() => setTimeout(() => pollStatus(url), pollInterval))
   }
 }
