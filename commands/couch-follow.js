@@ -58,7 +58,9 @@ function handler (argv) {
   const {blue, green, orange, purple, red, yellow, emoji} = require('@buzuli/color')
 
   const throttle = require('@buzuli/throttle')
+  const buzJson = require('@buzuli/json')
 
+  let lastRev
   let lastId = null
   let lastDoc = null
   let leaderSeq = 0
@@ -105,7 +107,7 @@ function handler (argv) {
         const size = reportInfo ? `${pkgSizeColor(pkgSize.toLocaleString())} b - ` : ''
         const lastModified = ((lastDoc.time) || {}).modified
         const age = lastModified ? blue(durations.millis(moment(now).diff(moment(lastModified)))) : ''
-        const doc = (completeDoc && lastDoc) ? `\n${JSON.stringify(lastDoc, null, 2)}` : ''
+        const doc = (completeDoc && lastDoc) ? `\n${buzJson(lastDoc)}` : ''
         docInfo = `${version}${latest}(${size}${age})${doc}`
       }
 
@@ -118,9 +120,10 @@ function handler (argv) {
   let count = 0
   let stop = () => {}
   trackSeq(url, (document = {}) => {
-    const {id, seq, doc} = document
+    const {id, seq, doc, changes} = document
     count++
     lastId = id
+    lastRev = changes ? changes[0].rev : undefined
     leaderSeq = seq || 0
     lastDoc = doc
     notify({force: fullThrottle})
@@ -137,7 +140,7 @@ function handler (argv) {
   }
 
   // Track the latest sequence for a URL
-  function trackSeq (url, handler) {
+  function trackSeq (url, changeHandler) {
     const errorNotify = throttle({minDelay, maxDelay: null})
     const reportError = (error) => {
       errorNotify({
@@ -159,7 +162,7 @@ function handler (argv) {
       : Promise.resolve(since)
     )
     .then(seq => {
-      handler({seq})
+      changeHandler({seq})
 
       const feed = new follow.Feed({
         db: url,
@@ -167,7 +170,7 @@ function handler (argv) {
         include_docs: completeDoc || reportInfo
       })
 
-      feed.on('change', handler)
+      feed.on('change', changeHandler)
       feed.on('error', reportError)
       feed.on('stop', () => console.log(`Halted after receiving ${orange(count)} sequences.`))
 
