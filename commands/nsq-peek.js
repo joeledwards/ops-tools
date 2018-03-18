@@ -61,6 +61,8 @@ function builder (yargs) {
 
 function handler (argv) {
   const nsq = require('nsqjs')
+  const buzJson = require('@buzuli/json')
+  const hexdump = require('@buzuli/hexdump')
   const {endsWith, isNil} = require('ramda')
   const {blue, green, yellow} = require('@buzuli/color')
 
@@ -154,7 +156,13 @@ function handler (argv) {
 
   function messageHandler (msg) {
     count++
-    log.info(msg.json())
+
+    try {
+      log.info(`Received message [JSON]:\n${buzJson(msg.json())}`)
+    } catch (err) {
+      // Message is not JSON
+      log.info(`Received message [hexdump]:\n${hexdump(msg.body)}`)
+    }
 
     if (ack) {
       log.info(blue(`acknowledging message ${progress()}`))

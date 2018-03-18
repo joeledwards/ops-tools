@@ -20,6 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "@buzuli/color": "^1.2.0",
+    "@buzuli/hexdump": "^1.0.4",
     "@buzuli/json": "^1.0.1",
     "@buzuli/throttle": "^2.0.2",
     "async": "^2.6.0",
