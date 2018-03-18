@@ -5,7 +5,9 @@ module.exports = {
 }
 
 function handler ({url}) {
+  const buzJson = require('@buzuli/json')
   const {colorCode} = require('../lib/http')
+
   require('axios')({
     method: 'get',
     url: `${url}/_monitor/status`,
@@ -14,7 +16,7 @@ function handler ({url}) {
   .then(({status, statusText, data, headers}) => {
     const [code, text] = colorCode(status, statusText)
     const response = (headers['content-type'] || '').match(/json$/)
-      ? JSON.stringify(data, null, 2)
+      ? buzJson(data)
       : data
     console.info(`[${code}] ${text}\n${response}`)
   })
