@@ -21,7 +21,7 @@
   "dependencies": {
     "@buzuli/color": "^1.2.0",
     "@buzuli/hexdump": "^1.0.4",
-    "@buzuli/json": "^1.1.0",
+    "@buzuli/json": "^1.1.2",
     "@buzuli/throttle": "^2.0.2",
     "async": "^2.6.0",
     "aws-sdk": "^2.190.0",
