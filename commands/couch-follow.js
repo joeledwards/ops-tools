@@ -60,7 +60,7 @@ function handler (argv) {
   const throttle = require('@buzuli/throttle')
   const buzJson = require('@buzuli/json')
 
-  let lastRev
+  let lastRev = null
   let lastId = null
   let lastDoc = null
   let leaderSeq = 0
@@ -109,6 +109,8 @@ function handler (argv) {
         const age = lastModified ? blue(durations.millis(moment(now).diff(moment(lastModified)))) : ''
         const doc = (completeDoc && lastDoc) ? `\n${buzJson(lastDoc)}` : ''
         docInfo = `${version}${latest}(${size}${age})${doc}`
+      } else {
+        docInfo = lastRev ? `[${green(lastRev)}]` : ''
       }
 
       console.log(`${ts}${seq}${id}${docInfo}`)

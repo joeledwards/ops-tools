@@ -77,7 +77,7 @@ function handler ({id, key, name, quiet}) {
     return r.compose(
       r.head,
       r.map(r.path(['Value'])),
-      r.filter(r.pathEq(['Key'], 'Name')),
+      r.filter(r.pathEq(['Key'], 'Name'))
     )(instance.Tags || [])
   }
 
