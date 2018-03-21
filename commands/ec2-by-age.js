@@ -15,10 +15,10 @@ function handler () {
   const region = ec2.aws.region
 
   ec2.listInstances()
-  .then(({Reservations}) => {
-    const now = moment()
+    .then(({Reservations}) => {
+      const now = moment()
 
-    const fieldExtractor = ({
+      const fieldExtractor = ({
         InstanceId: id,
         InstaceType: type,
         Tags: tags,
@@ -28,33 +28,33 @@ function handler () {
         },
         Hypervisor: hv,
         VirtualizationType: vt
-    }) => {
-      const name = head(compose(
-        map(({Value}) => Value),
-        filter(({Key}) => toLower(Key) === 'name')
-      )(tags))
-      const age = durations.millis(now.diff(moment(launchTime)))
-      const created = launchTime.toISOString()
+      }) => {
+        const name = head(compose(
+          map(({Value}) => Value),
+          filter(({Key}) => toLower(Key) === 'name')
+        )(tags))
+        const age = durations.millis(now.diff(moment(launchTime)))
+        const created = launchTime.toISOString()
 
-      return {id, name, type, created, age, state, hv, vt}
-    }
+        return {id, name, type, created, age, state, hv, vt}
+      }
 
-    const summarizer = ({id, name, created, age, state, hv, vt}) => {
-      return `[${purple(created)} | ${orange(age)}] ${yellow(id)} ${gray(hv + ':' + vt)} [${(state === 'running') ? green(state) : red(state)}] (${blue(name)})`
-    }
+      const summarizer = ({id, name, created, age, state, hv, vt}) => {
+        return `[${purple(created)} | ${orange(age)}] ${yellow(id)} ${gray(hv + ':' + vt)} [${(state === 'running') ? green(state) : red(state)}] (${blue(name)})`
+      }
 
-    const instances = map(flatten, map(({Instances: is}) => is))(Reservations)
-    const summaries = compose(
-      map(summarizer),
-      sortBy(({created, name}) => [created, name]),
-      map(fieldExtractor)
-    )(instances)
+      const instances = map(flatten, map(({Instances: is}) => is))(Reservations)
+      const summaries = compose(
+        map(summarizer),
+        sortBy(({created, name}) => [created, name]),
+        map(fieldExtractor)
+      )(instances)
 
-    console.log(join('\n')(summaries))
-    console.log(`${orange(instances.length)} instances from region ${blue(region)}`)
-  })
-  .catch(error => {
-    console.error(error)
-    process.exit(1)
-  })
+      console.log(join('\n')(summaries))
+      console.log(`${orange(instances.length)} instances from region ${blue(region)}`)
+    })
+    .catch(error => {
+      console.error(error)
+      process.exit(1)
+    })
 }

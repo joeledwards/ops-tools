@@ -46,22 +46,22 @@ function handler (argv) {
   }
 
   launchInstances(options)
-  .then(result => {
-    console.log(yellow('Config'))
-    console.log(options)
-    console.log()
-    console.log(yellow('Outcome'))
-    console.log(result)
-    console.log()
-    console.log(green(
-      `Instance launch will succeed in region ${yellow(ec2.aws.region)}`
-    ))
-  })
-  .catch(error => {
-    console.error(error)
-    console.error(red(
-      `Instance launch failure in ${yellow(ec2.aws.region)}: details above`
-    ))
-    process.exit(1)
-  })
+    .then(result => {
+      console.log(yellow('Config'))
+      console.log(options)
+      console.log()
+      console.log(yellow('Outcome'))
+      console.log(result)
+      console.log()
+      console.log(green(
+        `Instance launch will succeed in region ${yellow(ec2.aws.region)}`
+      ))
+    })
+    .catch(error => {
+      console.error(error)
+      console.error(red(
+        `Instance launch failure in ${yellow(ec2.aws.region)}: details above`
+      ))
+      process.exit(1)
+    })
 }

@@ -7,12 +7,12 @@ module.exports = {
 
 function builder (yargs) {
   yargs
-  .option('timeout', {
-    type: 'number',
-    desc: 'max time (in milliseconds) to wait for a connection',
-    default: 5000,
-    alias: ['t']
-  })
+    .option('timeout', {
+      type: 'number',
+      desc: 'max time (in milliseconds) to wait for a connection',
+      default: 5000,
+      alias: ['t']
+    })
 }
 
 function handler ({timeout, url}) {
@@ -28,24 +28,24 @@ function handler ({timeout, url}) {
   }
 
   require('axios')(options)
-  .then(resp => {
-    const {data, headers, status, statusText} = resp
+    .then(resp => {
+      const {data, headers, status, statusText} = resp
 
-    const [codeColored, textColored] = colorCode(status, statusText)
-    console.log(`[${codeColored}] ${textColored}`)
+      const [codeColored, textColored] = colorCode(status, statusText)
+      console.log(`[${codeColored}] ${textColored}`)
 
-    const maxHeaderLength = r.compose(r.reduce(r.max, 0), r.map(h => h.length), r.keys)(headers)
-    r.compose(r.sortBy(([k, v]) => k), r.toPairs)(headers)
-      .forEach(([name, value]) => {
-        const pad = ' '.repeat(maxHeaderLength - name.length)
-        console.log(`${pad}${gray(name)} : ${blue(value)}`)
-      })
+      const maxHeaderLength = r.compose(r.reduce(r.max, 0), r.map(h => h.length), r.keys)(headers)
+      r.compose(r.sortBy(([k, v]) => k), r.toPairs)(headers)
+        .forEach(([name, value]) => {
+          const pad = ' '.repeat(maxHeaderLength - name.length)
+          console.log(`${pad}${gray(name)} : ${blue(value)}`)
+        })
 
-    console.log()
-    console.log(JSON.stringify(data, null, 2))
-  })
-  .catch(error => {
-    console.error(`Error fetching ${url} :`, error)
-    process.exit(1)
-  })
+      console.log()
+      console.log(JSON.stringify(data, null, 2))
+    })
+    .catch(error => {
+      console.error(`Error fetching ${url} :`, error)
+      process.exit(1)
+    })
 }

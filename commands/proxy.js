@@ -7,16 +7,16 @@ module.exports = {
 
 function builder (yargs) {
   yargs
-  .option('bind-port', {
-    type: 'number',
-    desc: 'port on which the proxy server should listen',
-    default: 8118
-  })
-  .option('bind-host', {
-    type: 'string',
-    desc: 'host on which the proxy server should listen',
-    default: '0.0.0.0'
-  })
+    .option('bind-port', {
+      type: 'number',
+      desc: 'port on which the proxy server should listen',
+      default: 8118
+    })
+    .option('bind-host', {
+      type: 'string',
+      desc: 'host on which the proxy server should listen',
+      default: '0.0.0.0'
+    })
 }
 
 function handler ({bindPort, bindHost, targetUrl}) {

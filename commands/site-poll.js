@@ -7,24 +7,24 @@ module.exports = {
 
 function builder (yargs) {
   yargs
-  .option('timeout', {
-    type: 'number',
-    desc: 'max duration for a successful request',
-    default: 2500,
-    alias: ['t']
-  })
-  .option('status-code', {
-    type: 'number',
-    desc: 'status code which is considered successful',
-    default: 200,
-    alias: ['c']
-  })
-  .option('poll-interval', {
-    type: 'number',
-    desc: 'delay between request attempts',
-    default: 15000,
-    alias: ['p']
-  })
+    .option('timeout', {
+      type: 'number',
+      desc: 'max duration for a successful request',
+      default: 2500,
+      alias: ['t']
+    })
+    .option('status-code', {
+      type: 'number',
+      desc: 'status code which is considered successful',
+      default: 200,
+      alias: ['c']
+    })
+    .option('poll-interval', {
+      type: 'number',
+      desc: 'delay between request attempts',
+      default: 15000,
+      alias: ['p']
+    })
 }
 
 function handler ({pollInterval, statusCode, timeout, url}) {
@@ -45,35 +45,35 @@ function handler ({pollInterval, statusCode, timeout, url}) {
     }
 
     axios.get(url, options)
-    .then(({status, data}) => {
-      if (status === statusCode) {
-        console.log(
-          `[${colorCode(status)}]`,
-          'Site is online',
-          emoji.inject(':white_check_mark:')
-        )
-      } else {
-        console.warn(
-          `[${colorCode(status)}]`,
-          'Site is offline',
-          emoji.inject(':warning:')
-        )
-      }
-    })
-    .catch(error => {
-      if (error.code) {
-        console.error(
-          red(`Error connecting:`),
-          yellow(error.code),
-          `: ${error.message}`,
-          error.message.includes('timeout')
-            ? emoji.inject(':stopwatch:')
-            : emoji.inject(':no_entry_sign:')
-        )
-      } else {
-        console.error(error)
-      }
-    })
-    .then(() => setTimeout(() => pollStatus(url), pollInterval))
+      .then(({status, data}) => {
+        if (status === statusCode) {
+          console.log(
+            `[${colorCode(status)}]`,
+            'Site is online',
+            emoji.inject(':white_check_mark:')
+          )
+        } else {
+          console.warn(
+            `[${colorCode(status)}]`,
+            'Site is offline',
+            emoji.inject(':warning:')
+          )
+        }
+      })
+      .catch(error => {
+        if (error.code) {
+          console.error(
+            red(`Error connecting:`),
+            yellow(error.code),
+            `: ${error.message}`,
+            error.message.includes('timeout')
+              ? emoji.inject(':stopwatch:')
+              : emoji.inject(':no_entry_sign:')
+          )
+        } else {
+          console.error(error)
+        }
+      })
+      .then(() => setTimeout(() => pollStatus(url), pollInterval))
   }
 }
