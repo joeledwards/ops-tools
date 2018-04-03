@@ -1,6 +1,6 @@
 # Wish List
-* [ ] couch-follow : write out logs to file/leveldb in JSON format (timestamp-order db, @scope/package@version-order+ts db)
-* [ ] couch-follow : server from leveldbs supporting queries based on timestamp and/or package identity)
+* [ ] couch-follow : express server integrated which supports range queries from history leveldb based on seq or id)
+* [ ] couch-follow : option to configure the bind port for the express history server
 * [ ] ec2-npme : provision an npmE instance on ec2 and configure it for use
 * [ ] ec2-terminate : terminate an ec2 instance by ID
 * [ ] ec2-create-ami : create an AMI from an ec2 instance
