@@ -70,7 +70,7 @@ async function handler (argv) {
     let lastRev = null
     let lastId = null
     let lastDoc = null
-    let leaderSeq = 0
+    let lastSeq = 0
 
     const {
       completeDoc,
@@ -92,8 +92,15 @@ async function handler (argv) {
       reportFunc: () => {
         const now = new Date()
         const ts = `[${blue(now.toISOString())}] `
-        const seq = `sequence=${orange(leaderSeq || 0)} `
+        const seq = `sequence=${orange(lastSeq || 0)} `
         const id = lastId ? `${yellow(lastId)}` : ''
+
+        const dbRecord = {
+          id: lastId,
+          rev: lastRev,
+          seq: lastSeq,
+          readTime: now.toISOString(),
+        }
 
         let docInfo = ''
         if (lastDoc) {
@@ -119,8 +126,22 @@ async function handler (argv) {
           const age = lastModified ? blue(durations.millis(moment(now).diff(moment(lastModified)))) : ''
           const doc = (completeDoc && lastDoc) ? `\n${buzJson(lastDoc)}` : ''
           docInfo = `${version}${latest}(${size}${age})${doc}`
+
+          if (db) {
+            dbRecord.createdTime = created ? moment(created).toISOString() : undefined
+            dbRecord.updateTime = lastModified ? moment(lastModified).toISOString() : undefined
+            dbRecord.newestVersion = lastVersion
+            dbRecord.latestVersion = latestVersion
+            dbRecord.packumentSize = pkgSize
+          }
         } else {
           docInfo = lastRev ? `[${green(lastRev)}]` : ''
+        }
+
+        if (db) {
+          const jsonRecord = JSON.stringify(dbRecord)
+          db.put(`id:${lastId}:${lastRev}:${lastSeq}`, jsonRecord)
+          db.put(`seq:${lastSeq}:${lastId}:${lastRev}`, jsonRecord)
         }
 
         console.log(`${ts}${seq}${id}${docInfo}`)
@@ -136,7 +157,7 @@ async function handler (argv) {
       count++
       lastId = id
       lastRev = changes ? changes[0].rev : undefined
-      leaderSeq = seq || 0
+      lastSeq = seq || 0
       lastDoc = doc
       notify({force: fullThrottle})
 
