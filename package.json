@@ -32,6 +32,8 @@
     "follow": "^1.0.0",
     "http-proxy": "^1.16.2",
     "ioredis": "^3.2.2",
+    "leveldown": "^3.0.0",
+    "levelup": "^2.0.2",
     "log-a-log": "^4.0.1",
     "mem": "^3.0.0",
     "moment": "^2.20.1",

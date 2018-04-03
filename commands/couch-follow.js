@@ -24,6 +24,11 @@ function builder (yargs) {
       default: false,
       alias: ['i']
     })
+    .option('leveldb', {
+      type: 'string',
+      desc: 'the LevelDB directory to which history should be written',
+      alias: ['L']
+    })
     .option('limit', {
       type: 'number',
       desc: 'stop after a fixed number of documents are retrieved',
@@ -49,141 +54,164 @@ function builder (yargs) {
     })
 }
 
-function handler (argv) {
-  const axios = require('axios')
-  const durations = require('durations')
-  const follow = require('follow')
-  const moment = require('moment')
-  const r = require('ramda')
+async function handler (argv) {
   const {blue, green, orange, purple, red, yellow, emoji} = require('@buzuli/color')
 
-  const throttle = require('@buzuli/throttle')
-  const buzJson = require('@buzuli/json')
+  try {
+    const axios = require('axios')
+    const durations = require('durations')
+    const follow = require('follow')
+    const moment = require('moment')
+    const r = require('ramda')
 
-  let lastRev = null
-  let lastId = null
-  let lastDoc = null
-  let leaderSeq = 0
+    const throttle = require('@buzuli/throttle')
+    const buzJson = require('@buzuli/json')
 
-  const {
-    completeDoc,
-    fullThrottle,
-    url,
-    info: reportInfo,
-    limit,
-    maxDelay,
-    minDelay,
-    since
-  } = argv
+    let lastRev = null
+    let lastId = null
+    let lastDoc = null
+    let leaderSeq = 0
 
-  console.log(`url: ${blue(url)}`)
+    const {
+      completeDoc,
+      fullThrottle,
+      url,
+      info: reportInfo,
+      leveldb,
+      limit,
+      maxDelay,
+      minDelay,
+      since
+    } = argv
 
-  const notify = throttle({
-    reportFunc: () => {
-      const now = new Date()
-      const ts = `[${blue(now.toISOString())}] `
-      const seq = `sequence=${orange(leaderSeq || 0)} `
-      const id = lastId ? `${yellow(lastId)}` : ''
+    const db = await openDb(leveldb)
 
-      let docInfo = ''
-      if (lastDoc) {
-        const latestVersion = (lastDoc['dist-tags'] || {}).latest
-        const created = moment(((lastDoc.time) || {}).created)
-        const lastVersion = r.compose(
-          r.head,
-          r.reduce(([accTag, accTime], [nextTag, nextTime]) => {
-            return (nextTime.diff(accTime) > 0)
-              ? [nextTag, nextTime]
-              : [accTag, accTime]
-          }, [latestVersion, created]),
-          r.filter(([tag, time]) => tag !== 'created' && tag !== 'modified'),
-          r.map(([tag, time]) => [tag, moment(time)]),
-          r.toPairs
-        )(lastDoc.time)
-        const version = lastVersion ? `@${green(lastVersion)} ` : ' '
-        const latest = (latestVersion && latestVersion !== lastVersion) ? `[latest:${purple(latestVersion)}] ` : ''
-        const pkgSize = Buffer.byteLength(JSON.stringify(lastDoc))
-        const pkgSizeColor = pkgSize >= 1000000 ? red : pkgSize >= 100000 ? orange : yellow
-        const size = reportInfo ? `${pkgSizeColor(pkgSize.toLocaleString())} b - ` : ''
-        const lastModified = ((lastDoc.time) || {}).modified
-        const age = lastModified ? blue(durations.millis(moment(now).diff(moment(lastModified)))) : ''
-        const doc = (completeDoc && lastDoc) ? `\n${buzJson(lastDoc)}` : ''
-        docInfo = `${version}${latest}(${size}${age})${doc}`
-      } else {
-        docInfo = lastRev ? `[${green(lastRev)}]` : ''
-      }
+    console.log(`url: ${blue(url)}`)
 
-      console.log(`${ts}${seq}${id}${docInfo}`)
-    },
-    minDelay,
-    maxDelay
-  })
+    const notify = throttle({
+      reportFunc: () => {
+        const now = new Date()
+        const ts = `[${blue(now.toISOString())}] `
+        const seq = `sequence=${orange(leaderSeq || 0)} `
+        const id = lastId ? `${yellow(lastId)}` : ''
 
-  let count = 0
-  let stop = () => {}
-  trackSeq(url, (document = {}) => {
-    const {id, seq, doc, changes} = document
-    count++
-    lastId = id
-    lastRev = changes ? changes[0].rev : undefined
-    leaderSeq = seq || 0
-    lastDoc = doc
-    notify({force: fullThrottle})
-
-    if (count >= limit) {
-      stop()
-    }
-  })
-
-  function latestSeq (url) {
-    return axios
-      .get(url)
-      .then(({data}) => data.update_seq)
-  }
-
-  // Track the latest sequence for a URL
-  function trackSeq (url, changeHandler) {
-    const errorNotify = throttle({minDelay, maxDelay: null})
-    const reportError = (error) => {
-      errorNotify({
-        force: fullThrottle,
-        reportFunc: () => {
-          console.error(error)
-          console.error(
-            red(`Error tracking offset from leader ${blue(url)}.`),
-            emoji.inject('Details above :point_up:')
-          )
+        let docInfo = ''
+        if (lastDoc) {
+          const latestVersion = (lastDoc['dist-tags'] || {}).latest
+          const created = moment(((lastDoc.time) || {}).created)
+          const lastVersion = r.compose(
+            r.head,
+            r.reduce(([accTag, accTime], [nextTag, nextTime]) => {
+              return (nextTime.diff(accTime) > 0)
+                ? [nextTag, nextTime]
+                : [accTag, accTime]
+            }, [latestVersion, created]),
+            r.filter(([tag, time]) => tag !== 'created' && tag !== 'modified'),
+            r.map(([tag, time]) => [tag, moment(time)]),
+            r.toPairs
+          )(lastDoc.time)
+          const version = lastVersion ? `@${green(lastVersion)} ` : ' '
+          const latest = (latestVersion && latestVersion !== lastVersion) ? `[latest:${purple(latestVersion)}] ` : ''
+          const pkgSize = Buffer.byteLength(JSON.stringify(lastDoc))
+          const pkgSizeColor = pkgSize >= 1000000 ? red : pkgSize >= 100000 ? orange : yellow
+          const size = reportInfo ? `${pkgSizeColor(pkgSize.toLocaleString())} b - ` : ''
+          const lastModified = ((lastDoc.time) || {}).modified
+          const age = lastModified ? blue(durations.millis(moment(now).diff(moment(lastModified)))) : ''
+          const doc = (completeDoc && lastDoc) ? `\n${buzJson(lastDoc)}` : ''
+          docInfo = `${version}${latest}(${size}${age})${doc}`
+        } else {
+          docInfo = lastRev ? `[${green(lastRev)}]` : ''
         }
-      })
-    }
 
-    // Get the initial sequence
-    (
-      since < 0
-      ? latestSeq(url)
-      : Promise.resolve(since)
-    )
-    .then(seq => {
-      changeHandler({seq})
+        console.log(`${ts}${seq}${id}${docInfo}`)
+      },
+      minDelay,
+      maxDelay
+    })
 
-      const feed = new follow.Feed({
-        db: url,
-        since: seq,
-        include_docs: completeDoc || reportInfo
-      })
+    let count = 0
+    let stop = () => {}
+    trackSeq(url, (document = {}) => {
+      const {id, seq, doc, changes} = document
+      count++
+      lastId = id
+      lastRev = changes ? changes[0].rev : undefined
+      leaderSeq = seq || 0
+      lastDoc = doc
+      notify({force: fullThrottle})
 
-      feed.on('change', changeHandler)
-      feed.on('error', reportError)
-      feed.on('stop', () => console.log(`Halted after receiving ${orange(count)} sequences.`))
-
-      feed.follow()
-
-      stop = () => {
-        errorNotify({halt: true})
-        notify({halt: true, force: true})
-        feed.stop()
+      if (count >= limit) {
+        stop()
       }
     })
-    .catch(error => reportError(error))
+
+    function latestSeq (url) {
+      return axios
+        .get(url)
+        .then(({data}) => data.update_seq)
+    }
+
+    // Track the latest sequence for a URL
+    function trackSeq (url, changeHandler) {
+      const errorNotify = throttle({minDelay, maxDelay: null})
+      const reportError = (error) => {
+        errorNotify({
+          force: fullThrottle,
+          reportFunc: () => {
+            console.error(error)
+            console.error(
+              red(`Error tracking offset from leader ${blue(url)}.`),
+              emoji.inject('Details above :point_up:')
+            )
+          }
+        })
+      }
+
+      // Get the initial sequence
+      (
+        since < 0
+        ? latestSeq(url)
+        : Promise.resolve(since)
+      )
+      .then(seq => {
+        changeHandler({seq})
+
+        const feed = new follow.Feed({
+          db: url,
+          since: seq,
+          include_docs: completeDoc || reportInfo
+        })
+
+        feed.on('change', changeHandler)
+        feed.on('error', reportError)
+        feed.on('stop', () => console.log(`Halted after receiving ${orange(count)} sequences.`))
+
+        feed.follow()
+
+        stop = () => {
+          errorNotify({halt: true})
+          notify({halt: true, force: true})
+          feed.stop()
+        }
+      })
+      .catch(error => reportError(error))
+    }
+
+    function openDb (leveldb) {
+      if (!leveldb) {
+        return Promise.resolve(undefined)
+      }
+
+      return new Promise((resolve, reject) => {
+        console.log(`db: ${blue(leveldb)}`)
+        const leveldown = require('leveldown')
+        const levelup = require('levelup')
+
+        levelup(leveldown(leveldb), (error, db) => error ? reject(error) : resolve(db))
+      })
+    }
+  } catch (error) {
+    console.error(error)
+    console.error(red(emoji.inject(`Fatal error! Details above :point_up:`)))
   }
 }
