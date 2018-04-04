@@ -53,7 +53,7 @@ tap.test(async t => {
   const {stderr: plainErr, stdout: plainOut} = await testCmd(t, bin, {status: 1})
   t.ok(plainOut.length === 0, 'no output to stdout for unexpected help')
   t.ok(r.startsWith(helpOut)(plainErr),
-       'should display help when no command specified')
+    'should display help when no command specified')
 
   const subCommands = (await listDir(cmdDir)).map(cmd => cmd.split('.')[0])
 

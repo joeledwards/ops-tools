@@ -88,9 +88,9 @@ function copyImage ({ec2, srcRegion, srcAmi, amiName, amiDesc, simulate}) {
         if (simulate && isDryRunError(error)) {
           resolve(
             random.hex(8)
-            .then(hex => ({
-              ami: `ami-${random.hex(8)}`
-            }))
+              .then(hex => ({
+                ami: `ami-${random.hex(8)}`
+              }))
           )
         } else {
           reject(error)
@@ -233,23 +233,23 @@ function handler (argv) {
         log.info(`Replicating ${blue(srcAmi)} from ${yellow(srcRegion)} to ${yellow(dstRegion)}`)
 
         replicateImage({dstRegion, ...argv})
-        .then(
-          ({published, ami}) => {
-            const action = published ? 'published' : 'copied'
-            const icon = emoji.inject(published ? ':gift:' : ':lock:')
-            log.info(`Successfully ${action} to ${yellow(dstRegion)} as ${green(ami)} ${icon}`)
-            next()
-          },
-          error => {
-            log.error(error)
-            log.error(
-              red(`Error replicating to ${yellow(dstRegion)}.`),
-              emoji.inject('Details above :point_up:')
-            )
+          .then(
+            ({published, ami}) => {
+              const action = published ? 'published' : 'copied'
+              const icon = emoji.inject(published ? ':gift:' : ':lock:')
+              log.info(`Successfully ${action} to ${yellow(dstRegion)} as ${green(ami)} ${icon}`)
+              next()
+            },
+            error => {
+              log.error(error)
+              log.error(
+                red(`Error replicating to ${yellow(dstRegion)}.`),
+                emoji.inject('Details above :point_up:')
+              )
 
-            next(error)
-          }
-        )
+              next(error)
+            }
+          )
       }
     })
 

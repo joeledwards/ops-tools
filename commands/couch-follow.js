@@ -201,31 +201,31 @@ async function followCouch (argv) {
     // Get the initial sequence
     (
       since < 0
-      ? latestSeq(url)
-      : Promise.resolve(since)
+        ? latestSeq(url)
+        : Promise.resolve(since)
     )
-    .then(seq => {
-      changeHandler({seq})
+      .then(seq => {
+        changeHandler({seq})
 
-      const feed = new follow.Feed({
-        db: url,
-        since: seq,
-        include_docs: completeDoc || reportInfo
+        const feed = new follow.Feed({
+          db: url,
+          since: seq,
+          include_docs: completeDoc || reportInfo
+        })
+
+        feed.on('change', changeHandler)
+        feed.on('error', reportError)
+        feed.on('stop', () => console.log(`Halted after receiving ${orange(count)} sequences.`))
+
+        feed.follow()
+
+        stop = () => {
+          errorNotify({halt: true})
+          notify({halt: true, force: true})
+          feed.stop()
+        }
       })
-
-      feed.on('change', changeHandler)
-      feed.on('error', reportError)
-      feed.on('stop', () => console.log(`Halted after receiving ${orange(count)} sequences.`))
-
-      feed.follow()
-
-      stop = () => {
-        errorNotify({halt: true})
-        notify({halt: true, force: true})
-        feed.stop()
-      }
-    })
-    .catch(error => reportError(error))
+      .catch(error => reportError(error))
   }
 
   function openDb (leveldb) {

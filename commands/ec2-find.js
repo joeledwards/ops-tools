@@ -7,30 +7,30 @@ module.exports = {
 
 function builder (yargs) {
   yargs
-  .option('quiet', {
-    type: 'boolean',
-    desc: 'only output server list (JSON)',
-    default: false,
-    alias: ['q']
-  })
-  .option('id', {
-    type: 'string',
-    desc: 'id search regex',
-    default: false,
-    alias: ['i']
-  })
-  .option('key', {
-    type: 'string',
-    desc: 'ssh key search regex',
-    default: false,
-    alias: ['k']
-  })
-  .option('name', {
-    type: 'string',
-    desc: 'name search regex',
-    default: false,
-    alias: ['n']
-  })
+    .option('quiet', {
+      type: 'boolean',
+      desc: 'only output server list (JSON)',
+      default: false,
+      alias: ['q']
+    })
+    .option('id', {
+      type: 'string',
+      desc: 'id search regex',
+      default: false,
+      alias: ['i']
+    })
+    .option('key', {
+      type: 'string',
+      desc: 'ssh key search regex',
+      default: false,
+      alias: ['k']
+    })
+    .option('name', {
+      type: 'string',
+      desc: 'name search regex',
+      default: false,
+      alias: ['n']
+    })
 }
 
 function handler ({id, key, name, quiet}) {
@@ -85,22 +85,22 @@ function handler ({id, key, name, quiet}) {
     instanceFilter,
     fieldExtractor
   })
-  .then(instances => {
-    const count = instances.length
-    if (quiet) {
-      console.log(JSON.stringify(instances))
-    } else {
-      console.log(json(instances))
-      console.log(green(
-        `Listed ${orange(count)} instances for region ${yellow(ec2.aws.region)}`
+    .then(instances => {
+      const count = instances.length
+      if (quiet) {
+        console.log(JSON.stringify(instances))
+      } else {
+        console.log(json(instances))
+        console.log(green(
+          `Listed ${orange(count)} instances for region ${yellow(ec2.aws.region)}`
+        ))
+      }
+    })
+    .catch(error => {
+      console.error(error)
+      console.error(red(
+        `Error finding instances in ${yellow(ec2.aws.region)}: details above`
       ))
-    }
-  })
-  .catch(error => {
-    console.error(error)
-    console.error(red(
-      `Error finding instances in ${yellow(ec2.aws.region)}: details above`
-    ))
-    process.exit(1)
-  })
+      process.exit(1)
+    })
 }

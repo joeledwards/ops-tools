@@ -7,12 +7,12 @@ module.exports = {
 
 function builder (yargs) {
   yargs
-  .option('raw', {
-    type: 'boolean',
+    .option('raw', {
+      type: 'boolean',
 
-    default: 'false',
-    alias: ['r']
-  })
+      default: 'false',
+      alias: ['r']
+    })
 }
 
 async function handler ({image, raw}) {
@@ -34,14 +34,14 @@ async function handler ({image, raw}) {
 
   let tagCount = 0
   oboe(response.data)
-  .node('!.*.name', name => {
-    tagCount++
-    console.log(raw ? name : yellow(name))
-    return oboe.drop()
-  })
-  .done(() => {
-    if (!raw) {
-      console.info(`Found ${orange(tagCount)} tags.`)
-    }
-  })
+    .node('!.*.name', name => {
+      tagCount++
+      console.log(raw ? name : yellow(name))
+      return oboe.drop()
+    })
+    .done(() => {
+      if (!raw) {
+        console.info(`Found ${orange(tagCount)} tags.`)
+      }
+    })
 }

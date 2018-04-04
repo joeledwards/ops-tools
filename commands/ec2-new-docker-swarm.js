@@ -7,35 +7,35 @@ module.exports = {
 
 function builder (yargs) {
   yargs
-  .options('manager-type', {
-    type: 'string',
-    desc: 'aws instance type for manager nodes',
-    default: 'm4.large',
-    alias: ['t']
-  })
-  .options('swarm-alias', {
-    type: 'string',
-    desc: 'alias to assign this cluster for easier recognition',
-    alias: ['a', 'alias']
-  })
-  .option('worker-count', {
-    type: 'number',
-    desc: 'number of worker nodes',
-    default: 0,
-    alias: ['c']
-  })
-  .options('worker-type', {
-    type: 'string',
-    desc: 'aws instance type for worker nodes',
-    default: 'm4.large',
-    alias: ['T']
-  })
-  .options('simulate', {
-    tpe: 'boolean',
-    desc: 'simulate the swarm setup without provisioning any resources',
-    default: false,
-    alias: ['s']
-  })
+    .options('manager-type', {
+      type: 'string',
+      desc: 'aws instance type for manager nodes',
+      default: 'm4.large',
+      alias: ['t']
+    })
+    .options('swarm-alias', {
+      type: 'string',
+      desc: 'alias to assign this cluster for easier recognition',
+      alias: ['a', 'alias']
+    })
+    .option('worker-count', {
+      type: 'number',
+      desc: 'number of worker nodes',
+      default: 0,
+      alias: ['c']
+    })
+    .options('worker-type', {
+      type: 'string',
+      desc: 'aws instance type for worker nodes',
+      default: 'm4.large',
+      alias: ['T']
+    })
+    .options('simulate', {
+      tpe: 'boolean',
+      desc: 'simulate the swarm setup without provisioning any resources',
+      default: false,
+      alias: ['s']
+    })
 }
 
 function handler ({

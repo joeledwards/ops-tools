@@ -24,70 +24,70 @@ function handler () {
   let passphrase
 
   passphrasePrompt()
-  .then(pass => {
-    passphrase = pass
-    return ec2.listInstances()
-  })
-  .then(({Reservations}) => {
-    const fieldExtractor = ({
-      InstanceId: id,
-      InstanceType: type,
-      Tags: tags,
-      PublicIpAddress: ip,
-      State: {
-        Name: state
-      }
-    }) => {
-      const name = r.head(r.compose(
-        r.map(({Value}) => Value),
-        r.filter(({Key}) => r.toLower(Key) === 'name')
-      )(tags))
-
-      return {id, name, type, state, ip}
-    }
-
-    const summarizer = ({id, name, type, uptime, state}) => {
-      const ut = (uptime === null) ? 'unknown' : durations.millis(uptime)
-      return `[${orange(ut)}] ${green(region)} ${yellow(id)} [${(state === 'running') ? green(state) : red(state)}] (${blue(name)})`
-    }
-
-    const instances = r.compose(
-      r.flatten,
-      r.map(({Instances}) => Instances)
-    )(Reservations)
-
-    const results = []
-    const uptimeTasks = r.compose(
-      r.map(info => {
-        return next => {
-          return checkUptime({id: info.id, name: info.name, host: info.ip, passphrase})
-            .then(uptime => ({...info, uptime}))
-            .then(r => results.push(r))
-            .then(() => next(), next)
-        }
-      }),
-      r.map(fieldExtractor)
-    )(instances)
-
-    async.series(uptimeTasks, error => {
-      if (error) {
-        console.error(`Error checking uptimes:`, error)
-      } else {
-        const summaries = r.compose(
-          r.reverse,
-          r.map(summarizer),
-          r.sortBy(({uptime}) => uptime)
-        )(results)
-
-        console.log(r.join('\n')(summaries))
-        console.log(`Checked uptime for ${orange(instances.length)} instances in ${blue(region)}`)
-      }
+    .then(pass => {
+      passphrase = pass
+      return ec2.listInstances()
     })
-  })
-  .catch(error => {
-    console.error(error)
-    process.exit(1)
-  })
+    .then(({Reservations}) => {
+      const fieldExtractor = ({
+        InstanceId: id,
+        InstanceType: type,
+        Tags: tags,
+        PublicIpAddress: ip,
+        State: {
+          Name: state
+        }
+      }) => {
+        const name = r.head(r.compose(
+          r.map(({Value}) => Value),
+          r.filter(({Key}) => r.toLower(Key) === 'name')
+        )(tags))
+
+        return {id, name, type, state, ip}
+      }
+
+      const summarizer = ({id, name, type, uptime, state}) => {
+        const ut = (uptime === null) ? 'unknown' : durations.millis(uptime)
+        return `[${orange(ut)}] ${green(region)} ${yellow(id)} [${(state === 'running') ? green(state) : red(state)}] (${blue(name)})`
+      }
+
+      const instances = r.compose(
+        r.flatten,
+        r.map(({Instances}) => Instances)
+      )(Reservations)
+
+      const results = []
+      const uptimeTasks = r.compose(
+        r.map(info => {
+          return next => {
+            return checkUptime({id: info.id, name: info.name, host: info.ip, passphrase})
+              .then(uptime => ({...info, uptime}))
+              .then(r => results.push(r))
+              .then(() => next(), next)
+          }
+        }),
+        r.map(fieldExtractor)
+      )(instances)
+
+      async.series(uptimeTasks, error => {
+        if (error) {
+          console.error(`Error checking uptimes:`, error)
+        } else {
+          const summaries = r.compose(
+            r.reverse,
+            r.map(summarizer),
+            r.sortBy(({uptime}) => uptime)
+          )(results)
+
+          console.log(r.join('\n')(summaries))
+          console.log(`Checked uptime for ${orange(instances.length)} instances in ${blue(region)}`)
+        }
+      })
+    })
+    .catch(error => {
+      console.error(error)
+      process.exit(1)
+    })
 
   async function checkUptime ({
     id,

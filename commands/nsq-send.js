@@ -7,18 +7,18 @@ module.exports = {
 
 function builder (yargs) {
   yargs
-  .option('host', {
-    type: 'string',
-    desc: 'the host on which NSQ is running',
-    default: 'localhost',
-    alias: ['h']
-  })
-  .option('port', {
-    type: 'number',
-    desc: 'the port on which NSQ is listening',
-    default: 4150,
-    alias: ['p']
-  })
+    .option('host', {
+      type: 'string',
+      desc: 'the host on which NSQ is running',
+      default: 'localhost',
+      alias: ['h']
+    })
+    .option('port', {
+      type: 'number',
+      desc: 'the port on which NSQ is listening',
+      default: 4150,
+      alias: ['p']
+    })
 }
 
 function handler ({host, port, topic, message}) {
