@@ -5,6 +5,7 @@ module.exports = {
 }
 
 function handler ({url}) {
+  const {blue, red, yellow, emoji} = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
   const {colorCode} = require('../lib/http')
 
@@ -21,6 +22,7 @@ function handler ({url}) {
       console.info(`[${code}] ${text}\n${response}`)
     })
     .catch(error => {
-      console.error(`Error fetching state from ${url} :`, error)
+      console.error(error)
+      console.error(red(emoji.inject(`Error fetching state from ${blue(url)} [${yellow(error.message)}]. More detail above :point_up:`)))
     })
 }
