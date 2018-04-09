@@ -7,6 +7,12 @@ module.exports = {
 
 function builder (yargs) {
   return yargs
+    .option('bind-port', {
+      type: 'number',
+      desc: 'the port on which the history server should listen',
+      default: 31415,
+      alias: ['p']
+    })
     .option('complete-doc', {
       type: 'boolean',
       desc: 'pull back and render the complete doc on each report (streams ALL content)',
@@ -65,6 +71,87 @@ async function handler (argv) {
   }
 }
 
+async function historyServer (db, argv) {
+  console.log('Starting history server...')
+
+  new Promise((resolve, reject) => {
+    const express = require('express')
+
+    const {
+      bindPort
+    } = argv
+
+    const app = express()
+
+    // Request records by sequence number
+    app.get('/history/sequence', (req, res) => {
+      console.log('GET /history/sequence')
+      
+      const {
+        start,
+        end,
+        limit
+      } = req.query
+
+      const options = {}
+
+      if (start) {
+        try {
+          parseInt(start)
+          options.gte = start
+        } catch (error) {
+          return res.status(400).json({message: `Invalid start sequence: ${start}`})
+        }
+      }
+
+      if (end) {
+        try {
+          parseInt(end)
+          option.lte = end
+        } catch (error) {
+          return res.status(400).json({message: `Invalid end sequence: ${end}`})
+        }
+      }
+
+      if (limit) {
+        try {
+          options.limit = parseInt(limit)
+        } catch (error) {
+          return res.status(400).json({message: `Invalid limit: ${limit}`})
+        }
+      }
+
+      db.createReadStream(options)
+      .on('data', (key, value) => {
+      })
+      .on('end', () => {
+      })
+    })
+
+    // Request records by package name
+    app.get('/history/package', (req, res) => {
+      console.log('GET /history/package')
+
+      const {
+        name,
+        limit
+      } = req.query
+    })
+
+    // Continuous feed of sequence (with optional context count)
+    app.get('/feed', (req, res) => {
+
+      const {
+      } = req.query
+    })
+
+    app.listen(bindPort, () => {
+      console.log(`History HTTP server is listening on port ${bindPort}`)
+      resolve()
+    })
+  })
+}
+
 async function followCouch (argv) {
   const {blue, green, orange, purple, red, yellow, emoji} = require('@buzuli/color')
 
@@ -96,7 +183,11 @@ async function followCouch (argv) {
 
   const db = await openDb(leveldb)
 
-  console.log(`url: ${blue(url)}`)
+  if (leveldb) {
+    await historyServer(db, argv)
+  }
+
+  console.log(`registry url: ${blue(url)}`)
 
   const notify = throttle({
     reportFunc: () => {
