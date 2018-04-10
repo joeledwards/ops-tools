@@ -71,87 +71,6 @@ async function handler (argv) {
   }
 }
 
-async function historyServer (db, argv) {
-  console.log('Starting history server...')
-
-  new Promise((resolve, reject) => {
-    const express = require('express')
-
-    const {
-      bindPort
-    } = argv
-
-    const app = express()
-
-    // Request records by sequence number
-    app.get('/history/sequence', (req, res) => {
-      console.log('GET /history/sequence')
-      
-      const {
-        start,
-        end,
-        limit
-      } = req.query
-
-      const options = {}
-
-      if (start) {
-        try {
-          parseInt(start)
-          options.gte = start
-        } catch (error) {
-          return res.status(400).json({message: `Invalid start sequence: ${start}`})
-        }
-      }
-
-      if (end) {
-        try {
-          parseInt(end)
-          option.lte = end
-        } catch (error) {
-          return res.status(400).json({message: `Invalid end sequence: ${end}`})
-        }
-      }
-
-      if (limit) {
-        try {
-          options.limit = parseInt(limit)
-        } catch (error) {
-          return res.status(400).json({message: `Invalid limit: ${limit}`})
-        }
-      }
-
-      db.createReadStream(options)
-      .on('data', (key, value) => {
-      })
-      .on('end', () => {
-      })
-    })
-
-    // Request records by package name
-    app.get('/history/package', (req, res) => {
-      console.log('GET /history/package')
-
-      const {
-        name,
-        limit
-      } = req.query
-    })
-
-    // Continuous feed of sequence (with optional context count)
-    app.get('/feed', (req, res) => {
-
-      const {
-      } = req.query
-    })
-
-    app.listen(bindPort, () => {
-      console.log(`History HTTP server is listening on port ${bindPort}`)
-      resolve()
-    })
-  })
-}
-
 async function followCouch (argv) {
   const {blue, green, orange, purple, red, yellow, emoji} = require('@buzuli/color')
 
@@ -241,8 +160,8 @@ async function followCouch (argv) {
 
       if (db) {
         const jsonRecord = JSON.stringify(dbRecord)
-        db.put(`id:${lastId}:${lastRev}:${lastSeq}`, jsonRecord)
-        db.put(`seq:${lastSeq}:${lastId}:${lastRev}`, jsonRecord)
+        db.put(`pkg:${lastId}:${lastRev}`, jsonRecord)
+        db.put(`seq:${lastSeq}`, jsonRecord)
       }
 
       console.log(`${ts}${seq}${id}${docInfo}`)
@@ -332,4 +251,168 @@ async function followCouch (argv) {
       levelup(leveldown(leveldb), (error, db) => error ? reject(error) : resolve(db))
     })
   }
+}
+
+async function historyServer (db, argv) {
+  const {blue, green, orange, purple, red, yellow, emoji} = require('@buzuli/color')
+  const r = require('ramda')
+
+  const log = msg => console.info(`[${yellow(new Date().toISOString())}] ${msg}`)
+
+  log(`Starting history server...`)
+
+  new Promise((resolve, reject) => {
+    const express = require('express')
+
+    const {
+      bindPort
+    } = argv
+
+    const app = express()
+
+    // Request records by sequence number
+    app.get('/history/sequence', (req, res) => {
+      log(`${blue('GET')} ${green('/history/sequence')}`)
+      
+      const {
+        start,
+        end,
+        limit
+      } = req.query
+
+      const options = {
+        gte: 'seq:',
+        lt: 'ser:'
+      }
+
+      if (start) {
+        try {
+          const startSeq = parseInt(start)
+          options.gte = `seq:${startSeq}`
+        } catch (error) {
+          return res.status(400).json({message: `Invalid start sequence: ${start}`})
+        }
+      }
+
+      if (end) {
+        try {
+          const endSeq = parseInt(end)
+          option.lte = `seq:${endSeq}`
+        } catch (error) {
+          return res.status(400).json({message: `Invalid end sequence: ${end}`})
+        }
+      }
+
+      if (limit) {
+        try {
+          options.limit = parseInt(limit)
+        } catch (error) {
+          return res.status(400).json({message: `Invalid limit: ${limit}`})
+        }
+      }
+
+      let prefix = null
+      res.write('[')
+      db.createReadStream(options)
+      .on('data', data => {
+        if (prefix) {
+          res.write(prefix)
+        }
+        res.write(data.value)
+        prefix = ','
+      })
+      .on('end', () => {
+        res.write(']')
+        res.send()
+      })
+    })
+
+    // Request records by package name
+    app.get('/history/package', (req, res) => {
+      const qs = r.compose(
+        r.join('&'),
+        r.map(([k, v]) => `${yellow(k)}=${blue(v)}`),
+        r.toPairs
+      )(req.query || {})
+      log(`${blue('GET')} ${green('/history/package')}${qs ? '?' + qs : ''}`)
+
+      const {
+        name,
+        limit
+      } = req.query
+
+      const options = {
+        gte: 'pkg:',
+        lt: 'pkh:'
+      }
+
+      if (name) {
+        options.gte = `pkg:${name}`
+        options.lt = `pkg:${name}_`
+      }
+
+      if (limit) {
+        try {
+          options.limit = parseInt(limit)
+        } catch (error) {
+          return res.status(400).json({message: `Invalid limit: ${limit}`})
+        }
+      }
+
+      let prefix = null
+      res.write('[')
+      db.createReadStream(options)
+      .on('data', data => {
+        if (prefix) {
+          res.write(prefix)
+        } else {
+          prefix = ','
+        }
+        res.write(data.value)
+      })
+      .on('end', () => {
+        res.write(']')
+        res.send()
+      })
+    })
+
+    // Continuous feed of changes (with optional context count)
+    app.get('/feed', (req, res) => {
+      const {
+        context,
+        limit
+      } = req.query
+      
+      let ctxt = 0
+      if (context) {
+        try {
+          ctxt = parseInt(limit)
+        } catch (error) {
+          return res.status(400).json({message: `Invalid value for context: ${context}`})
+        }
+      }
+
+      let max = 0
+      if (limit) {
+        try {
+          max = parseInt(limit)
+        } catch (error) {
+          return res.status(400).json({message: `Invalid value for limit: ${limit}`})
+        }
+      }
+
+      // TODO:
+      // - query ctxt records from LevelDB
+      // - push the context changes first
+      // - push every new change as it arrives
+      //   (this will require introduction of an emitter
+      //    from which the database writer and each feed
+      //    receives changes)
+    })
+
+    app.listen(bindPort, () => {
+      log(`History HTTP server is listening on port ${orange(bindPort)}`)
+      resolve()
+    })
+  })
 }
