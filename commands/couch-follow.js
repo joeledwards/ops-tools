@@ -94,6 +94,7 @@ async function followCouch (argv) {
   let lastId = null
   let lastDoc = null
   let lastSeq = 0
+  let lastDel = false
 
   const {
     completeDoc,
@@ -184,7 +185,7 @@ async function followCouch (argv) {
     maxDelay
   })
 
-  let count = -1 
+  let count = -1
   let stop = () => {}
   trackSeq(url, (document = {}) => {
     count++
@@ -208,8 +209,8 @@ async function followCouch (argv) {
   })
 
   // This could be problematic. All other operations are synchronous, but this...
-  async function getTarballSize () {
-  }
+  // async function getTarballSize () {
+  // }
 
   function formatRev (rev) {
     if (rev) {
@@ -288,15 +289,15 @@ async function followCouch (argv) {
 }
 
 // History Server
-async function historyServer (db, argv) {
-  const {blue, green, orange, purple, red, yellow, emoji} = require('@buzuli/color')
+function historyServer (db, argv) {
+  const {blue, green, orange, yellow} = require('@buzuli/color')
   const r = require('ramda')
 
   const log = msg => console.info(`[${yellow(new Date().toISOString())}] ${msg}`)
 
   log(`Starting history server...`)
 
-  new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const express = require('express')
 
     const {
@@ -307,8 +308,8 @@ async function historyServer (db, argv) {
 
     // Request records by sequence number
     app.get('/history/sequence', (req, res) => {
-      log(`${blue('GET')} ${green('/history/sequence')}`)
-      
+      log(`${blue('GET')} ${green('/history/sequence')}${colorQuery(req.query)}`)
+
       const {
         start,
         end,
@@ -332,7 +333,7 @@ async function historyServer (db, argv) {
       if (end) {
         try {
           const endSeq = parseInt(end)
-          option.lte = `seq:${endSeq}`
+          options.lte = `seq:${endSeq}`
         } catch (error) {
           return res.status(400).json({message: `Invalid end sequence: ${end}`})
         }
@@ -349,27 +350,22 @@ async function historyServer (db, argv) {
       let prefix = null
       res.write('[')
       db.createReadStream(options)
-      .on('data', data => {
-        if (prefix) {
-          res.write(prefix)
-        }
-        res.write(data.value)
-        prefix = ','
-      })
-      .on('end', () => {
-        res.write(']')
-        res.send()
-      })
+        .on('data', data => {
+          if (prefix) {
+            res.write(prefix)
+          }
+          res.write(data.value)
+          prefix = ','
+        })
+        .on('end', () => {
+          res.write(']')
+          res.send()
+        })
     })
 
     // Request records by package name
     app.get('/history/package', (req, res) => {
-      const qs = r.compose(
-        r.join('&'),
-        r.map(([k, v]) => `${yellow(k)}=${blue(v)}`),
-        r.toPairs
-      )(req.query || {})
-      log(`${blue('GET')} ${green('/history/package')}${qs ? '?' + qs : ''}`)
+      log(`${blue('GET')} ${green('/history/package')}${colorQuery(req.query)}`)
 
       const {
         name,
@@ -397,18 +393,18 @@ async function historyServer (db, argv) {
       let prefix = null
       res.write('[')
       db.createReadStream(options)
-      .on('data', data => {
-        if (prefix) {
-          res.write(prefix)
-        } else {
-          prefix = ','
-        }
-        res.write(data.value)
-      })
-      .on('end', () => {
-        res.write(']')
-        res.send()
-      })
+        .on('data', data => {
+          if (prefix) {
+            res.write(prefix)
+          } else {
+            prefix = ','
+          }
+          res.write(data.value)
+        })
+        .on('end', () => {
+          res.write(']')
+          res.send()
+        })
     })
 
     // Continuous feed of changes (with optional context count)
@@ -417,11 +413,11 @@ async function historyServer (db, argv) {
         context,
         limit
       } = req.query
-      
+
       let ctxt = 0
       if (context) {
         try {
-          ctxt = parseInt(limit)
+          ctxt = parseInt(context)
         } catch (error) {
           return res.status(400).json({message: `Invalid value for context: ${context}`})
         }
@@ -436,6 +432,10 @@ async function historyServer (db, argv) {
         }
       }
 
+      log(`${blue('GET')} ${green('/feed')}${colorQuery(req.query)}`)
+      log(`  context records : ${ctxt}`)
+      log(`      new records : ${max}`)
+
       // TODO:
       // - query ctxt records from LevelDB
       // - push the context changes first
@@ -444,6 +444,15 @@ async function historyServer (db, argv) {
       //    from which the database writer and each feed
       //    receives changes)
     })
+
+    function colorQuery (queryString) {
+      const qs = r.compose(
+        r.join('&'),
+        r.map(([k, v]) => `${yellow(k)}=${blue(v)}`),
+        r.toPairs
+      )(queryString || {})
+      return qs ? ('?' + qs) : ''
+    }
 
     app.listen(bindPort, () => {
       log(`History HTTP server is listening on port ${orange(bindPort)}`)
