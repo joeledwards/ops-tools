@@ -26,9 +26,15 @@ function builder (yargs) {
     })
     .option('info', {
       type: 'boolen',
-      desc: 'report version, size, and age info (streams ALL content)',
+      desc: 'report version, size, and age info (streams full packument)',
       default: false,
       alias: ['i']
+    })
+    .option('all-info', {
+      type: 'boolen',
+      desc: 'report attachment size (WARNING: streams all data, including attachments)',
+      default: false,
+      alias: ['I']
     })
     .option('leveldb', {
       type: 'string',
@@ -71,8 +77,9 @@ async function handler (argv) {
   }
 }
 
+// CouchDB Follower
 async function followCouch (argv) {
-  const {blue, green, orange, purple, red, yellow, emoji} = require('@buzuli/color')
+  const {blue, green, grey, orange, purple, red, yellow, emoji} = require('@buzuli/color')
 
   const axios = require('axios')
   const durations = require('durations')
@@ -93,6 +100,7 @@ async function followCouch (argv) {
     fullThrottle,
     url,
     info: reportInfo,
+    allInfo,
     leveldb,
     limit,
     maxDelay,
@@ -110,6 +118,7 @@ async function followCouch (argv) {
 
   const notify = throttle({
     reportFunc: () => {
+      const reportWatch = durations.stopwatch().start()
       const now = new Date()
       const ts = `[${blue(now.toISOString())}] `
       const seq = `sequence=${orange(lastSeq || 0)} `
@@ -141,11 +150,14 @@ async function followCouch (argv) {
         const latest = (latestVersion && latestVersion !== lastVersion) ? `[latest:${purple(latestVersion)}] ` : ''
         const pkgSize = Buffer.byteLength(JSON.stringify(lastDoc))
         const pkgSizeColor = pkgSize >= 1000000 ? red : pkgSize >= 100000 ? orange : yellow
-        const size = reportInfo ? `${pkgSizeColor(pkgSize.toLocaleString())} b - ` : ''
+        const size = (reportInfo || allInfo) ? `${pkgSizeColor(pkgSize.toLocaleString())} b -` : ''
         const lastModified = ((lastDoc.time) || {}).modified
-        const age = lastModified ? blue(durations.millis(moment(now).diff(moment(lastModified)))) : ''
+        const rev = allInfo ? ` [${formatRev(lastRev)}]` : ''
+        const age = lastModified ? ` ${blue(durations.millis(moment(now).diff(moment(lastModified))))}` : ''
         const doc = (completeDoc && lastDoc) ? `\n${buzJson(lastDoc)}` : ''
-        docInfo = `${version}${latest}(${size}${age})${doc}`
+        const del = lastDel ? red(' DELETED') : ''
+        const took = allInfo ? ` ${grey(reportWatch)}` : ''
+        docInfo = `${version}${latest}(${size}${age}${del})${rev}${took}${doc}`
 
         if (db) {
           dbRecord.createdTime = created ? moment(created).toISOString() : undefined
@@ -155,7 +167,9 @@ async function followCouch (argv) {
           dbRecord.packumentSize = pkgSize
         }
       } else {
-        docInfo = lastRev ? `[${green(lastRev)}]` : ''
+        const revStr = lastRev ? `[${formatRev(lastRev)}]` : ''
+        const delStr = lastDel ? `(${red('DELETED')})` : ''
+        docInfo = `${revStr} ${delStr}`
       }
 
       if (db) {
@@ -170,21 +184,41 @@ async function followCouch (argv) {
     maxDelay
   })
 
-  let count = 0
+  let count = -1 
   let stop = () => {}
   trackSeq(url, (document = {}) => {
-    const {id, seq, doc, changes} = document
     count++
+
+    if (count < 1) {
+      return
+    }
+
+    const {id, seq, doc, changes, deleted = false} = document
     lastId = id
     lastRev = changes ? changes[0].rev : undefined
     lastSeq = seq || 0
-    lastDoc = doc
+    lastDoc = doc || {}
+    lastDel = deleted
+
     notify({force: fullThrottle})
 
     if (count >= limit) {
       stop()
     }
   })
+
+  // This could be problematic. All other operations are synchronous, but this...
+  async function getTarballSize () {
+  }
+
+  function formatRev (rev) {
+    if (rev) {
+      const [revSeq, revHash] = rev.split('-')
+      return `${orange(revSeq)}-${grey(revHash)}`
+    } else {
+      return purple(rev)
+    }
+  }
 
   function latestSeq (url) {
     return axios
@@ -215,12 +249,13 @@ async function followCouch (argv) {
         : Promise.resolve(since)
     )
       .then(seq => {
-        changeHandler({seq})
+        changeHandler({seq: seq - 1})
 
         const feed = new follow.Feed({
           db: url,
-          since: seq,
-          include_docs: completeDoc || reportInfo
+          since: seq - 1,
+          include_docs: completeDoc || reportInfo || allInfo,
+          attachments: allInfo
         })
 
         feed.on('change', changeHandler)
@@ -231,7 +266,6 @@ async function followCouch (argv) {
 
         stop = () => {
           errorNotify({halt: true})
-          notify({halt: true, force: true})
           feed.stop()
         }
       })
@@ -253,6 +287,7 @@ async function followCouch (argv) {
   }
 }
 
+// History Server
 async function historyServer (db, argv) {
   const {blue, green, orange, purple, red, yellow, emoji} = require('@buzuli/color')
   const r = require('ramda')
