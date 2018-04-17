@@ -13,27 +13,39 @@ function builder (yargs) {
       default: false,
       alias: ['q']
     })
-    .option('id', {
+    .option('instance-id', {
       type: 'string',
       desc: 'id search regex',
       default: false,
-      alias: ['i']
-    })
-    .option('key', {
-      type: 'string',
-      desc: 'ssh key search regex',
-      default: false,
-      alias: ['k']
+      alias: ['id', 'i']
     })
     .option('name', {
       type: 'string',
-      desc: 'name search regex',
+      desc: 'name search regex (value of the Name tag)',
       default: false,
       alias: ['n']
     })
+    .option('ssh-key', {
+      type: 'string',
+      desc: 'ssh key search regex',
+      default: false,
+      alias: ['key', 'k']
+    })
+    .option('tag-key', {
+      type: 'string',
+      desc: 'tag key search regex',
+      default: false,
+      alias: ['t']
+    })
+    .option('tag-value', {
+      type: 'string',
+      desc: 'tag value search regex',
+      default: false,
+      alias: ['T']
+    })
 }
 
-function handler ({id, key, name, quiet}) {
+function handler ({id, key, name, tagName, tagValue, quiet}) {
   const {green, orange, red, yellow} = require('@buzuli/color')
   const json = require('@buzuli/json')
   const r = require('ramda')
@@ -48,11 +60,27 @@ function handler ({id, key, name, quiet}) {
   const idFilter = makeRegFilter(id)
   const keyFilter = makeRegFilter(key)
   const nameFilter = makeRegFilter(name)
+  const tagNameFilter = makeRegFilter(tagName)
+  const tagValueFilter = makeRegFilter(tagValue)
 
   function instanceFilter (instance) {
-    const {id, sshKey, name} = fieldExtractor(instance)
+    const {id, sshKey, name, tags} = fieldExtractor(instance)
 
-    return idFilter(id) && keyFilter(sshKey) && nameFilter(name)
+    return idFilter(id)
+      && keyFilter(sshKey)
+      && nameFilter(name)
+      && r.compose(
+        r.head,
+        r.map(n => true),
+        r.filter(tagNameFilter),
+        r.map(t => t.Key)
+      )(tags)
+      && r.compose(
+        r.head,
+        r.map(v => true),
+        r.filter(tagValueFilter),
+        r.map(t => t.Value)
+      )(tags)
   }
 
   function fieldExtractor (instance) {
@@ -67,6 +95,7 @@ function handler ({id, key, name, quiet}) {
       id,
       sshKey,
       name: findName(instance),
+      tags: instance.Tags || [],
       network: {
         privateIp, publicIp
       }
