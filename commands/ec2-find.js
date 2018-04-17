@@ -45,7 +45,7 @@ function builder (yargs) {
     })
 }
 
-function handler ({id, key, name, tagName, tagValue, quiet}) {
+function handler ({id, key, name, tagKey, tagValue, quiet}) {
   const {green, orange, red, yellow} = require('@buzuli/color')
   const json = require('@buzuli/json')
   const r = require('ramda')
@@ -60,7 +60,7 @@ function handler ({id, key, name, tagName, tagValue, quiet}) {
   const idFilter = makeRegFilter(id)
   const keyFilter = makeRegFilter(key)
   const nameFilter = makeRegFilter(name)
-  const tagNameFilter = makeRegFilter(tagName)
+  const tagKeyFilter = makeRegFilter(tagKey)
   const tagValueFilter = makeRegFilter(tagValue)
 
   function instanceFilter (instance) {
@@ -72,7 +72,7 @@ function handler ({id, key, name, tagName, tagValue, quiet}) {
       && r.compose(
         r.head,
         r.map(n => true),
-        r.filter(tagNameFilter),
+        r.filter(tagKeyFilter),
         r.map(t => t.Key)
       )(tags)
       && r.compose(
