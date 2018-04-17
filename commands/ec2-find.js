@@ -66,16 +66,16 @@ function handler ({id, key, name, tagKey, tagValue, quiet}) {
   function instanceFilter (instance) {
     const {id, sshKey, name, tags} = fieldExtractor(instance)
 
-    return idFilter(id)
-      && keyFilter(sshKey)
-      && nameFilter(name)
-      && r.compose(
+    return idFilter(id) &&
+      keyFilter(sshKey) &&
+      nameFilter(name) &&
+      r.compose(
         r.head,
         r.map(n => true),
         r.filter(tagKeyFilter),
         r.map(t => t.Key)
-      )(tags)
-      && r.compose(
+      )(tags) &&
+      r.compose(
         r.head,
         r.map(v => true),
         r.filter(tagValueFilter),

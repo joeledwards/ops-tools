@@ -21,6 +21,8 @@ function run () {
 
       // only perform the update check when showing help
       updateCheck()
+
+      process.exit(1)
     })
     .argv
 }
