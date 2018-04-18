@@ -16,36 +16,41 @@ function builder (yargs) {
     .option('instance-id', {
       type: 'string',
       desc: 'id search regex',
-      default: false,
-      alias: ['id', 'i']
+      alias: ['id']
     })
     .option('name', {
       type: 'string',
       desc: 'name search regex (value of the Name tag)',
-      default: false,
       alias: ['n']
+    })
+    .option('private-ip', {
+      type: 'string',
+      desc: 'private IP regex',
+      alias: ['i']
+    })
+    .option('public-ip', {
+      type: 'string',
+      desc: 'public IP regex',
+      alias: ['I']
     })
     .option('ssh-key', {
       type: 'string',
       desc: 'ssh key search regex',
-      default: false,
       alias: ['key', 'k']
     })
     .option('tag-key', {
       type: 'string',
       desc: 'tag key search regex',
-      default: false,
       alias: ['t']
     })
     .option('tag-value', {
       type: 'string',
       desc: 'tag value search regex',
-      default: false,
       alias: ['T']
     })
 }
 
-function handler ({id, key, name, tagKey, tagValue, quiet}) {
+function handler ({id, sshKey, name, privateIp, publicIp, tagKey, tagValue, quiet}) {
   const {green, orange, red, yellow} = require('@buzuli/color')
   const json = require('@buzuli/json')
   const r = require('ramda')
@@ -57,30 +62,44 @@ function handler ({id, key, name, tagKey, tagValue, quiet}) {
     return v => regex ? (v && v.match(regex)) : true
   }
 
+  function makeTagFilter (extractor, filter) {
+    return tags => {
+      if (!tags) {
+        return true
+      }
+      if (!filter) {
+        return true
+      }
+      return r.compose(
+        r.head,
+        r.map(n => true),
+        r.filter(filter),
+        r.filter(r.complement(r.isNil)),
+        r.map(extractor)
+      )(tags)
+    }
+  }
+
   const idFilter = makeRegFilter(id)
-  const keyFilter = makeRegFilter(key)
+  const keyFilter = makeRegFilter(sshKey)
   const nameFilter = makeRegFilter(name)
-  const tagKeyFilter = makeRegFilter(tagKey)
-  const tagValueFilter = makeRegFilter(tagValue)
+  const privateIpFilter = makeRegFilter(privateIp)
+  const publicIpFilter = makeRegFilter(publicIp)
+  const tagKeyFilter = makeTagFilter(t => t.Key, makeRegFilter(tagKey))
+  const tagValueFilter = makeTagFilter(t => t.Value, makeRegFilter(tagValue))
+
+  let count = 0
 
   function instanceFilter (instance) {
-    const {id, sshKey, name, tags} = fieldExtractor(instance)
+    const {id, sshKey, name, tags, network: {privateIp, publicIp} = {}} = fieldExtractor(instance)
 
     return idFilter(id) &&
       keyFilter(sshKey) &&
-      nameFilter(name) &&
-      r.compose(
-        r.head,
-        r.map(n => true),
-        r.filter(tagKeyFilter),
-        r.map(t => t.Key)
-      )(tags) &&
-      r.compose(
-        r.head,
-        r.map(v => true),
-        r.filter(tagValueFilter),
-        r.map(t => t.Value)
-      )(tags)
+      nameFilter(tags) &&
+      privateIpFilter(privateIp) &&
+      publicIpFilter(publicIp) &&
+      tagKeyFilter(tags) &&
+      tagValueFilter(tags)
   }
 
   function fieldExtractor (instance) {
@@ -88,14 +107,15 @@ function handler ({id, key, name, tagKey, tagValue, quiet}) {
       InstanceId: id,
       KeyName: sshKey,
       PrivateIpAddress: privateIp,
-      PublicIpAddress: publicIp
+      PublicIpAddress: publicIp,
+      Tags: tags = []
     } = instance
 
     return {
       id,
       sshKey,
       name: findName(instance),
-      tags: instance.Tags || [],
+      tags,
       network: {
         privateIp, publicIp
       }
