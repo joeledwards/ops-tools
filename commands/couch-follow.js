@@ -313,7 +313,8 @@ function historyServer (db, argv) {
       const {
         start,
         end,
-        limit
+        limit,
+        reverse
       } = req.query
 
       const options = {
@@ -347,6 +348,8 @@ function historyServer (db, argv) {
         }
       }
 
+      options.reverse = !reverse
+
       let prefix = null
       res.write('[')
       db.createReadStream(options)
@@ -369,7 +372,8 @@ function historyServer (db, argv) {
 
       const {
         name,
-        limit
+        limit,
+        reverse
       } = req.query
 
       const options = {
@@ -389,6 +393,8 @@ function historyServer (db, argv) {
           return res.status(400).json({message: `Invalid limit: ${limit}`})
         }
       }
+
+      options.reverse = !reverse
 
       let prefix = null
       res.write('[')

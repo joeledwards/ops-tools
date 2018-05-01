@@ -87,10 +87,9 @@ function copyImage ({ec2, srcRegion, srcAmi, amiName, amiDesc, simulate}) {
       if (error) {
         if (simulate && isDryRunError(error)) {
           resolve(
-            random.hex(8)
-              .then(hex => ({
-                ami: `ami-${random.hex(8)}`
-              }))
+            random.hex(8).then(hex => ({
+              ami: `ami-${hex}`
+            }))
           )
         } else {
           reject(error)
