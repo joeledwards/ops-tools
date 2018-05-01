@@ -88,14 +88,21 @@ function handler ({id, sshKey, name, privateIp, publicIp, tagKey, tagValue, quie
   const tagKeyFilter = makeTagFilter(t => t.Key, makeRegFilter(tagKey))
   const tagValueFilter = makeTagFilter(t => t.Value, makeRegFilter(tagValue))
 
-  let count = 0
-
   function instanceFilter (instance) {
-    const {id, sshKey, name, tags, network: {privateIp, publicIp} = {}} = fieldExtractor(instance)
+    const {
+      id,
+      name,
+      sshKey,
+      tags,
+      network: {
+        privateIp,
+        publicIp
+      } = {}
+    } = fieldExtractor(instance)
 
     return idFilter(id) &&
       keyFilter(sshKey) &&
-      nameFilter(tags) &&
+      nameFilter(name) &&
       privateIpFilter(privateIp) &&
       publicIpFilter(publicIp) &&
       tagKeyFilter(tags) &&
