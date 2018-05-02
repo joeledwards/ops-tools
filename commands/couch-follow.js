@@ -177,6 +177,10 @@ async function followCouch (argv) {
         const jsonRecord = JSON.stringify(dbRecord)
         db.put(`pkg:${lastId}:${lastRev}`, jsonRecord)
         db.put(`seq:${lastSeq}`, jsonRecord)
+
+        if (lastDel) {
+          db.put(`del:${lastId}:${lastRev}`, jsonRecord)
+        }
       }
 
       console.log(`${ts}${seq}${id}${docInfo}`)
@@ -379,6 +383,53 @@ function historyServer (db, argv) {
       const options = {
         gte: 'pkg:',
         lt: 'pkh:'
+      }
+
+      if (name) {
+        options.gte = `pkg:${name}`
+        options.lt = `pkg:${name}_`
+      }
+
+      if (limit) {
+        try {
+          options.limit = parseInt(limit)
+        } catch (error) {
+          return res.status(400).json({message: `Invalid limit: ${limit}`})
+        }
+      }
+
+      options.reverse = !reverse
+
+      let prefix = null
+      res.write('[')
+      db.createReadStream(options)
+        .on('data', data => {
+          if (prefix) {
+            res.write(prefix)
+          } else {
+            prefix = ','
+          }
+          res.write(data.value)
+        })
+        .on('end', () => {
+          res.write(']')
+          res.send()
+        })
+    })
+
+    // Request records by package name
+    app.get('/history/deletes', (req, res) => {
+      log(`${blue('GET')} ${green('/history/deletes')}${colorQuery(req.query)}`)
+
+      const {
+        name,
+        limit,
+        reverse
+      } = req.query
+
+      const options = {
+        gte: 'del:',
+        lt: 'dem:'
       }
 
       if (name) {

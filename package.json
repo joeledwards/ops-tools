@@ -2,6 +2,7 @@
   "name": "@buzuli/ops-tools",
   "version": "4.11.0",
   "description": "Miscellaneous ops tools to make my life easier.",
+  "repository": "github:joeledwards/ops-tools",
   "scripts": {
     "stack:nsq:start": "docker stack deploy --prune -c docker-compose.yml nsq",
     "stack:nsq:stop": "docker stack rm nsq",
@@ -20,7 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "@buzuli/color": "^1.2.0",
-    "@buzuli/hexdump": "^1.0.4",
+    "@buzuli/hexdump": "^1.1.0",
     "@buzuli/json": "^1.1.3",
     "@buzuli/throttle": "^2.0.2",
     "async": "^2.6.0",
