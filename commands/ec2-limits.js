@@ -5,7 +5,7 @@ module.exports = {
 }
 
 function handler () {
-  const {green, orange, red, yellow, emoji} = require('@buzuli/color')
+  const {red, emoji} = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
   const r = require('ramda')
 
