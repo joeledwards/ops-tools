@@ -30,7 +30,7 @@ function handler ({host, port, topic, message}) {
 
   console.info('connecting...')
 
-  nsq.on('close', () => console.info('Connection closed'))
+  nsq.on('closed', () => console.info('Connection closed'))
   nsq.on('error', error => console.error('Error:', error))
   nsq.once('ready', () => {
     console.log('sending message...')
