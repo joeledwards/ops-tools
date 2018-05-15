@@ -5,14 +5,26 @@ module.exports = {
   handler
 }
 
-function builder () {
+function builder (yargs) {
+  yargs
+    .option('sort-by-request-count', {
+      type: 'boolean',
+      desc: 'order by request count, descending',
+      default: false,
+      alias: ['rc', 'r']
+    })
+    .option('sort-by-byte-count', {
+      type: 'boolean',
+      desc: 'order by byte count, descending [overrides -b]',
+      default: false,
+      alias: ['bc', 'b']
+    })
 }
 
 const ONE_HOUR = 60 * 60 * 1000
 const CF_API_URL = 'https://api.cloudflare.com/client/v4'
-const ZONE_ID = '57aebc5dc4eced6cea17c89ce8393d84'
 
-function handler () {
+function handler ({bc, rc}) {
   const c = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
 
@@ -21,36 +33,76 @@ function handler () {
   const qs = require('qs')
   const r = require('ramda')
 
+  const ordering = bc ? 'byte-count' : rc ? 'request-count' : null
+
   listZones()
-  .then(async zones => {
-    try {
-      const allStats = {}
+    .then(async zones => {
+      try {
+        const allStats = {}
 
-      for (zoneId in zones) {
-        const zone = zones[zoneId]
-        console.log(`${c.blue(zone.name)} [${c.yellow(zone.id)}]:`)
+        for (let zoneId in zones) {
+          const zone = zones[zoneId]
+          console.log(`${c.blue(zone.name)} [${c.yellow(zone.id)}]:`)
 
-        const stats = await getStats(zoneId)
-        allStats[zoneId] = stats
-        console.log(`  status:`)
-        formatCounts(stats, 'http_status').forEach(p => console.log(`  ${p}`))
-        console.log(`  content-type:`)
-        formatCounts(stats, 'content_type').forEach(p => console.log(`  ${p}`))
-        console.log(`  ssl:`)
-        formatCounts(stats, 'ssl').forEach(p => console.log(`  ${p}`))
+          const stats = await getStats(zoneId)
+          allStats[zoneId] = stats
+
+          console.log(`  status:`)
+          formatCounts(stats, 'http_status', ordering, decorateStatusKey)
+            .forEach(p => console.log(`  ${p}`))
+
+          console.log()
+
+          console.log(`  content-type:`)
+          formatCounts(stats, 'content_type', ordering)
+            .forEach(p => console.log(`  ${p}`))
+
+          console.log()
+
+          console.log(`  ssl:`)
+          formatCounts(stats, 'ssl', ordering, decorateSslKey)
+            .forEach(p => console.log(`  ${p}`))
+        }
+      } catch (error) {
+        console.error(error)
+        process.exit(1)
       }
-    } catch (error) {
+    }, error => {
       console.error(error)
       process.exit(1)
-    }
-  }, error => {
-    console.error(error)
-    process.exit(1)
-  })
+    })
 
-  function formatCounts(info, category) {
+  function decorateStatusKey (key) {
+    const status = parseInt(key) || 0
+    return (
+      (status >= 500)
+        ? c.yellow
+        : (status >= 400)
+          ? c.red
+          : (status >= 300)
+            ? c.blue
+            : (status >= 200)
+              ? c.green
+              : c.purple
+    )(key)
+  }
+
+  function decorateSslKey (key) {
+    return (key === 'encrypted' ? c.green : c.red)(key)
+  }
+
+  function formatCounts (info, category, ordering, keyDecorator) {
     const rq = info.requests[category]
     const bw = info.bandwidth[category] || {}
+    const decorateKey = keyDecorator || (k => c.blue(k))
+
+    const sortField = ([k, v]) => {
+      if (ordering === 'byte-count' && v.bandwidth) { return Number(v.bandwidth) || 0 }
+
+      if (ordering === 'request-count' && v.requests) { return Number(v.requests) || 0 }
+
+      return Number(k) || k
+    }
 
     const pairs = r.compose(
       r.mergeAll,
@@ -71,10 +123,11 @@ function handler () {
     return r.compose(
       r.map(([key, {requests, bandwidth}]) => {
         const pad = ' '.repeat(maxKeyLength - key.length)
-        return `${pad}${c.green(key)} : ${c.orange(requests)}` +
+        return `${pad}${decorateKey(key)} : ${c.orange(requests)}` +
           (bandwidth ? ` (${bandwidth.toLocaleString()} b)` : '')
       }),
-      r.sortBy(([k, v]) => k),
+      // r.sortBy(([k, v]) => k),
+      r.sortBy(sortField),
       r.toPairs
     )(pairs)
   }
@@ -113,9 +166,9 @@ function handler () {
     const zoneStats = await cfApiCall(
       `/zones/${zoneId}/analytics/dashboard`,
       {since, continuous}
-    ) 
+    )
 
-    //console.log(buzJson(zoneStats))
+    // console.log(buzJson(zoneStats))
 
     const {
       query: {
@@ -127,8 +180,10 @@ function handler () {
       totals
     } = zoneStats
 
+    zoneStats.time_delta = timeDelta
+
     if (all) {
-      totals
+      return totals
     } else {
       return r.compose(
         r.last,

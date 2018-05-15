@@ -6,9 +6,9 @@
   "scripts": {
     "stack:nsq:start": "docker stack deploy --prune -c docker-compose.yml nsq",
     "stack:nsq:stop": "docker stack rm nsq",
-    "lint": "standard",
-    "lint:fix": "standard --fix",
-    "pretest": "standard",
+    "lint": "standard --verbose",
+    "lint:fix": "standard --verbose --fix",
+    "pretest": "npm run lint",
     "start": "node bin/ops.js",
     "proxy": "nodemon bin/ops.js proxy",
     "test": "tap tests/unit/*.js"
