@@ -7,6 +7,12 @@ module.exports = {
 
 function builder (yargs) {
   yargs
+    .option('full-interval', {
+      type: 'boolean',
+      desc: 'get values from the full time interval',
+      default: false,
+      alias: ['full', 'f']
+    })
     .option('sort-by-request-count', {
       type: 'boolean',
       desc: 'order by request count, descending',
@@ -24,7 +30,7 @@ function builder (yargs) {
 const ONE_HOUR = 60 * 60 * 1000
 const CF_API_URL = 'https://api.cloudflare.com/client/v4'
 
-function handler ({bc, rc}) {
+function handler ({full, bc, rc}) {
   const c = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
 
@@ -44,7 +50,7 @@ function handler ({bc, rc}) {
           const zone = zones[zoneId]
           console.log(`${c.blue(zone.name)} [${c.yellow(zone.id)}]:`)
 
-          const stats = await getStats(zoneId)
+          const stats = await getStats(zoneId, full)
           allStats[zoneId] = stats
 
           console.log(`  status:`)
@@ -158,7 +164,7 @@ function handler ({bc, rc}) {
     )(zones)
   }
 
-  async function getStats (zoneId, all = false) {
+  async function getStats (zoneId, full = false) {
     const now = Date.now()
     const since = new Date(now - ONE_HOUR).toISOString().split('.')[0] + 'Z'
     const continuous = true
@@ -168,21 +174,19 @@ function handler ({bc, rc}) {
       {since, continuous}
     )
 
-    // console.log(buzJson(zoneStats))
-
     const {
       query: {
         time_delta: timeDelta
       },
       result: {
-        timeseries
-      },
-      totals
+        timeseries,
+        totals
+      }
     } = zoneStats
 
     zoneStats.time_delta = timeDelta
 
-    if (all) {
+    if (full) {
       return totals
     } else {
       return r.compose(
