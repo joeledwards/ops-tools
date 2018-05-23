@@ -25,7 +25,7 @@ function builder (yargs) {
       aliases: ['c'],
       type: 'string',
       default: 'buzuli#ephemeral',
-      desc: 'the channel from which to "peak"'
+      desc: 'the channel from which to "peek"'
     })
     .option('client-id', {
       type: 'string',

@@ -502,6 +502,21 @@ function historyServer (db, argv) {
       //    receives changes)
     })
 
+    app.get('/routes', (req, res) => {
+      res.status(200).json(
+        app._router.stack
+        .filter(r => r.route)
+        .map(
+          ({
+            route: {
+              path,
+              stack: [{method}] = []
+            } = {}
+          }) => ({method, path})
+        )
+      )
+    })
+
     function colorQuery (queryString) {
       const qs = r.compose(
         r.join('&'),
