@@ -505,15 +505,15 @@ function historyServer (db, argv) {
     app.get('/routes', (req, res) => {
       res.status(200).json(
         app._router.stack
-        .filter(r => r.route)
-        .map(
-          ({
-            route: {
-              path,
-              stack: [{method}] = []
-            } = {}
-          }) => ({method, path})
-        )
+          .filter(r => r.route)
+          .map(
+            ({
+              route: {
+                path,
+                stack: [{method}] = []
+              } = {}
+            }) => ({method, path})
+          )
       )
     })
 
