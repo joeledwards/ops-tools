@@ -7,12 +7,12 @@ module.exports = {
 
 function builder (yargs) {
   yargs
-  .option('full', {
-    type: 'boolean',
-    desc: 'List all function output supplied by the Lambda API',
-    default: false,
-    alias: 'f'
-  })
+    .option('full', {
+      type: 'boolean',
+      desc: 'List all function output supplied by the Lambda API',
+      default: false,
+      alias: 'f'
+    })
 }
 
 function handler ({full}) {
@@ -31,7 +31,7 @@ function handler ({full}) {
     .catch(error => {
       console.error(error)
       console.error(c.red(
-        `Error finding instances in ${c.yellow(ec2.aws.region)}: details above`
+        `Error finding instances in ${c.yellow(lambda.aws.region)}: details above`
       ))
       process.exit(1)
     })
@@ -41,7 +41,7 @@ function handler ({full}) {
   }
 
   function formatSummary (result) {
-    //console.log(buzJson(result))
+    // console.log(buzJson(result))
     const maxNameLen = result.Functions
       .map(({FunctionName}) => FunctionName.length)
       .reduce((a, b) => a > b ? a : b)
@@ -49,7 +49,7 @@ function handler ({full}) {
     const pad = name => ' '.repeat(maxNameLen - name.length)
 
     console.log(`maxNameLen=${maxNameLen}`)
-    
+
     console.log(
       r.compose(
         r.join('\n'),
