@@ -72,7 +72,6 @@ function handler ({
   const r = require('ramda')
 
   const ec2 = require('../lib/aws').ec2()
-  console.log('Case Sensitive:', caseSensitive)
   const regexFlags = caseSensitive ? undefined : 'i'
 
   function makeRegFilter (expression) {
