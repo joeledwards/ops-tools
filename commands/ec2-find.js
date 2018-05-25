@@ -113,6 +113,7 @@ function handler ({id, sshKey, name, privateIp, publicIp, tagKey, tagValue, quie
     const {
       InstanceId: id,
       KeyName: sshKey,
+      State: {Name: state},
       PrivateIpAddress: privateIp,
       PublicIpAddress: publicIp,
       Tags: tags = []
@@ -121,6 +122,7 @@ function handler ({id, sshKey, name, privateIp, publicIp, tagKey, tagValue, quie
     return {
       id,
       sshKey,
+      state,
       name: findName(instance),
       tags,
       network: {
