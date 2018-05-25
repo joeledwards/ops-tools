@@ -13,6 +13,12 @@ function builder (yargs) {
       default: false,
       alias: ['q']
     })
+    .option('case-sensitive', {
+      type: 'boolean',
+      desc: 'make matches case sensitive',
+      default: false,
+      alias: ['c']
+    })
     .option('instance-id', {
       type: 'string',
       desc: 'id search regex',
@@ -50,15 +56,27 @@ function builder (yargs) {
     })
 }
 
-function handler ({id, sshKey, name, privateIp, publicIp, tagKey, tagValue, quiet}) {
+function handler ({
+  id,
+  sshKey,
+  caseSensitive,
+  name,
+  privateIp,
+  publicIp,
+  tagKey,
+  tagValue,
+  quiet
+}) {
   const {green, orange, red, yellow} = require('@buzuli/color')
   const json = require('@buzuli/json')
   const r = require('ramda')
 
   const ec2 = require('../lib/aws').ec2()
+  console.log('Case Sensitive:', caseSensitive)
+  const regexFlags = caseSensitive ? undefined : 'i'
 
   function makeRegFilter (expression) {
-    const regex = expression ? new RegExp(expression) : undefined
+    const regex = expression ? new RegExp(expression, regexFlags) : undefined
     return v => regex ? (v && v.match(regex)) : true
   }
 
