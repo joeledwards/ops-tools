@@ -67,8 +67,8 @@ function handler ({
   tagValue,
   quiet
 }) {
-  const {green, orange, red, yellow} = require('@buzuli/color')
-  const json = require('@buzuli/json')
+  const c = require('@buzuli/color')
+  const buzJson = require('@buzuli/json')
   const r = require('ramda')
 
   const ec2 = require('../lib/aws').ec2()
@@ -165,17 +165,17 @@ function handler ({
       if (quiet) {
         console.log(JSON.stringify(instances))
       } else {
-        console.log(json(instances))
-        console.log(green(
-          `Listed ${orange(count)} instances for region ${yellow(ec2.aws.region)}`
+        console.log(buzJson(instances))
+        console.log(c.green(
+          `Listed ${c.orange(count)} instances for region ${c.yellow(ec2.aws.region)}`
         ))
       }
     })
     .catch(error => {
       console.error(error)
-      console.error(red(
-        `Error finding instances in ${yellow(ec2.aws.region)}: details above`
-      ))
+      console.error(c.red(c.emoji.inject(
+        `Error finding instances in ${c.yellow(ec2.aws.region)}: details above :point_up:`
+      )))
       process.exit(1)
     })
 }
