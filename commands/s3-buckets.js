@@ -5,7 +5,6 @@ module.exports = {
 }
 
 function handler () {
-  const buzJson = require('@buzuli/json')
   const c = require('@buzuli/color')
   const s3 = require('../lib/aws').s3()
   const r = require('ramda')
@@ -26,10 +25,10 @@ function handler () {
               })
           })
         ))
-        .map(({bucket, region}) => {
-           return `  [${regionDecor(region)}] ${c.yellow(bucket)}`
-        })
-        .join('\n')
+          .map(({bucket, region}) => {
+            return `  [${regionDecor(region)}] ${c.yellow(bucket)}`
+          })
+          .join('\n')
       )
 
       const count = buckets.length
