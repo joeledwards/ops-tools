@@ -16,10 +16,8 @@ function handler ({url}) {
   })
     .then(({status, statusText, data, headers}) => {
       const [code, text] = colorCode(status, statusText)
-      const response = (headers['content-type'] || '').match(/json$/)
-        ? buzJson(data)
-        : data
-      console.info(`[${code}] ${text}\n${response}`)
+      console.info(buzJson(data))
+      console.info(`[${code}] ${text}`)
     })
     .catch(error => {
       console.error(error)
