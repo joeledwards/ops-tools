@@ -16,7 +16,6 @@ function run () {
     .exitProcess(false)
     .commandDir('../commands')
     .demandCommand()
-    .strict()
     .fail(() => {
       yargs.showHelp()
 
