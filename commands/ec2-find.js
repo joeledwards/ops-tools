@@ -80,7 +80,6 @@ function handler ({
 
   const age = require('../lib/age')
   const ec2 = require('../lib/aws').ec2()
-  const pad = require('../lib/pad')
 
   const regexFlags = caseSensitive ? undefined : 'i'
 
@@ -196,7 +195,6 @@ function handler ({
         const keyStr = c.gray(`${c.key('white').bold(sshKey)}`)
         const stateStr = stateColor(state)
         const created = moment(launchTime).utc()
-        const createdStr = c.blue(created.format('YYYY-MM-DD HH:mm'))
         const ageStr = c.blue(age(created, now))
 
         return quiet ? name : `[${stateStr}] ${nameStr} (${keyStr} | ${ageStr})`
