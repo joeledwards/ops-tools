@@ -140,6 +140,7 @@ function handler ({
       InstanceId: id,
       KeyName: sshKey,
       State: {Name: state},
+      InstanceType: instanceType,
       LaunchTime: launchTime,
       PrivateIpAddress: privateIp,
       PublicIpAddress: publicIp,
@@ -150,6 +151,7 @@ function handler ({
       id,
       sshKey,
       state,
+      type: instanceType,
       launchTime: moment(launchTime).utc().toISOString(),
       name: findName(instance),
       tags,
@@ -190,14 +192,16 @@ function handler ({
 
     return r.compose(
       r.join('\n'),
-      r.map(({id, name, sshKey, state, launchTime}) => {
+      r.map(({id, name, sshKey, state, launchTime, type: instanceType}) => {
+        const created = moment(launchTime).utc()
+
+        const stateStr = stateColor(state)
         const nameStr = c.orange(name)
         const keyStr = c.gray(`${c.key('white').bold(sshKey)}`)
-        const stateStr = stateColor(state)
-        const created = moment(launchTime).utc()
+        const typeStr = c.yellow(instanceType)
         const ageStr = c.blue(age(created, now))
 
-        return quiet ? name : `[${stateStr}] ${nameStr} (${keyStr} | ${ageStr})`
+        return quiet ? name : `[${stateStr}] ${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
       })
     )(instances || [])
   }
