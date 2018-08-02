@@ -9,7 +9,7 @@ function builder (yargs) {
   yargs
     .option('quiet', {
       type: 'boolean',
-      desc: 'only output server list (JSON)',
+      desc: 'only output server list (no progress, summary, JSON formatting)',
       default: false,
       alias: ['q']
     })
@@ -23,6 +23,11 @@ function builder (yargs) {
       type: 'string',
       desc: 'id search regex',
       alias: ['id']
+    })
+    .option('json', {
+      type: 'boolean',
+      desc: 'output JSON containing extended details about each instance',
+      alias: 'j'
     })
     .option('name', {
       type: 'string',
@@ -60,6 +65,7 @@ function handler ({
   id,
   sshKey,
   caseSensitive,
+  json,
   name,
   privateIp,
   publicIp,
@@ -67,11 +73,15 @@ function handler ({
   tagValue,
   quiet
 }) {
-  const c = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
+  const c = require('@buzuli/color')
+  const moment = require('moment')
   const r = require('ramda')
 
+  const age = require('../lib/age')
   const ec2 = require('../lib/aws').ec2()
+  const pad = require('../lib/pad')
+
   const regexFlags = caseSensitive ? undefined : 'i'
 
   function makeRegFilter (expression) {
@@ -131,6 +141,7 @@ function handler ({
       InstanceId: id,
       KeyName: sshKey,
       State: {Name: state},
+      LaunchTime: launchTime,
       PrivateIpAddress: privateIp,
       PublicIpAddress: publicIp,
       Tags: tags = []
@@ -140,6 +151,7 @@ function handler ({
       id,
       sshKey,
       state,
+      launchTime: moment(launchTime).utc().toISOString(),
       name: findName(instance),
       tags,
       network: {
@@ -156,6 +168,42 @@ function handler ({
     )(instance.Tags || [])
   }
 
+  function stateColor (state) {
+    const decor = text => text
+    switch (state) {
+      case 'pending':
+        return c.blue(decor(state))
+      case 'running':
+        return c.green(decor(state))
+      case 'shutting-down':
+      case 'stopping':
+        return c.yellow(decor(state))
+      case 'stopped':
+        return c.orange(decor(state))
+      case 'terminated':
+      default:
+        return c.red(decor(state))
+    }
+  }
+
+  function summarize (instances) {
+    const now = moment.utc()
+
+    return r.compose(
+      r.join('\n'),
+      r.map(({id, name, sshKey, state, launchTime}) => {
+        const nameStr = c.orange(name)
+        const keyStr = c.gray(`${c.key('white').bold(sshKey)}`)
+        const stateStr = stateColor(state)
+        const created = moment(launchTime).utc()
+        const createdStr = c.blue(created.format('YYYY-MM-DD HH:mm'))
+        const ageStr = c.blue(age(created, now))
+
+        return quiet ? name : `[${stateStr}] ${nameStr} (${keyStr} | ${ageStr})`
+      })
+    )(instances || [])
+  }
+
   ec2.findInstances({
     instanceFilter,
     fieldExtractor
@@ -163,9 +211,9 @@ function handler ({
     .then(instances => {
       const count = instances.length
       if (quiet) {
-        console.log(JSON.stringify(instances))
+        console.log(json ? JSON.stringify(instances) : summarize(instances))
       } else {
-        console.log(buzJson(instances))
+        console.log(json ? buzJson(instances) : summarize(instances))
         console.log(c.green(
           `Listed ${c.orange(count)} instances for region ${c.yellow(ec2.aws.region)}`
         ))

@@ -8,7 +8,6 @@ function handler ({bucket, key}) {
   const buzJson = require('@buzuli/json')
   const c = require('@buzuli/color')
 
-  const age = require('../lib/age')
   const s3 = require('../lib/aws/s3')()
 
   const options = {

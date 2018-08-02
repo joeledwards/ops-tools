@@ -28,7 +28,6 @@ function handler ({quiet, zone}) {
   const cfZone = zone || process.env.CLOUDFLARE_ZONE
 
   const axios = require('axios')
-  const moment = require('moment')
   const qs = require('qs')
   const r = require('ramda')
 
