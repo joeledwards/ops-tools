@@ -1,6 +1,6 @@
 {
   "name": "@buzuli/ops-tools",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Miscellaneous ops tools to make my life easier.",
   "repository": "github:joeledwards/ops-tools",
   "scripts": {
