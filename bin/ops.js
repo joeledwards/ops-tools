@@ -16,6 +16,7 @@ function run () {
     .exitProcess(false)
     .commandDir('../commands')
     .demandCommand()
+    //.strict() // Breaks some positional arg commands (emr-cluster-info)
     .fail(() => {
       yargs.showHelp()
 

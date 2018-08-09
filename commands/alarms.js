@@ -5,7 +5,8 @@ module.exports = {
 }
 
 function handler () {
-  const {red, yellow, green} = require('@buzuli/color')
+  const c = require('@buzuli/color')
+  const buzJson = require('@buzuli/json')
   const cw = require('../lib/aws').cloudwatch()
 
   cw.listAlarms()
@@ -13,16 +14,16 @@ function handler () {
       const {MetricAlarms: alarms} = result
 
       if (alarms.length > 0) {
-        console.log(yellow(`Alarms:`))
-        console.log(alarms)
+        console.log(c.yellow(`Alarms:`))
+        console.log(buzJson(alarms))
       } else {
-        console.log(green(`No alarms.`))
+        console.log(c.green(`No alarms.`))
       }
     })
     .catch(error => {
       console.error(error)
-      console.error(red(
-        `Instance launch failure in ${yellow(cw.aws.region)}: details above`
+      console.error(c.red(
+        `Instance launch failure in ${c.yellow(cw.aws.region)}: details above`
       ))
       process.exit(1)
     })
