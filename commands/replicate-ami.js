@@ -310,4 +310,3 @@ function builder (yargs) {
       desc: 'perform a dry run of the operation'
     })
 }
-

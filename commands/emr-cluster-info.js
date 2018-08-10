@@ -89,7 +89,7 @@ function handler ({cluster, json}) {
       }
     })
     .catch(error => {
-      console.error(`Error describing cluster ${yellow(id)} :`, error)
+      console.error(`Error describing cluster ${yellow(cluster)} :`, error)
       process.exit(1)
     })
 
