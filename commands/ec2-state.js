@@ -1,5 +1,5 @@
 module.exports = {
-  command: 'ec2-state <instance-id>',
+  command: 'ec2-state <instance>',
   desc: 'Check or alter the state of an EC2 instance',
   builder,
   handler
@@ -32,14 +32,14 @@ function builder (yargs) {
     })
 }
 
-function handler ({instanceId, restart, start, stop, terminate}) {
+function handler ({instance, restart, start, stop, terminate}) {
   const ec2 = require('../lib/aws').ec2()
   const c = require('@buzuli/color')
   const r = require('ramda')
 
   const awsOptions = {
     InstanceIds: [
-      instanceId
+      instance
     ]
   }
 

@@ -138,6 +138,7 @@ function handler ({
   function fieldExtractor (instance) {
     const {
       InstanceId: id,
+      ImageId: image,
       KeyName: sshKey,
       State: {Name: state},
       InstanceType: instanceType,
@@ -149,6 +150,7 @@ function handler ({
 
     return {
       id,
+      image,
       sshKey,
       state,
       type: instanceType,
