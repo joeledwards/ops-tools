@@ -149,7 +149,12 @@ function handler ({
       InstanceId: id,
       ImageId: image,
       KeyName: sshKey,
-      State: {Name: state},
+      State: { Name: state },
+      Placement: { AvailabilityZone: az },
+      CpuOptions: {
+        CoreCount: cores,
+        ThreadsPerCore: threads
+      },
       InstanceType: instanceType,
       LaunchTime: launchTime,
       PrivateIpAddress: privateIp,
@@ -161,9 +166,14 @@ function handler ({
       id,
       image,
       sshKey,
-      state,
+      az,
       type: instanceType,
+      cpus: {
+        cores,
+        threads: cores * threads
+      },
       launchTime: moment(launchTime).utc().toISOString(),
+      state,
       name: findName(instance),
       tags,
       network: {
@@ -203,16 +213,29 @@ function handler ({
 
     return r.compose(
       r.join('\n'),
-      r.map(({id, name, sshKey, state, launchTime, type: instanceType}) => {
+      r.map(({
+        id,
+        name,
+        az,
+        sshKey,
+        state,
+        launchTime,
+        type: instanceType,
+        cpus: {
+          cores,
+          threads
+        }
+      }) => {
         const created = moment(launchTime).utc()
 
         const stateStr = stateColor(state)
         const nameStr = c.orange(name || '--')
-        const keyStr = c.gray(`${c.key('white').bold(sshKey)}`)
+        const keyStr = c.key('white').bold(sshKey)
         const typeStr = c.yellow(instanceType)
         const ageStr = c.blue(age(created, now))
+        const azStr = `${c.key('white').bold(az)}`
 
-        return quiet ? name : `[${stateStr}] ${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
+        return quiet ? name : `[${stateStr}] ${azStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
       })
     )(instances || [])
   }
