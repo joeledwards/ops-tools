@@ -11,18 +11,18 @@ function builder (yargs) {
       type: 'boolean',
       desc: 'only output server list (no progress, summary, JSON formatting)',
       default: false,
-      alias: ['q']
+      alias: 'q'
     })
     .option('case-sensitive', {
       type: 'boolean',
-      desc: 'make matches case sensitive',
+      desc: 'make filter expressions case sensitive',
       default: false,
-      alias: ['c']
+      alias: 'c'
     })
     .option('instance-id', {
       type: 'string',
       desc: 'id search regex',
-      alias: ['id']
+      alias: 'id'
     })
     .option('json', {
       type: 'boolean',
@@ -32,17 +32,22 @@ function builder (yargs) {
     .option('name', {
       type: 'string',
       desc: 'name search regex (value of the Name tag)',
-      alias: ['n']
+      alias: 'n'
+    })
+    .option('state', {
+      type: 'string',
+      desc: 'state search regex (pending | running | shutting-down | stopping | stopped | terminated)',
+      alias: 's'
     })
     .option('private-ip', {
       type: 'string',
       desc: 'private IP regex',
-      alias: ['i']
+      alias: 'i'
     })
     .option('public-ip', {
       type: 'string',
       desc: 'public IP regex',
-      alias: ['I']
+      alias: 'I'
     })
     .option('ssh-key', {
       type: 'string',
@@ -52,23 +57,24 @@ function builder (yargs) {
     .option('tag-key', {
       type: 'string',
       desc: 'tag key search regex',
-      alias: ['t']
+      alias: 't'
     })
     .option('tag-value', {
       type: 'string',
       desc: 'tag value search regex',
-      alias: ['T']
+      alias: 'T'
     })
 }
 
 function handler ({
   id,
-  sshKey,
   caseSensitive,
   json,
   name,
+  state,
   privateIp,
   publicIp,
+  sshKey,
   tagKey,
   tagValue,
   quiet
@@ -109,6 +115,7 @@ function handler ({
   const idFilter = makeRegFilter(id)
   const keyFilter = makeRegFilter(sshKey)
   const nameFilter = makeRegFilter(name)
+  const stateFilter = makeRegFilter(state)
   const privateIpFilter = makeRegFilter(privateIp)
   const publicIpFilter = makeRegFilter(publicIp)
   const tagKeyFilter = makeTagFilter(t => t.Key, makeRegFilter(tagKey))
@@ -119,6 +126,7 @@ function handler ({
       id,
       name,
       sshKey,
+      state,
       tags,
       network: {
         privateIp,
@@ -132,7 +140,8 @@ function handler ({
       privateIpFilter(privateIp) &&
       publicIpFilter(publicIp) &&
       tagKeyFilter(tags) &&
-      tagValueFilter(tags)
+      tagValueFilter(tags) &&
+      stateFilter(state)
   }
 
   function fieldExtractor (instance) {
@@ -198,7 +207,7 @@ function handler ({
         const created = moment(launchTime).utc()
 
         const stateStr = stateColor(state)
-        const nameStr = c.orange(name)
+        const nameStr = c.orange(name || '--')
         const keyStr = c.gray(`${c.key('white').bold(sshKey)}`)
         const typeStr = c.yellow(instanceType)
         const ageStr = c.blue(age(created, now))
