@@ -58,6 +58,10 @@ function builder (yargs) {
       default: null,
       alias: ['D']
     })
+    .option('secret', {
+      type: 'string',
+      desc: 'this is required for non-public (npmE) registries'
+    })
     .option('since', {
       type: 'number',
       desc: 'start scanning from this sequence (default is latest)',
@@ -106,6 +110,7 @@ async function followCouch (argv) {
     limit,
     maxDelay,
     minDelay,
+    secret,
     since
   } = argv
 
@@ -256,12 +261,18 @@ async function followCouch (argv) {
       .then(seq => {
         changeHandler({seq: seq - 1})
 
-        const feed = new follow.Feed({
+        const followOptions = {
           db: url,
           since: seq - 1,
           include_docs: completeDoc || reportInfo || allInfo,
           attachments: allInfo
-        })
+        }
+
+        if (secret) {
+          followOptions.query_params = {sharedFetchSecret: secret}
+        }
+
+        const feed = new follow.Feed(followOptions)
 
         feed.on('change', changeHandler)
         feed.on('error', reportError)
