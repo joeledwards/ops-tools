@@ -7,6 +7,7 @@ module.exports = {
 
 function builder (yargs) {
   return yargs
+    .env('COUCH_FOLLOW')
     .option('bind-port', {
       type: 'number',
       desc: 'the port on which the history server should listen',
