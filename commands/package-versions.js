@@ -29,13 +29,15 @@ async function handler ({pkg, json}) {
 
     const {status, data} = await axios({
       method: 'get',
-      url
+      url,
+      validateStatus: () => true
     })
 
     if (status !== 200) {
-      const error = await collectError(data)
-      console.error(error)
-      console.error(`[${status}] :point_up:`)
+      console.error(buzJson({
+        status,
+        ...(await collectError(data))
+      }))
       process.exit(1)
     }
 
@@ -161,11 +163,17 @@ async function handler ({pkg, json}) {
   }
 }
 
-function collectError (bodyStream) {
-  return new Promise((resolve, reject) => {
-    const parts = []
-    bodyStream.on('data', data => parts.push(data))
-    bodyStream.once('end', () => resolve(Buffer.concat(parts).toString()))
-    bodyStream.once('error', error => reject(error))
-  })
+function collectError (body) {
+  if (body === null || body === undefined) {
+    return Promise.resolve({})
+  } else if (typeof (body.on) === 'function') {
+    return new Promise((resolve, reject) => {
+      const parts = []
+      body.on('data', data => parts.push(data))
+      body.once('end', () => resolve(Buffer.concat(parts).toString()))
+      body.once('error', error => reject(error))
+    })
+  } else {
+    return Promise.resolve(body)
+  }
 }
