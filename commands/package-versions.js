@@ -13,9 +13,23 @@ function builder (yargs) {
       default: false,
       alias: 'j'
     })
+    .option('columns', {
+      type: 'number',
+      desc: 'number of columns for publishes chart',
+      default: 60,
+      alias: 'c'
+    })
+    /* Add this next
+    .option('months', {
+      type: 'boolean',
+      desc: 'plot day counts with a separate chart for each month',
+      deafult: false,
+      alias: 'm'
+    })
+    */
 }
 
-async function handler ({pkg, json}) {
+async function handler ({pkg, json, columns}) {
   try {
     const c = require('@buzuli/color')
     const r = require('ramda')
@@ -100,7 +114,7 @@ async function handler ({pkg, json}) {
       console.info(` Newest : ${formatVersion(newest)}`)
       console.info(` Oldest : ${formatVersion(oldest)}`)
 
-      const maxBuckets = 80
+      const maxBuckets = columns
       const buckets = []
 
       const times = r.compose(
