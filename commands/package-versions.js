@@ -13,23 +13,29 @@ function builder (yargs) {
       default: false,
       alias: 'j'
     })
-    .option('columns', {
+    .option('height', {
       type: 'number',
-      desc: 'number of columns for publishes chart',
+      desc: 'height of the publish frequency chart',
+      default: 12,
+      alias: 'h'
+    })
+    .option('width', {
+      type: 'number',
+      desc: 'width of the publish frequency chart',
       default: 60,
-      alias: 'c'
+      alias: 'w'
     })
     /* Add this next
-    .option('months', {
+    .option('days', {
       type: 'boolean',
-      desc: 'plot day counts with a separate chart for each month',
-      deafult: false,
-      alias: 'm'
+      desc: 'chart each day individually, showing multiple lines of plots if necessary',
+      default: false,
+      alias: 'd'
     })
     */
 }
 
-async function handler ({pkg, json, columns}) {
+async function handler ({pkg, json, height, width}) {
   try {
     const c = require('@buzuli/color')
     const r = require('ramda')
@@ -38,6 +44,8 @@ async function handler ({pkg, json, columns}) {
     const buzJson = require('@buzuli/json')
     const durations = require('durations')
     const asciichart = require('asciichart')
+
+    const chart = require('../lib/chart')
 
     const url = `https://registry.npmjs.com/${encodeURIComponent(pkg)}`
 
@@ -114,63 +122,19 @@ async function handler ({pkg, json, columns}) {
       console.info(` Latest : ${formatVersion(latest)}`)
       console.info(` Newest : ${formatVersion(newest)}`)
 
-      const maxBuckets = columns
-      const buckets = []
-
-      const times = r.compose(
-        r.sortBy(t => t.valueOf()),
-        r.map(([_version, time]) => moment(time).utc()),
+      const timestamps = r.compose(
+        r.map(([_version, time]) => time),
         r.filter(([version, _time]) => version !== 'created' && version !== 'modified'),
         r.toPairs
       )(publishTimes)
 
-      const start = r.head(times)
-      const end = r.last(times)
-      const fullRange = end.valueOf() - start.valueOf()
-      const bucketCount = Math.max(
-        1, Math.min(fullRange, maxBuckets)
-      )
-
-      if (bucketCount > 1) {
-        const partitionRemainder = fullRange % bucketCount
-        const stepCount = bucketCount - ((partitionRemainder > 0) ? 1 : 0)
-        const bucketStep = Math.floor(fullRange / stepCount)
-
-        let tIdx = 0
-        for (let i = 0; i < bucketCount; i++) {
-          const rangeStart = start.valueOf() + i * bucketStep
-          const nextRange = rangeStart + bucketStep
-          let inRange = true
-          let count = 0
-
-          while (inRange) {
-            const time = times[tIdx]
-            if (time < nextRange) {
-              count++
-              tIdx++
-            } else {
-              inRange = false
-            }
-          }
-
-          buckets.push({start: rangeStart, count})
-        }
-
-        const formatTime = ts => {
-          const date = c.blue(ts.format('YYYY-MM-DD'))
-          const time = c.yellow(ts.format('HH:mm'))
-          return `${date} ${time}`
-        }
-
-        const chartData = buckets.map(({count}) => count)
-        const startStr = formatTime(start)
-        const endStr = formatTime(end)
-        const spanStr = c.orange(durations.millis(fullRange))
-
-        console.info()
-        console.info(`  Publishes | ${startStr} to ${endStr} (${spanStr})`)
-        const versionChart = asciichart.plot(chartData, {height: 12})
-        console.info(versionChart)
+      if (timestamps.length > 1) {
+        console.log(chart.times({
+          times: timestamps,
+          label: 'Publishes',
+          width,
+          height
+        }))
       }
     }
   } catch (error) {
