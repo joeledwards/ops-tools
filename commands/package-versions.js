@@ -59,7 +59,7 @@ async function handler ({pkg, json, columns}) {
 
     const oldest = r.compose(
       r.head,
-      r.sortBy(({time}) => time.toISOString()),
+      r.sortBy(({time}) => time.valueOf()),
       r.filter(({version}) => !['created', 'modified'].includes(version)),
       r.map(([version, time]) => ({time: moment(time).utc(), version})),
       r.toPairs
@@ -67,7 +67,7 @@ async function handler ({pkg, json, columns}) {
 
     const newest = r.compose(
       r.last,
-      r.sortBy(({time}) => time.toISOString()),
+      r.sortBy(({time}) => time.valueOf()),
       r.filter(({version}) => !['created', 'modified'].includes(version)),
       r.map(([version, time]) => ({time: moment(time).utc(), version})),
       r.toPairs
@@ -97,7 +97,7 @@ async function handler ({pkg, json, columns}) {
       }
       console.info(buzJson(record))
     } else {
-      const pkgStr = c.yellow(pkg)
+      const pkgStr = c.yellow.bold(pkg)
       const countStr = c.orange(versionCount)
 
       const formatVersion = ({version, time}) => {
@@ -110,33 +110,35 @@ async function handler ({pkg, json, columns}) {
 
       console.info(`${pkgStr}`)
       console.info(`  Count : ${countStr}`)
+      console.info(` Oldest : ${formatVersion(oldest)}`)
       console.info(` Latest : ${formatVersion(latest)}`)
       console.info(` Newest : ${formatVersion(newest)}`)
-      console.info(` Oldest : ${formatVersion(oldest)}`)
 
       const maxBuckets = columns
       const buckets = []
 
       const times = r.compose(
-        r.sortBy(r.identity),
-        r.map(([_version, time]) => moment(time).utc().valueOf()),
+        r.sortBy(t => t.valueOf()),
+        r.map(([_version, time]) => moment(time).utc()),
         r.filter(([version, _time]) => version !== 'created' && version !== 'modified'),
         r.toPairs
       )(publishTimes)
 
       const start = r.head(times)
       const end = r.last(times)
-      const bucketCount = Math.max(1, Math.min(end - start, maxBuckets))
+      const fullRange = end.valueOf() - start.valueOf()
+      const bucketCount = Math.max(
+        1, Math.min(fullRange, maxBuckets)
+      )
 
       if (bucketCount > 1) {
-        const fullRange = end - start
         const partitionRemainder = fullRange % bucketCount
         const stepCount = bucketCount - ((partitionRemainder > 0) ? 1 : 0)
         const bucketStep = Math.floor(fullRange / stepCount)
 
         let tIdx = 0
         for (let i = 0; i < bucketCount; i++) {
-          const rangeStart = start + i * bucketStep
+          const rangeStart = start.valueOf() + i * bucketStep
           const nextRange = rangeStart + bucketStep
           let inRange = true
           let count = 0
@@ -155,19 +157,18 @@ async function handler ({pkg, json, columns}) {
         }
 
         const formatTime = ts => {
-          const timestamp = moment(ts)
-          const date = c.blue(timestamp.format('YYYY-MM-DD'))
-          const time = c.yellow(timestamp.format('HH:MM'))
+          const date = c.blue(ts.format('YYYY-MM-DD'))
+          const time = c.yellow(ts.format('HH:mm'))
           return `${date} ${time}`
         }
 
         const chartData = buckets.map(({count}) => count)
         const startStr = formatTime(start)
         const endStr = formatTime(end)
-        const spanStr = c.orange(durations.millis(end - start))
+        const spanStr = c.orange(durations.millis(fullRange))
 
-        console.log()
-        console.log(`  Publishes | ${startStr} to ${endStr} (${spanStr})`)
+        console.info()
+        console.info(`  Publishes | ${startStr} to ${endStr} (${spanStr})`)
         const versionChart = asciichart.plot(chartData, {height: 12})
         console.info(versionChart)
       }
