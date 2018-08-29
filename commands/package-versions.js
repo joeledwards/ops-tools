@@ -43,7 +43,6 @@ async function handler ({pkg, json, height, width}) {
     const moment = require('moment')
     const buzJson = require('@buzuli/json')
     const durations = require('durations')
-    const asciichart = require('asciichart')
 
     const chart = require('../lib/chart')
 

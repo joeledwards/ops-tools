@@ -64,7 +64,7 @@ function handler () {
         times: r.map(({created}) => created)(translated),
         label: 'Launches',
         height: 10,
-        width: 60,
+        width: 60
       }))
       console.info()
       console.info(`${c.orange(instances.length)} instances from region ${c.blue(region)}`)
