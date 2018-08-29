@@ -16,7 +16,6 @@ function builder (yargs) {
     .option('height', {
       type: 'number',
       desc: 'height of the publish frequency chart',
-      default: 12,
       alias: 'h'
     })
     .option('width', {
@@ -25,35 +24,44 @@ function builder (yargs) {
       default: 60,
       alias: 'w'
     })
-    /* Add this next
     .option('days', {
       type: 'boolean',
       desc: 'chart each day individually, showing multiple lines of plots if necessary',
       default: false,
       alias: 'd'
     })
-    */
+    .options('timings', {
+      type: 'boolean',
+      desc: 'report timing metadata (how long did fetch and report generation)',
+      default: false,
+      alias: 't'
+    })
 }
 
-async function handler ({pkg, json, height, width}) {
+async function handler ({pkg, json, height, width, days, timings}) {
   try {
+    const durations = require('durations')
+    const watch = durations.stopwatch().start()
+
     const c = require('@buzuli/color')
     const r = require('ramda')
     const axios = require('axios')
     const moment = require('moment')
     const buzJson = require('@buzuli/json')
-    const durations = require('durations')
 
     const chart = require('../lib/chart')
 
     const url = `https://registry.npmjs.com/${encodeURIComponent(pkg)}`
 
+    const fetchWatch = durations.stopwatch().start()
     const {status, data} = await axios({
       method: 'get',
       url,
       validateStatus: () => true
     })
+    fetchWatch.stop()
 
+    const dataWatch = durations.stopwatch().start()
     if (status !== 200) {
       console.error(buzJson({
         status,
@@ -97,11 +105,21 @@ async function handler ({pkg, json, height, width}) {
 
     if (json) {
       const record = {
-        versionCount,
+        name: pkg,
+        versions: versionCount,
         latest: serializableVersion(latest),
         oldest: serializableVersion(oldest),
         newest: serializableVersion(newest)
       }
+
+      if (timings) {
+        record.timings = {
+          fetch: fetchWatch.duration().nanos() / 1000000000.0,
+          data: dataWatch.duration().nanos() / 1000000000.0,
+          total: watch.duration().nanos() / 1000000000.0
+        }
+      }
+
       console.info(buzJson(record))
     } else {
       const pkgStr = c.yellow.bold(pkg)
@@ -115,11 +133,12 @@ async function handler ({pkg, json, height, width}) {
         return `${versionStr} [${timeStr} | ${ageStr}]`
       }
 
-      console.info(`${pkgStr}`)
-      console.info(`  Count : ${countStr}`)
-      console.info(` Oldest : ${formatVersion(oldest)}`)
-      console.info(` Latest : ${formatVersion(latest)}`)
-      console.info(` Newest : ${formatVersion(newest)}`)
+      console.info(`${pkgStr} | ${countStr} versions`)
+      console.info()
+      console.info(`  Oldest : ${formatVersion(oldest)}`)
+      console.info(`  Latest : ${formatVersion(latest)}`)
+      console.info(`  Newest : ${formatVersion(newest)}`)
+      console.info()
 
       const timestamps = r.compose(
         r.map(([_version, time]) => time),
@@ -127,13 +146,39 @@ async function handler ({pkg, json, height, width}) {
         r.toPairs
       )(publishTimes)
 
+      dataWatch.stop()
+      const chartWatch = durations.stopwatch().start()
+
       if (timestamps.length > 1) {
-        console.log(chart.times({
-          times: timestamps,
-          label: 'Publishes',
-          width,
-          height
-        }))
+        if (days) {
+          console.log(chart.days({
+            times: timestamps,
+            label: 'Publishes',
+            width,
+            height: height || 5,
+            meta: {
+            }
+          }))
+        } else {
+          console.log(chart.times({
+            times: timestamps,
+            label: 'Publishes',
+            width,
+            height: height || 12
+          }))
+        }
+      }
+
+      chartWatch.stop()
+      watch.stop()
+
+      if (timings) {
+        console.info()
+        console.info(`=== Times ⏱  ==============`)
+        console.info(`  fetch : ${c.orange(fetchWatch)}`)
+        console.info(`   data : ${c.orange(dataWatch)}`)
+        console.info(`  chart : ${c.orange(chartWatch)}`)
+        console.info(`  total : ${c.orange(watch)}`)
       }
     }
   } catch (error) {
