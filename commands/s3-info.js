@@ -4,7 +4,7 @@ module.exports = {
   handler
 }
 
-function handler ({bucket, key}) {
+function handler ({ bucket, key }) {
   const buzJson = require('@buzuli/json')
   const c = require('@buzuli/color')
 
@@ -21,7 +21,7 @@ function handler ({bucket, key}) {
       console.log(buzJson(metadata))
     })
     .catch(error => {
-      const {statusCode: status, code} = error
+      const { statusCode: status, code } = error
 
       if (status && code) {
         console.error(

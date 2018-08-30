@@ -19,10 +19,10 @@ function builder (yargs) {
     })
 }
 
-function handler ({bindPort, bindHost, url}) {
+function handler ({ bindPort, bindHost, url }) {
   require('log-a-log')()
 
-  const {green, orange} = require('@buzuli/color')
+  const { green, orange } = require('@buzuli/color')
   const http = require('http')
   const httpProxy = require('http-proxy')
 

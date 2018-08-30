@@ -60,7 +60,7 @@ function handler ({
 
   async function run () {
     try {
-      const {swarmId} = spawnSwarm()
+      const { swarmId } = spawnSwarm()
       console.log(`Successfully launched swarm ${yellow(swarmId)} `)
     } catch (error) {
       console.error(error)
@@ -73,14 +73,14 @@ function handler ({
   async function spawnSwarm () {
     const zones = await ec2.listZones()
     const swarmId = uuid()
-    const {primaryInfo: {token, ip}} = await launchManagers({swarmId, zones})
+    const { primaryInfo: { token, ip } } = await launchManagers({ swarmId, zones })
 
     console.info(`All managers launched.`)
 
     if (workerCount < 1) {
       console.log(`No workers requested.`)
     } else {
-      await launchWorkers({primaryIp: ip, token, zones})
+      await launchWorkers({ primaryIp: ip, token, zones })
       console.log(`All ${orange(workerCount)} workers attached.`)
     }
 
@@ -89,14 +89,14 @@ function handler ({
     }
   }
 
-  async function launchManagers ({swarmId, zones}) {
+  async function launchManagers ({ swarmId, zones }) {
     // Split managers evenly between zones (regions too when relevant)
 
     return P.reduce(
       r.take(3)(zones),
       async (primaryInfo, az) => {
-        const managerOptions = {az, primaryInfo, swarmId}
-        const {ip, token} = await launchManager(managerOptions)
+        const managerOptions = { az, primaryInfo, swarmId }
+        const { ip, token } = await launchManager(managerOptions)
         const {
           ip: primaryIp,
           token: primaryToken,
@@ -115,7 +115,7 @@ function handler ({
   }
 
   let lastOctet = 2
-  async function launchManager ({az, primaryInfo, swarmId}) {
+  async function launchManager ({ az, primaryInfo, swarmId }) {
     console.info(`Launching${primaryInfo ? ' primary' : ''} swarm ${yellow(swarmId)} manager in zone ${yellow(az)}`)
 
     // Always fetch the manager's IP and ID after launch
@@ -133,19 +133,19 @@ function handler ({
       token = await random.hex(32)
     }
 
-    return {id, ip, token}
+    return { id, ip, token }
   }
 
-  async function launchWorkers ({primaryIp, token, zones}) {
+  async function launchWorkers ({ primaryIp, token, zones }) {
     // Split workers evenly between zones (regions too when relevant)
 
     P.reduce(
       zones,
-      (acc, az) => launchWorker({az, primaryIp, token})
+      (acc, az) => launchWorker({ az, primaryIp, token })
     )
   }
 
-  async function launchWorker ({az, primaryIp, token}) {
+  async function launchWorker ({ az, primaryIp, token }) {
     instanceOptions()
     console.log(`Launching worker in zone ${yellow(az)}...`)
 
@@ -158,7 +158,7 @@ function handler ({
     return 'ami-deadbeef'
   }
 
-  function instanceOptions ({az, type, sshKey, launchScript = ''}) {
+  function instanceOptions ({ az, type, sshKey, launchScript = '' }) {
     return {
       AdditionalInfo: launchScript,
       ImageId: zoneImage(az),

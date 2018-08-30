@@ -10,14 +10,14 @@ function handler () {
   const r = require('ramda')
 
   s3.listBuckets()
-    .then(async ({Buckets: buckets}) => {
+    .then(async ({ Buckets: buckets }) => {
       const regionDecor = c.pool()
 
       console.log(
         (await Promise.all(
-          buckets.map(({Name: bucket}) => {
-            return s3.getBucketLocation({Bucket: bucket})
-              .then(({LocationConstraint: region}) => {
+          buckets.map(({ Name: bucket }) => {
+            return s3.getBucketLocation({ Bucket: bucket })
+              .then(({ LocationConstraint: region }) => {
                 return {
                   bucket,
                   region: r.isEmpty(region) ? 'us-east-1' : region
@@ -25,7 +25,7 @@ function handler () {
               })
           })
         ))
-          .map(({bucket, region}) => {
+          .map(({ bucket, region }) => {
             return `  [${regionDecor(region)}] ${c.yellow(bucket)}`
           })
           .join('\n')

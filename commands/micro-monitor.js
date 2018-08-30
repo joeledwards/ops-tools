@@ -4,17 +4,17 @@ module.exports = {
   handler
 }
 
-function handler ({url}) {
-  const {blue, red, yellow, emoji} = require('@buzuli/color')
+function handler ({ url }) {
+  const { blue, red, yellow, emoji } = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
-  const {colorCode} = require('../lib/http')
+  const { colorCode } = require('../lib/http')
 
   require('axios')({
     method: 'get',
     url: `${url}/_monitor/status`,
     validateStatus: () => true
   })
-    .then(({status, statusText, data, headers}) => {
+    .then(({ status, statusText, data, headers }) => {
       const [code, text] = colorCode(status, statusText)
       console.info(buzJson(data))
       console.info(`[${code}] ${text}`)

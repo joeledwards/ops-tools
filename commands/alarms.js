@@ -11,7 +11,7 @@ function handler () {
 
   cw.listAlarms()
     .then(result => {
-      const {MetricAlarms: alarms} = result
+      const { MetricAlarms: alarms } = result
 
       if (alarms.length > 0) {
         console.log(c.yellow(`Alarms:`))

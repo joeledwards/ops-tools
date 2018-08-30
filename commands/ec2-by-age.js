@@ -17,7 +17,7 @@ function handler () {
   const region = ec2.aws.region
 
   ec2.listInstances()
-    .then(({Reservations}) => {
+    .then(({ Reservations }) => {
       const now = moment()
 
       const fieldExtractor = ({
@@ -32,16 +32,16 @@ function handler () {
         VirtualizationType: vt
       }) => {
         const name = r.head(r.compose(
-          r.map(({Value}) => Value),
-          r.filter(({Key}) => r.toLower(Key) === 'name')
+          r.map(({ Value }) => Value),
+          r.filter(({ Key }) => r.toLower(Key) === 'name')
         )(tags))
         const age = durations.millis(now.diff(moment(launchTime)))
         const created = launchTime.toISOString()
 
-        return {id, name, type, created, age, state, hv, vt}
+        return { id, name, type, created, age, state, hv, vt }
       }
 
-      const summarizer = ({id, name, created, age, state, hv, vt}) => {
+      const summarizer = ({ id, name, created, age, state, hv, vt }) => {
         const createStr = c.purple(created)
         const ageStr = c.orange(age)
         const idStr = c.yellow(id)
@@ -51,17 +51,17 @@ function handler () {
         return `[${createStr} | ${ageStr}] ${idStr} ${vmStr} [${stateStr}] (${nameStr})`
       }
 
-      const instances = r.map(r.flatten, r.map(({Instances: is}) => is))(Reservations)
+      const instances = r.map(r.flatten, r.map(({ Instances: is }) => is))(Reservations)
       const translated = r.map(fieldExtractor)(instances)
       const summaries = r.compose(
         r.map(summarizer),
-        r.sortBy(({created, name}) => [created, name])
+        r.sortBy(({ created, name }) => [created, name])
       )(translated)
 
       console.info(r.join('\n')(summaries))
       console.info()
       console.info(chart.times({
-        times: r.map(({created}) => created)(translated),
+        times: r.map(({ created }) => created)(translated),
         label: 'Launches',
         height: 10,
         width: 60

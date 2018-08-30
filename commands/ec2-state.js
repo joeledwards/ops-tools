@@ -32,7 +32,7 @@ function builder (yargs) {
     })
 }
 
-function handler ({instance, restart, start, stop, terminate}) {
+function handler ({ instance, restart, start, stop, terminate }) {
   const ec2 = require('../lib/aws').ec2()
   const c = require('@buzuli/color')
   const r = require('ramda')
@@ -81,9 +81,9 @@ function handler ({instance, restart, start, stop, terminate}) {
     }
   }
 
-  ec2.findInstances({awsOptions, fieldExtractor})
+  ec2.findInstances({ awsOptions, fieldExtractor })
     .then(instances => {
-      instances.forEach(({id, name, state}) => {
+      instances.forEach(({ id, name, state }) => {
         console.log(`${c.yellow(id)} (${c.blue(name)}) : ${stateColor(state)}`)
       })
     })

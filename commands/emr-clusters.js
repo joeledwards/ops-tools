@@ -56,8 +56,8 @@ function builder (yargs) {
     })
 }
 
-function handler ({any, all, state, limit}) {
-  const {blue, gray, green, orange, red, yellow} = require('@buzuli/color')
+function handler ({ any, all, state, limit }) {
+  const { blue, gray, green, orange, red, yellow } = require('@buzuli/color')
   const r = require('ramda')
 
   const computeAge = require('../lib/age')
@@ -68,8 +68,8 @@ function handler ({any, all, state, limit}) {
     state ? [state] : DEFAULT_STATES
   )
 
-  emr.listClusters({ClusterStates})
-    .then(({Clusters: clusters}) => {
+  emr.listClusters({ ClusterStates })
+    .then(({ Clusters: clusters }) => {
       const clusterCount = Math.min(clusters.length, all ? clusters.length : limit)
 
       r.take(clusterCount)(clusters).forEach(cluster => {

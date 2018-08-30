@@ -5,7 +5,7 @@ module.exports = {
 }
 
 function handler (argv) {
-  const {red, yellow, green} = require('@buzuli/color')
+  const { red, yellow, green } = require('@buzuli/color')
   const ec2 = require('../lib/aws').ec2()
 
   const options = {

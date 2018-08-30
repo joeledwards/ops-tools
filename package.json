@@ -34,11 +34,11 @@
     "durations": "^3.4.1",
     "express": "^4.16.3",
     "http-proxy": "^1.17.0",
-    "ioredis": "^3.2.2",
+    "ioredis": "^4.0.0",
     "leveldown": "^4.0.1",
     "levelup": "^3.1.1",
     "log-a-log": "^6.0.0",
-    "mem": "^3.0.1",
+    "mem": "^4.0.0",
     "moment": "^2.22.2",
     "node-ssh": "^5.1.2",
     "nsqjs": "^0.10.1",
@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "nodemon": "^1.18.3",
-    "standard": "^11.0.1",
+    "standard": "^12.0.0",
     "tap": "^12.0.1"
   }
 }

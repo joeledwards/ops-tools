@@ -66,8 +66,8 @@ function handler (argv) {
   const nsq = require('nsqjs')
   const buzJson = require('@buzuli/json')
   const hexdump = require('@buzuli/hexdump')
-  const {endsWith, isNil} = require('ramda')
-  const {blue, green, yellow} = require('@buzuli/color')
+  const { endsWith, isNil } = require('ramda')
+  const { blue, green, yellow } = require('@buzuli/color')
 
   const log = require('../lib/log')
 
@@ -92,7 +92,7 @@ function handler (argv) {
     channel = endsWith('#ephemeral')(channel) ? channel : `${channel}#ephemeral`
   }
 
-  const options = {clientId}
+  const options = { clientId }
 
   if (tls === true) {
     log.info(`   tls-verify: ${tlsVerify}`)

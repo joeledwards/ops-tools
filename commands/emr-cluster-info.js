@@ -15,8 +15,8 @@ function builder (yargs) {
     })
 }
 
-function handler ({cluster, json}) {
-  const {blue, gray, green, orange, purple, red, yellow} = require('@buzuli/color')
+function handler ({ cluster, json }) {
+  const { blue, gray, green, orange, purple, red, yellow } = require('@buzuli/color')
   const durations = require('durations')
   const moment = require('moment')
   const r = require('ramda')
@@ -56,7 +56,7 @@ function handler ({cluster, json}) {
         r.map(({
           Id: id, InstanceType: type, RequestedInstanceCount: count
         }) => (`[${yellow(id)}] ${green(type)} x ${orange(count)}`)),
-        r.filter(({Name: n}) => n === name)
+        r.filter(({ Name: n }) => n === name)
       )
 
       const master = nodes('MASTER')(groups) || '--'
@@ -94,10 +94,10 @@ function handler ({cluster, json}) {
     })
 
   async function getClusterInfo (ClusterId) {
-    const cluster = await emr.describeCluster({ClusterId})
-    const groups = await emr.listInstanceGroups({ClusterId})
+    const cluster = await emr.describeCluster({ ClusterId })
+    const groups = await emr.listInstanceGroups({ ClusterId })
 
-    return {...cluster, ...groups}
+    return { ...cluster, ...groups }
   }
 
   function reasonColor (code, message) {

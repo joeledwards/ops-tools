@@ -6,11 +6,11 @@ module.exports = {
 }
 
 const async = require('async')
-const {red, yellow, green, blue, purple, emoji} = require('@buzuli/color')
-const {head} = require('ramda')
+const { red, yellow, green, blue, purple, emoji } = require('@buzuli/color')
+const { head } = require('ramda')
 const poller = require('promise-poller').default
 const random = require('../lib/random')
-const {regions, ec2: newEc2} = require('../lib/aws')
+const { regions, ec2: newEc2 } = require('../lib/aws')
 
 let sim
 const setSimulate = simulate => {
@@ -37,7 +37,7 @@ function isDryRunError (error) {
 
 // Poll an AMI to determine when it is available
 function pollAmiReady (options) {
-  const {region, ami, simulate} = options
+  const { region, ami, simulate } = options
 
   let bail = false
   let failures = 1
@@ -80,7 +80,7 @@ function pollAmiReady (options) {
 }
 
 // Copy an AMI from another region to the current region.
-function copyImage ({ec2, srcRegion, srcAmi, amiName, amiDesc, simulate}) {
+function copyImage ({ ec2, srcRegion, srcAmi, amiName, amiDesc, simulate }) {
   return new Promise((resolve, reject) => {
     const options = {
       DryRun: simulate,
@@ -111,7 +111,7 @@ function copyImage ({ec2, srcRegion, srcAmi, amiName, amiDesc, simulate}) {
 }
 
 // Make an AMI public
-function publishImage ({ec2, ami, simulate}) {
+function publishImage ({ ec2, ami, simulate }) {
   return new Promise((resolve, reject) => {
     // Make the image public.
     const region = ec2.aws.region
@@ -119,7 +119,7 @@ function publishImage ({ec2, ami, simulate}) {
       ImageId: ami,
       Attribute: 'launchPermission',
       LaunchPermission: {
-        Add: [{Group: 'all'}]
+        Add: [{ Group: 'all' }]
       }
     }
 
@@ -157,9 +157,9 @@ function publishImage ({ec2, ami, simulate}) {
 }
 
 // Fetch AMI details
-function getImageInfo ({region, ami, simulate}) {
+function getImageInfo ({ region, ami, simulate }) {
   return new Promise((resolve, reject) => {
-    const ec2 = newEc2({region})
+    const ec2 = newEc2({ region })
 
     const options = {
       DryRun: simulate,
@@ -193,11 +193,11 @@ function getImageInfo ({region, ami, simulate}) {
 
 // Copy, update, and optionally publish an AMI
 function replicateImage (options) {
-  const {srcRegion, srcAmi, dstRegion, amiName, amiDesc, publish, simulate} = options
-  const ec2 = newEc2({region: dstRegion})
+  const { srcRegion, srcAmi, dstRegion, amiName, amiDesc, publish, simulate } = options
+  const ec2 = newEc2({ region: dstRegion })
 
-  return getImageInfo({region: srcRegion, ami: srcAmi, simulate})
-    .then(({name, description}) => {
+  return getImageInfo({ region: srcRegion, ami: srcAmi, simulate })
+    .then(({ name, description }) => {
       return copyImage({
         ...options,
         ec2,
@@ -205,10 +205,10 @@ function replicateImage (options) {
         amiDesc: amiDesc || description
       })
     })
-    .then(({ami}) => {
+    .then(({ ami }) => {
       if (publish) {
-        return pollAmiReady({region: dstRegion, ami, simulate})
-          .then(() => publishImage({ec2, ami, simulate}))
+        return pollAmiReady({ region: dstRegion, ami, simulate })
+          .then(() => publishImage({ ec2, ami, simulate }))
       } else {
         return {
           ami,
@@ -252,9 +252,9 @@ function handler ({
       return next => {
         log.info(`Replicating ${blue(srcAmi)} from ${yellow(srcRegion)} to ${yellow(dstRegion)}`)
 
-        replicateImage({dstRegion, ...options})
+        replicateImage({ dstRegion, ...options })
           .then(
-            ({published, ami}) => {
+            ({ published, ami }) => {
               const action = published ? 'published' : 'copied'
               const icon = emoji.inject(published ? ':gift:' : ':lock:')
               log.info(`Successfully ${action} to ${yellow(dstRegion)} as ${green(ami)} ${icon}`)

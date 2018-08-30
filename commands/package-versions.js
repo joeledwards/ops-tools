@@ -38,7 +38,7 @@ function builder (yargs) {
     })
 }
 
-async function handler ({pkg, json, height, width, days, timings}) {
+async function handler ({ pkg, json, height, width, days, timings }) {
   try {
     const durations = require('durations')
     const watch = durations.stopwatch().start()
@@ -54,7 +54,7 @@ async function handler ({pkg, json, height, width, days, timings}) {
     const url = `https://registry.npmjs.com/${encodeURIComponent(pkg)}`
 
     const fetchWatch = durations.stopwatch().start()
-    const {status, data} = await axios({
+    const { status, data } = await axios({
       method: 'get',
       url,
       validateStatus: () => true
@@ -70,35 +70,35 @@ async function handler ({pkg, json, height, width, days, timings}) {
       process.exit(1)
     }
 
-    const {time: publishTimes, versions, 'dist-tags': tags} = data
+    const { time: publishTimes, versions, 'dist-tags': tags } = data
 
     const oldest = r.compose(
       r.head,
-      r.sortBy(({time}) => time.valueOf()),
-      r.filter(({version}) => !['created', 'modified'].includes(version)),
-      r.map(([version, time]) => ({time: moment(time).utc(), version})),
+      r.sortBy(({ time }) => time.valueOf()),
+      r.filter(({ version }) => !['created', 'modified'].includes(version)),
+      r.map(([version, time]) => ({ time: moment(time).utc(), version })),
       r.toPairs
     )(publishTimes)
 
     const newest = r.compose(
       r.last,
-      r.sortBy(({time}) => time.valueOf()),
-      r.filter(({version}) => !['created', 'modified'].includes(version)),
-      r.map(([version, time]) => ({time: moment(time).utc(), version})),
+      r.sortBy(({ time }) => time.valueOf()),
+      r.filter(({ version }) => !['created', 'modified'].includes(version)),
+      r.map(([version, time]) => ({ time: moment(time).utc(), version })),
       r.toPairs
     )(publishTimes)
 
     let latestVersion = tags.latest
     let latest = r.compose(
       r.head,
-      r.filter(({version}) => version === latestVersion),
-      r.filter(({version}) => !['created', 'modified'].includes(version)),
-      r.map(([version, time]) => ({time: moment(time).utc(), version})),
+      r.filter(({ version }) => version === latestVersion),
+      r.filter(({ version }) => !['created', 'modified'].includes(version)),
+      r.map(([version, time]) => ({ time: moment(time).utc(), version })),
       r.toPairs
     )(publishTimes)
 
     let versionCount = Object.keys(versions).length
-    const serializableVersion = ({version, time}) => ({
+    const serializableVersion = ({ version, time }) => ({
       version,
       time: time.toISOString()
     })
@@ -125,7 +125,7 @@ async function handler ({pkg, json, height, width, days, timings}) {
       const pkgStr = c.yellow.bold(pkg)
       const countStr = c.orange(versionCount)
 
-      const formatVersion = ({version, time}) => {
+      const formatVersion = ({ version, time }) => {
         const versionStr = c.green(version)
         const timeStr = c.blue(time.toISOString())
         const age = durations.millis(moment.utc().diff(time))

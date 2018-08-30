@@ -35,7 +35,7 @@ function builder (yargs) {
 const ONE_HOUR = 60 * 60 * 1000
 const CF_API_URL = 'https://api.cloudflare.com/client/v4'
 
-function handler ({full, bc, rc, zone}) {
+function handler ({ full, bc, rc, zone }) {
   const c = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
   const cfZone = zone || process.env.CLOUDFLARE_ZONE
@@ -49,9 +49,9 @@ function handler ({full, bc, rc, zone}) {
 
   if (cfZone) {
     getZoneInfo(cfZone)
-      .then(async ({name}) => {
+      .then(async ({ name }) => {
         try {
-          await summarizeZoneStats({id: cfZone, name})
+          await summarizeZoneStats({ id: cfZone, name })
         } catch (error) {
           console.error(error)
           process.exit(1)
@@ -77,7 +77,7 @@ function handler ({full, bc, rc, zone}) {
       })
   }
 
-  async function summarizeZoneStats ({id, name = 'unknown'}) {
+  async function summarizeZoneStats ({ id, name = 'unknown' }) {
     console.log(`${c.blue(name)} [${c.yellow(id)}]:`)
 
     const stats = await getStats(id, full)
@@ -148,7 +148,7 @@ function handler ({full, bc, rc, zone}) {
     )(pairs)
 
     return r.compose(
-      r.map(([key, {requests, bandwidth}]) => {
+      r.map(([key, { requests, bandwidth }]) => {
         const pad = ' '.repeat(maxKeyLength - key.length)
         return `${pad}${decorateKey(key)} : ${c.orange(requests)}` +
           (bandwidth ? ` (${bandwidth.toLocaleString()} b)` : '')
@@ -160,7 +160,7 @@ function handler ({full, bc, rc, zone}) {
   }
 
   async function getZoneInfo (zoneId) {
-    const {result: zone} = await cfApiCall(`/zones/${zoneId}`)
+    const { result: zone } = await cfApiCall(`/zones/${zoneId}`)
 
     return zone
   }
@@ -174,7 +174,7 @@ function handler ({full, bc, rc, zone}) {
     const direction = 'desc'
     const match = 'all'
 
-    const {result: zones} = await cfApiCall('/zones', {
+    const { result: zones } = await cfApiCall('/zones', {
       name,
       status,
       page,
@@ -198,7 +198,7 @@ function handler ({full, bc, rc, zone}) {
 
     const zoneStats = await cfApiCall(
       `/zones/${zoneId}/analytics/dashboard`,
-      {since, continuous}
+      { since, continuous }
     )
 
     const {
@@ -218,7 +218,7 @@ function handler ({full, bc, rc, zone}) {
     } else {
       return r.compose(
         r.last,
-        r.sortBy(({until}) => moment(until))
+        r.sortBy(({ until }) => moment(until))
       )(timeseries)
     }
   }
@@ -240,7 +240,7 @@ function handler ({full, bc, rc, zone}) {
       headers,
       validateStatus: () => true
     })
-      .then(({status, data, request: {method, path}}) => {
+      .then(({ status, data, request: { method, path } }) => {
         if (status === 200) {
           return data
         } else {

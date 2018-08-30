@@ -15,7 +15,7 @@ function builder (yargs) {
     })
 }
 
-function handler ({full}) {
+function handler ({ full }) {
   const c = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
   const lambda = require('../lib/aws').lambda()
@@ -42,7 +42,7 @@ function handler ({full}) {
 
   function formatSummary (result) {
     const maxNameLen = result.Functions
-      .map(({FunctionName}) => FunctionName.length)
+      .map(({ FunctionName }) => FunctionName.length)
       .reduce((a, b) => a > b ? a : b)
 
     const pad = name => ' '.repeat(maxNameLen - name.length)
@@ -62,7 +62,7 @@ function handler ({full}) {
 
           return `${updateStr} ${pad(name)}${nameStr}-${catStr} : ${c.blue(desc)}`
         }),
-        r.sortBy(({FunctionName}) => FunctionName.split('-').reverse())
+        r.sortBy(({ FunctionName }) => FunctionName.split('-').reverse())
       )(result.Functions)
     )
   }

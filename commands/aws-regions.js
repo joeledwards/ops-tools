@@ -9,18 +9,18 @@ function handler () {
   const ec2 = require('../lib/aws').ec2()
 
   ec2.listRegions()
-    .then(({Regions}) => {
-      const regions = Regions.map(({Endpoint: endpoint, RegionName: name}) => {
-        return {endpoint, name}
+    .then(({ Regions }) => {
+      const regions = Regions.map(({ Endpoint: endpoint, RegionName: name }) => {
+        return { endpoint, name }
       })
 
       regions.sort((a, b) => a.name.localeCompare(b.name))
 
       const maxNameLen = regions
-        .map(({name}) => name.length)
+        .map(({ name }) => name.length)
         .reduce((a, b) => Math.max(a, b))
 
-      const summary = regions.map(({name, endpoint}) => {
+      const summary = regions.map(({ name, endpoint }) => {
         const pad = '-'.repeat(maxNameLen - name.length + 3)
         return `${c.yellow(name)} ${pad} ${c.blue(endpoint)}`
       }).join('\n')

@@ -21,9 +21,9 @@ function builder (yargs) {
     })
 }
 
-function handler ({host, port, topic, message}) {
+function handler ({ host, port, topic, message }) {
   const nsqjs = require('nsqjs')
-  const {blue, green, orange, red, yellow, emoji} = require('@buzuli/color')
+  const { blue, green, orange, red, yellow, emoji } = require('@buzuli/color')
 
   const options = {}
   const nsq = new nsqjs.Writer(host, port, options)

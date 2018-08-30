@@ -5,8 +5,8 @@ module.exports = {
 }
 
 function handler () {
-  const {red, green, emoji} = require('@buzuli/color')
-  const {compose, map, sortBy} = require('ramda')
+  const { red, green, emoji } = require('@buzuli/color')
+  const { compose, map, sortBy } = require('ramda')
 
   const health = require('../lib/aws').health()
 
@@ -22,7 +22,7 @@ function handler () {
           startTime: start,
           endTime: end
         }) => `[${service}] ${region}:${zone}:${arn} (${status}) => ${start} - ${end}`),
-        sortBy(({service}) => service)
+        sortBy(({ service }) => service)
       )(data.events).forEach(summary => console.log(summary))
       console.log(green(`Successfully fetched AWS health events.`))
     })

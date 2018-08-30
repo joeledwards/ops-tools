@@ -1,7 +1,7 @@
 const durations = require('durations')
 const nsq = require('nsqjs')
 const v1uuid = require('uuid/v1')
-const {blue, green, red, yellow} = require('@buzuli/color')
+const { blue, green, red, yellow } = require('@buzuli/color')
 
 const log = require('../../lib/log')
 

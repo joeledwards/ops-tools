@@ -15,9 +15,9 @@ function builder (yargs) {
     })
 }
 
-function handler ({timeout, url}) {
-  const {colorCode} = require('../lib/http')
-  const {blue, gray} = require('@buzuli/color')
+function handler ({ timeout, url }) {
+  const { colorCode } = require('../lib/http')
+  const { blue, gray } = require('@buzuli/color')
   const r = require('ramda')
 
   const options = {
@@ -29,7 +29,7 @@ function handler ({timeout, url}) {
 
   require('axios')(options)
     .then(resp => {
-      const {data, headers, status, statusText} = resp
+      const { data, headers, status, statusText } = resp
 
       const [codeColored, textColored] = colorCode(status, statusText)
       console.log(`[${codeColored}] ${textColored}`)

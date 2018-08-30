@@ -22,7 +22,7 @@ function builder (yargs) {
 
 const CF_API_URL = 'https://api.cloudflare.com/client/v4'
 
-function handler ({quiet, zone}) {
+function handler ({ quiet, zone }) {
   const c = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
   const cfZone = zone || process.env.CLOUDFLARE_ZONE
@@ -33,9 +33,9 @@ function handler ({quiet, zone}) {
 
   if (cfZone) {
     getZoneInfo(cfZone)
-      .then(async ({name}) => {
+      .then(async ({ name }) => {
         try {
-          await summarizeZoneStats({id: cfZone, name})
+          await summarizeZoneStats({ id: cfZone, name })
         } catch (error) {
           console.error(error)
           process.exit(1)
@@ -61,7 +61,7 @@ function handler ({quiet, zone}) {
       })
   }
 
-  async function summarizeZoneStats ({id, name = 'unknown'}) {
+  async function summarizeZoneStats ({ id, name = 'unknown' }) {
     console.log(`${c.blue(name)} [${c.yellow(id)}]:`)
 
     const fields = await cfApiCall(`/zones/${id}/logs/received/fields`)
@@ -74,7 +74,7 @@ function handler ({quiet, zone}) {
   }
 
   async function getZoneInfo (zoneId) {
-    const {result: zone} = await cfApiCall(`/zones/${zoneId}`)
+    const { result: zone } = await cfApiCall(`/zones/${zoneId}`)
 
     return zone
   }
@@ -88,7 +88,7 @@ function handler ({quiet, zone}) {
     const direction = 'desc'
     const match = 'all'
 
-    const {result: zones} = await cfApiCall('/zones', {
+    const { result: zones } = await cfApiCall('/zones', {
       name,
       status,
       page,
@@ -122,7 +122,7 @@ function handler ({quiet, zone}) {
       headers,
       validateStatus: () => true
     })
-      .then(({status, data, request: {method, path}}) => {
+      .then(({ status, data, request: { method, path } }) => {
         if (status === 200) {
           return data
         } else {

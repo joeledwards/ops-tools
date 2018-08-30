@@ -27,12 +27,12 @@ function builder (yargs) {
     })
 }
 
-function handler ({pollInterval, statusCode, timeout, url}) {
+function handler ({ pollInterval, statusCode, timeout, url }) {
   require('log-a-log')()
 
   const axios = require('axios')
-  const {colorCode} = require('../lib/http')
-  const {red, yellow, blue, emoji} = require('@buzuli/color')
+  const { colorCode } = require('../lib/http')
+  const { red, yellow, blue, emoji } = require('@buzuli/color')
 
   console.log(`Polling status of ${blue(url)}`)
 
@@ -45,7 +45,7 @@ function handler ({pollInterval, statusCode, timeout, url}) {
     }
 
     axios.get(url, options)
-      .then(({status, data}) => {
+      .then(({ status, data }) => {
         if (status === statusCode) {
           console.log(
             `[${colorCode(status)}]`,

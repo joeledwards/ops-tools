@@ -30,13 +30,13 @@ function builder (yargs) {
     })
 }
 
-function handler ({after, bucket, limit, prefix}) {
+function handler ({ after, bucket, limit, prefix }) {
   if (limit > 1000) {
     console.error(`Maximum limit of 1000 for now.`)
     process.exit(1)
   }
 
-  const {blue, gray, orange, yellow} = require('@buzuli/color')
+  const { blue, gray, orange, yellow } = require('@buzuli/color')
   const age = require('../lib/age')
   const s3 = require('../lib/aws/s3')()
 

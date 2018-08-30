@@ -15,8 +15,8 @@ function builder (yargs) {
     })
 }
 
-async function handler ({image, raw}) {
-  const {green, orange, yellow} = require('@buzuli/color')
+async function handler ({ image, raw }) {
+  const { green, orange, yellow } = require('@buzuli/color')
   const axios = require('axios')
   const oboe = require('oboe')
 

@@ -67,7 +67,7 @@ function builder (yargs) {
 }
 
 async function handler (argv) {
-  const {red, emoji} = require('@buzuli/color')
+  const { red, emoji } = require('@buzuli/color')
 
   try {
     await followCouch(argv)
@@ -79,7 +79,7 @@ async function handler (argv) {
 
 // CouchDB Follower
 async function followCouch (argv) {
-  const {blue, green, grey, orange, purple, red, yellow, emoji} = require('@buzuli/color')
+  const { blue, green, grey, orange, purple, red, yellow, emoji } = require('@buzuli/color')
 
   const r = require('ramda')
   const axios = require('axios')
@@ -197,14 +197,14 @@ async function followCouch (argv) {
       return
     }
 
-    const {id, seq, doc, changes, deleted = false} = document
+    const { id, seq, doc, changes, deleted = false } = document
     lastId = id
     lastRev = changes ? changes[0].rev : undefined
     lastSeq = seq || 0
     lastDoc = doc || {}
     lastDel = deleted
 
-    notify({force: fullThrottle})
+    notify({ force: fullThrottle })
   })
 
   // This could be problematic. All other operations are synchronous, but this...
@@ -223,12 +223,12 @@ async function followCouch (argv) {
   function latestSeq (url) {
     return axios
       .get(url)
-      .then(({data}) => data.update_seq)
+      .then(({ data }) => data.update_seq)
   }
 
   // Track the latest sequence for a URL
   function trackSeq (url, changeHandler) {
-    const errorNotify = throttle({minDelay, maxDelay: null})
+    const errorNotify = throttle({ minDelay, maxDelay: null })
     const reportError = (error) => {
       errorNotify({
         force: fullThrottle,
@@ -249,7 +249,7 @@ async function followCouch (argv) {
         : Promise.resolve(since)
     )
       .then(seq => {
-        changeHandler({seq: seq - 1})
+        changeHandler({ seq: seq - 1 })
 
         const followOptions = {
           db: url,
@@ -258,7 +258,7 @@ async function followCouch (argv) {
         }
 
         if (secret) {
-          followOptions.query_params = {sharedFetchSecret: secret}
+          followOptions.query_params = { sharedFetchSecret: secret }
         }
 
         const feed = new ChangesStream(followOptions)
@@ -286,7 +286,7 @@ async function followCouch (argv) {
 
 // History Server
 function historyServer (db, argv) {
-  const {blue, green, orange, yellow} = require('@buzuli/color')
+  const { blue, green, orange, yellow } = require('@buzuli/color')
   const r = require('ramda')
 
   const log = msg => console.info(`[${yellow(new Date().toISOString())}] ${msg}`)
@@ -323,7 +323,7 @@ function historyServer (db, argv) {
           const startSeq = parseInt(start)
           options.gte = `seq:${startSeq}`
         } catch (error) {
-          return res.status(400).json({message: `Invalid start sequence: ${start}`})
+          return res.status(400).json({ message: `Invalid start sequence: ${start}` })
         }
       }
 
@@ -332,7 +332,7 @@ function historyServer (db, argv) {
           const endSeq = parseInt(end)
           options.lte = `seq:${endSeq}`
         } catch (error) {
-          return res.status(400).json({message: `Invalid end sequence: ${end}`})
+          return res.status(400).json({ message: `Invalid end sequence: ${end}` })
         }
       }
 
@@ -340,7 +340,7 @@ function historyServer (db, argv) {
         try {
           options.limit = parseInt(limit)
         } catch (error) {
-          return res.status(400).json({message: `Invalid limit: ${limit}`})
+          return res.status(400).json({ message: `Invalid limit: ${limit}` })
         }
       }
 
@@ -386,7 +386,7 @@ function historyServer (db, argv) {
         try {
           options.limit = parseInt(limit)
         } catch (error) {
-          return res.status(400).json({message: `Invalid limit: ${limit}`})
+          return res.status(400).json({ message: `Invalid limit: ${limit}` })
         }
       }
 
@@ -433,7 +433,7 @@ function historyServer (db, argv) {
         try {
           options.limit = parseInt(limit)
         } catch (error) {
-          return res.status(400).json({message: `Invalid limit: ${limit}`})
+          return res.status(400).json({ message: `Invalid limit: ${limit}` })
         }
       }
 
@@ -468,7 +468,7 @@ function historyServer (db, argv) {
         try {
           ctxt = parseInt(context)
         } catch (error) {
-          return res.status(400).json({message: `Invalid value for context: ${context}`})
+          return res.status(400).json({ message: `Invalid value for context: ${context}` })
         }
       }
 
@@ -477,7 +477,7 @@ function historyServer (db, argv) {
         try {
           max = parseInt(limit)
         } catch (error) {
-          return res.status(400).json({message: `Invalid value for limit: ${limit}`})
+          return res.status(400).json({ message: `Invalid value for limit: ${limit}` })
         }
       }
 
@@ -502,9 +502,9 @@ function historyServer (db, argv) {
             ({
               route: {
                 path,
-                stack: [{method}] = []
+                stack: [{ method }] = []
               } = {}
-            }) => ({method, path})
+            }) => ({ method, path })
           )
       )
     })

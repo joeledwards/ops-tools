@@ -28,7 +28,7 @@ function handler () {
       passphrase = pass
       return ec2.listInstances()
     })
-    .then(({Reservations}) => {
+    .then(({ Reservations }) => {
       const fieldExtractor = ({
         InstanceId: id,
         InstanceType: type,
@@ -39,29 +39,29 @@ function handler () {
         }
       }) => {
         const name = r.head(r.compose(
-          r.map(({Value}) => Value),
-          r.filter(({Key}) => r.toLower(Key) === 'name')
+          r.map(({ Value }) => Value),
+          r.filter(({ Key }) => r.toLower(Key) === 'name')
         )(tags))
 
-        return {id, name, type, state, ip}
+        return { id, name, type, state, ip }
       }
 
-      const summarizer = ({id, name, type, uptime, state}) => {
+      const summarizer = ({ id, name, type, uptime, state }) => {
         const ut = (uptime === null) ? 'unknown' : durations.millis(uptime)
         return `[${orange(ut)}] ${green(region)} ${yellow(id)} [${(state === 'running') ? green(state) : red(state)}] (${blue(name)})`
       }
 
       const instances = r.compose(
         r.flatten,
-        r.map(({Instances}) => Instances)
+        r.map(({ Instances }) => Instances)
       )(Reservations)
 
       const results = []
       const uptimeTasks = r.compose(
         r.map(info => {
           return next => {
-            return checkUptime({id: info.id, name: info.name, host: info.ip, passphrase})
-              .then(uptime => ({...info, uptime}))
+            return checkUptime({ id: info.id, name: info.name, host: info.ip, passphrase })
+              .then(uptime => ({ ...info, uptime }))
               .then(r => results.push(r))
               .then(() => next(), next)
           }
@@ -76,7 +76,7 @@ function handler () {
           const summaries = r.compose(
             r.reverse,
             r.map(summarizer),
-            r.sortBy(({uptime}) => uptime)
+            r.sortBy(({ uptime }) => uptime)
           )(results)
 
           console.log(r.join('\n')(summaries))
@@ -100,8 +100,8 @@ function handler () {
     try {
       console.log(`Checking uptime of ${yellow(id)} (${blue(name)})`)
       const ssh = new SSH()
-      await ssh.connect({host, username, privateKey, passphrase})
-      const {stdout: uptimeString} = await ssh.execCommand('uptime -s')
+      await ssh.connect({ host, username, privateKey, passphrase })
+      const { stdout: uptimeString } = await ssh.execCommand('uptime -s')
       const bootTime = moment.utc(uptimeString)
       const now = moment.utc()
       const uptime = now.diff(bootTime)

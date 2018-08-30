@@ -5,7 +5,7 @@ module.exports = {
 }
 
 function handler () {
-  const {red, emoji} = require('@buzuli/color')
+  const { red, emoji } = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
   const r = require('ramda')
 
@@ -21,15 +21,15 @@ function handler () {
   }
 
   ec2.describeAccountAttributes(params)
-    .then(({AccountAttributes: attributes}) => {
+    .then(({ AccountAttributes: attributes }) => {
       console.log(buzJson(
         r.compose(
           r.fromPairs,
-          r.map(({name, value}) => [name, value]),
-          r.sortBy(({name}) => name),
+          r.map(({ name, value }) => [name, value]),
+          r.sortBy(({ name }) => name),
           r.map(({
-            AttributeName: name, AttributeValues: [{AttributeValue: value} = {}] = []
-          }) => ({name, value: parseInt(value)}))
+            AttributeName: name, AttributeValues: [{ AttributeValue: value } = {}] = []
+          }) => ({ name, value: parseInt(value) }))
         )(attributes)
       ))
     })
