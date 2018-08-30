@@ -16,6 +16,7 @@ function run () {
     .exitProcess(false)
     .commandDir('../commands')
     .demandCommand()
+    .strict() // CAUTION: do not use hyphens in positional args
     .fail(() => {
       yargs.showHelp()
 

@@ -7,6 +7,7 @@ module.exports = {
 
 function builder (yargs) {
   return yargs
+    .env('COUCH_FOLLOW')
     .option('bind-port', {
       type: 'number',
       desc: 'the port on which the history server should listen',
@@ -52,6 +53,10 @@ function builder (yargs) {
       desc: 'maximum delay between reports',
       default: null,
       alias: ['D']
+    })
+    .option('secret', {
+      type: 'string',
+      desc: 'this is required for non-public (npmE) registries'
     })
     .option('since', {
       type: 'number',
@@ -100,6 +105,7 @@ async function followCouch (argv) {
     leveldb,
     maxDelay,
     minDelay,
+    secret,
     since
   } = argv
 
@@ -245,11 +251,17 @@ async function followCouch (argv) {
       .then(seq => {
         changeHandler({seq: seq - 1})
 
-        const feed = new ChangesStream({
+        const followOptions = {
           db: url,
           since: seq - 1,
           include_docs: completeDoc || reportInfo || allInfo
-        })
+        }
+
+        if (secret) {
+          followOptions.query_params = {sharedFetchSecret: secret}
+        }
+
+        const feed = new ChangesStream(followOptions)
 
         feed.on('readable', () => changeHandler(feed.read()))
         feed.on('error', reportError)

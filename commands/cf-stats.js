@@ -13,26 +13,32 @@ function builder (yargs) {
       default: false,
       alias: ['full', 'f']
     })
-    .option('sort-by-request-count', {
-      type: 'boolean',
-      desc: 'order by request count, descending',
-      default: false,
-      alias: ['rc', 'r']
-    })
     .option('sort-by-byte-count', {
       type: 'boolean',
       desc: 'order by byte count, descending [overrides -b]',
       default: false,
       alias: ['bc', 'b']
     })
+    .option('sort-by-request-count', {
+      type: 'boolean',
+      desc: 'order by request count, descending',
+      default: false,
+      alias: ['rc', 'r']
+    })
+    .option('zone', {
+      type: 'string',
+      desc: 'the zone for which stats should be pulled (defaults to all zones)',
+      alias: ['z']
+    })
 }
 
 const ONE_HOUR = 60 * 60 * 1000
 const CF_API_URL = 'https://api.cloudflare.com/client/v4'
 
-function handler ({full, bc, rc}) {
+function handler ({full, bc, rc, zone}) {
   const c = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
+  const cfZone = zone || process.env.CLOUDFLARE_ZONE
 
   const axios = require('axios')
   const moment = require('moment')
@@ -41,42 +47,57 @@ function handler ({full, bc, rc}) {
 
   const ordering = bc ? 'byte-count' : rc ? 'request-count' : null
 
-  listZones()
-    .then(async zones => {
-      try {
-        const allStats = {}
-
-        for (let zoneId in zones) {
-          const zone = zones[zoneId]
-          console.log(`${c.blue(zone.name)} [${c.yellow(zone.id)}]:`)
-
-          const stats = await getStats(zoneId, full)
-          allStats[zoneId] = stats
-
-          console.log(`  status:`)
-          formatCounts(stats, 'http_status', ordering, decorateStatusKey)
-            .forEach(p => console.log(`  ${p}`))
-
-          console.log()
-
-          console.log(`  content-type:`)
-          formatCounts(stats, 'content_type', ordering)
-            .forEach(p => console.log(`  ${p}`))
-
-          console.log()
-
-          console.log(`  ssl:`)
-          formatCounts(stats, 'ssl', ordering, decorateSslKey)
-            .forEach(p => console.log(`  ${p}`))
+  if (cfZone) {
+    getZoneInfo(cfZone)
+      .then(async ({name}) => {
+        try {
+          await summarizeZoneStats({id: cfZone, name})
+        } catch (error) {
+          console.error(error)
+          process.exit(1)
         }
-      } catch (error) {
+      }, error => {
         console.error(error)
         process.exit(1)
-      }
-    }, error => {
-      console.error(error)
-      process.exit(1)
-    })
+      })
+  } else {
+    listZones()
+      .then(async zones => {
+        try {
+          for (let zone in zones.values) {
+            await summarizeZoneStats(zone)
+          }
+        } catch (error) {
+          console.error(error)
+          process.exit(1)
+        }
+      }, error => {
+        console.error(error)
+        process.exit(1)
+      })
+  }
+
+  async function summarizeZoneStats ({id, name = 'unknown'}) {
+    console.log(`${c.blue(name)} [${c.yellow(id)}]:`)
+
+    const stats = await getStats(id, full)
+
+    console.log(`  status:`)
+    formatCounts(stats, 'http_status', ordering, decorateStatusKey)
+      .forEach(p => console.log(`  ${p}`))
+
+    console.log()
+
+    console.log(`  content-type:`)
+    formatCounts(stats, 'content_type', ordering)
+      .forEach(p => console.log(`  ${p}`))
+
+    console.log()
+
+    console.log(`  ssl:`)
+    formatCounts(stats, 'ssl', ordering, decorateSslKey)
+      .forEach(p => console.log(`  ${p}`))
+  }
 
   function decorateStatusKey (key) {
     const status = parseInt(key) || 0
@@ -136,6 +157,12 @@ function handler ({full, bc, rc}) {
       r.sortBy(sortField),
       r.toPairs
     )(pairs)
+  }
+
+  async function getZoneInfo (zoneId) {
+    const {result: zone} = await cfApiCall(`/zones/${zoneId}`)
+
+    return zone
   }
 
   async function listZones () {

@@ -1,3 +1,10 @@
+module.exports = {
+  command: 'replicate-ami <region> <ami>',
+  desc: 'replicate an AMI from one region to all others',
+  builder,
+  handler
+}
+
 const async = require('async')
 const {red, yellow, green, blue, purple, emoji} = require('@buzuli/color')
 const {head} = require('ramda')
@@ -213,8 +220,22 @@ function replicateImage (options) {
 }
 
 // Run through all regions
-function handler (argv) {
-  const {srcRegion, srcAmi, simulate, publish, name, description} = argv
+function handler ({
+  region: srcRegion,
+  ami: srcAmi,
+  simulate,
+  publish,
+  name,
+  description
+}) {
+  const options = {
+    srcRegion,
+    srcAmi,
+    simulate,
+    publish,
+    name,
+    description
+  }
   setSimulate(simulate)
 
   log.info(`Replicating image ${blue(srcAmi)} from ${yellow(srcRegion)} to all regions`)
@@ -231,7 +252,7 @@ function handler (argv) {
       return next => {
         log.info(`Replicating ${blue(srcAmi)} from ${yellow(srcRegion)} to ${yellow(dstRegion)}`)
 
-        replicateImage({dstRegion, ...argv})
+        replicateImage({dstRegion, ...options})
           .then(
             ({published, ami}) => {
               const action = published ? 'published' : 'copied'
@@ -288,11 +309,4 @@ function builder (yargs) {
       default: false,
       desc: 'perform a dry run of the operation'
     })
-}
-
-module.exports = {
-  command: 'replicate-ami <src-region> <src-ami>',
-  desc: 'replicate an AMI from one region to all others',
-  builder,
-  handler
 }

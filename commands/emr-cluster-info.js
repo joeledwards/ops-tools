@@ -1,5 +1,5 @@
 module.exports = {
-  command: 'emr-cluster-info <cluster-id>',
+  command: 'emr-cluster-info <cluster>',
   desc: 'Get details on a single EMR cluster',
   builder,
   handler
@@ -15,7 +15,7 @@ function builder (yargs) {
     })
 }
 
-function handler ({clusterId: id, json}) {
+function handler ({cluster, json}) {
   const {blue, gray, green, orange, purple, red, yellow} = require('@buzuli/color')
   const durations = require('durations')
   const moment = require('moment')
@@ -23,7 +23,7 @@ function handler ({clusterId: id, json}) {
 
   const emr = require('../lib/aws').emr()
 
-  getClusterInfo(id)
+  getClusterInfo(cluster)
     .then(info => {
       const {
         Cluster: {
@@ -72,7 +72,7 @@ function handler ({clusterId: id, json}) {
       if (json) {
         console.log(JSON.stringify(info, null, 2))
       } else {
-        console.log(`Cluster ${yellow(id)} (${green(name)})`)
+        console.log(`Cluster ${yellow(cluster)} (${green(name)})`)
         console.log(`     zone : ${yellow(zone)}`)
         console.log(`    owner : ${green(owner)}`)
         console.log(`    state : ${stateColor(state)} (${reasonColor(reasonCode, reasonMessage)})`)
@@ -89,7 +89,7 @@ function handler ({clusterId: id, json}) {
       }
     })
     .catch(error => {
-      console.error(`Error describing cluster ${yellow(id)} :`, error)
+      console.error(`Error describing cluster ${yellow(cluster)} :`, error)
       process.exit(1)
     })
 

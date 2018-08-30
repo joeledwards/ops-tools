@@ -1,5 +1,5 @@
 module.exports = {
-  command: 'proxy <target-url>',
+  command: 'proxy <url>',
   desc: 'proxies to a remote URL and logs traffic for debugging',
   builder,
   handler
@@ -19,7 +19,7 @@ function builder (yargs) {
     })
 }
 
-function handler ({bindPort, bindHost, targetUrl}) {
+function handler ({bindPort, bindHost, url}) {
   require('log-a-log')()
 
   const {green, orange} = require('@buzuli/color')
@@ -39,13 +39,13 @@ function handler ({bindPort, bindHost, targetUrl}) {
     console.info(`[${orange(id)}] ${orange(req.method)} ${green(req.url)}`)
 
     proxy.web(req, res, {
-      target: targetUrl,
+      target: url,
       start: 'node bin/ops.js'
     })
   })
 
   server.listen(bindPort, bindHost, () => {
-    console.info(`${bindHost}:${bindPort} => ${targetUrl}`)
+    console.info(`${bindHost}:${bindPort} => ${url}`)
     console.info('Proxy server listening...')
   })
 }

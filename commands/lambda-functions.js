@@ -41,14 +41,11 @@ function handler ({full}) {
   }
 
   function formatSummary (result) {
-    // console.log(buzJson(result))
     const maxNameLen = result.Functions
       .map(({FunctionName}) => FunctionName.length)
       .reduce((a, b) => a > b ? a : b)
 
     const pad = name => ' '.repeat(maxNameLen - name.length)
-
-    console.log(`maxNameLen=${maxNameLen}`)
 
     console.log(
       r.compose(

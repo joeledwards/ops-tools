@@ -8,6 +8,7 @@ module.exports = {
 function builder (yargs) {
   return yargs
     .option('ack', {
+      alias: 'a',
       type: 'boolean',
       default: true,
       desc: 'acknowledge received messages'
@@ -22,7 +23,7 @@ function builder (yargs) {
       desc: 'cluster access secret'
     })
     .option('channel', {
-      aliases: ['c'],
+      alias: 'c',
       type: 'string',
       default: 'buzuli#ephemeral',
       desc: 'the channel from which to "peek"'
@@ -32,6 +33,7 @@ function builder (yargs) {
       default: 'buzuli'
     })
     .option('limit', {
+      alias: 'l',
       type: 'number',
       default: 10
     })
@@ -54,6 +56,7 @@ function builder (yargs) {
       default: false
     })
     .option('unlimited', {
+      alias: 'u',
       type: 'boolean',
       default: false
     })
