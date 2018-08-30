@@ -41,11 +41,6 @@ function builder (yargs) {
       desc: 'the LevelDB directory to which history should be written',
       alias: ['L']
     })
-    .option('limit', {
-      type: 'number',
-      desc: 'stop after a fixed number of documents are retrieved',
-      alias: ['l']
-    })
     .option('min-delay', {
       type: 'number',
       desc: 'minimum delay between reports',
@@ -81,11 +76,11 @@ async function handler (argv) {
 async function followCouch (argv) {
   const {blue, green, grey, orange, purple, red, yellow, emoji} = require('@buzuli/color')
 
-  const axios = require('axios')
-  const durations = require('durations')
-  const follow = require('follow')
-  const moment = require('moment')
   const r = require('ramda')
+  const axios = require('axios')
+  const moment = require('moment')
+  const durations = require('durations')
+  const ChangesStream = require('changes-stream')
 
   const throttle = require('@buzuli/throttle')
   const buzJson = require('@buzuli/json')
@@ -103,7 +98,6 @@ async function followCouch (argv) {
     info: reportInfo,
     allInfo,
     leveldb,
-    limit,
     maxDelay,
     minDelay,
     since
@@ -190,7 +184,6 @@ async function followCouch (argv) {
   })
 
   let count = -1
-  let stop = () => {}
   trackSeq(url, (document = {}) => {
     count++
 
@@ -206,10 +199,6 @@ async function followCouch (argv) {
     lastDel = deleted
 
     notify({force: fullThrottle})
-
-    if (count >= limit) {
-      stop()
-    }
   })
 
   // This could be problematic. All other operations are synchronous, but this...
@@ -256,23 +245,14 @@ async function followCouch (argv) {
       .then(seq => {
         changeHandler({seq: seq - 1})
 
-        const feed = new follow.Feed({
+        const feed = new ChangesStream({
           db: url,
           since: seq - 1,
-          include_docs: completeDoc || reportInfo || allInfo,
-          attachments: allInfo
+          include_docs: completeDoc || reportInfo || allInfo
         })
 
-        feed.on('change', changeHandler)
+        feed.on('readable', () => changeHandler(feed.read()))
         feed.on('error', reportError)
-        feed.on('stop', () => console.log(`Halted after receiving ${orange(count)} sequences.`))
-
-        feed.follow()
-
-        stop = () => {
-          errorNotify({halt: true})
-          feed.stop()
-        }
       })
       .catch(error => reportError(error))
   }

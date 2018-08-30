@@ -7,29 +7,29 @@ module.exports = {
 
 function builder (yargs) {
   yargs
-  .option('restart', {
-    type: 'boolean',
-    default: undefined,
-    desc: 'stops the instance if it is running'
-  })
-  .option('start', {
-    type: 'boolean',
-    default: undefined,
-    desc: 'starts the instance if it is not running',
-    conflicts: ['restart']
-  })
-  .option('stop', {
-    type: 'boolean',
-    default: undefined,
-    desc: 'stops the instance if it is running',
-    conflicts: ['restart', 'start']
-  })
-  .option('terminate', {
-    type: 'boolean',
-    default: undefined,
-    desc: 'terminates the instance if it exists',
-    conflicts: ['restart', 'start', 'stop']
-  })
+    .option('restart', {
+      type: 'boolean',
+      default: undefined,
+      desc: 'stops the instance if it is running'
+    })
+    .option('start', {
+      type: 'boolean',
+      default: undefined,
+      desc: 'starts the instance if it is not running',
+      conflicts: ['restart']
+    })
+    .option('stop', {
+      type: 'boolean',
+      default: undefined,
+      desc: 'stops the instance if it is running',
+      conflicts: ['restart', 'start']
+    })
+    .option('terminate', {
+      type: 'boolean',
+      default: undefined,
+      desc: 'terminates the instance if it exists',
+      conflicts: ['restart', 'start', 'stop']
+    })
 }
 
 function handler ({instanceId, restart, start, stop, terminate}) {

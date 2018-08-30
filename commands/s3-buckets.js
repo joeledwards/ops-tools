@@ -5,7 +5,6 @@ module.exports = {
 }
 
 function handler () {
-  const buzJson = require('@buzuli/json')
   const c = require('@buzuli/color')
   const s3 = require('../lib/aws').s3()
 
@@ -20,8 +19,8 @@ function handler () {
     })
     .catch(error => {
       console.error(error)
-      console.error(red(
-        `Error listing buckets in ${yellow(s3.aws.region)}: details above :point_up:`
+      console.error(c.red(
+        `Error listing buckets in ${c.yellow(s3.aws.region)}: details above :point_up:`
       ))
       process.exit(1)
     })
