@@ -229,13 +229,13 @@ async function followCouch (argv) {
   // Track the latest sequence for a URL
   function trackSeq (url, changeHandler) {
     const errorNotify = throttle({ minDelay, maxDelay: null })
-    const reportError = (error) => {
+    const reportError = (error, fatal) => {
       errorNotify({
         force: fullThrottle,
         reportFunc: () => {
           console.error(error)
           console.error(
-            red(`Error tracking offset from leader ${blue(url)}.`),
+            red(`${fatal ? 'Fatal e' : 'E'}rror tracking offset from leader ${blue(url)}.`),
             emoji.inject('Details above :point_up:')
           )
         }
@@ -266,7 +266,10 @@ async function followCouch (argv) {
         feed.on('readable', () => changeHandler(feed.read()))
         feed.on('error', reportError)
       })
-      .catch(error => reportError(error))
+      .catch(error => {
+        reportError(error, true)
+        process.exit(1)
+      })
   }
 
   function openDb (leveldb) {
