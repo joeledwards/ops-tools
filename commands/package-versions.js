@@ -7,11 +7,23 @@ module.exports = {
 
 function builder (yargs) {
   yargs
+    .options('extended', {
+      type: 'boolean',
+      desc: 'output all versions',
+      default: false,
+      alias: 'x'
+    })
     .option('json', {
       type: 'boolean',
       desc: 'output summary as json',
       default: false,
       alias: 'j'
+    })
+    .option('registry', {
+      type: 'string',
+      desc: 'base URL of the registry',
+      default: 'https://registry.npmjs.org',
+      alias: 'r'
     })
     .option('height', {
       type: 'number',
@@ -36,33 +48,40 @@ function builder (yargs) {
       default: false,
       alias: 't'
     })
-    .options('extended', {
-      type: 'boolean',
-      desc: 'output all versions',
-      default: false,
-      alias: 'x'
-    })
 }
 
-async function handler ({ pkg, json, height, width, days, timings, extended }) {
+async function handler (options) {
   try {
+    const {
+      extended,
+      json,
+      registry,
+      pkg,
+      height,
+      width,
+      days,
+      timings
+    } = options
+
     const durations = require('durations')
     const watch = durations.stopwatch().start()
 
     const c = require('@buzuli/color')
     const r = require('ramda')
+    const url = require('../lib/url')
     const axios = require('axios')
     const moment = require('moment')
     const buzJson = require('@buzuli/json')
 
     const chart = require('../lib/chart')
 
-    const url = `https://registry.npmjs.com/${encodeURIComponent(pkg)}`
+    const baseUrl = url.base(url.coerce(registry))
+    const pkgUrl = url.resolve(baseUrl, encodeURIComponent(pkg))
 
     const fetchWatch = durations.stopwatch().start()
     const { status, data } = await axios({
       method: 'get',
-      url,
+      url: pkgUrl,
       validateStatus: () => true
     })
     fetchWatch.stop()
@@ -112,6 +131,7 @@ async function handler ({ pkg, json, height, width, days, timings, extended }) {
     if (json) {
       const record = {
         publish_times: extended ? publishTimes : undefined,
+        registry: baseUrl,
         name: pkg,
         versions: versionCount,
         latest: serializableVersion(latest),
@@ -131,6 +151,7 @@ async function handler ({ pkg, json, height, width, days, timings, extended }) {
     } else {
       const pkgStr = c.yellow.bold(pkg)
       const countStr = c.orange(versionCount)
+      const registryStr = `${c.grey('@')} ${c.blue(baseUrl)}`
 
       const formatVersion = ({ version, time }) => {
         const versionStr = c.green(version)
@@ -143,14 +164,14 @@ async function handler ({ pkg, json, height, width, days, timings, extended }) {
       if (extended) {
         r.compose(
           r.map(formatVersion),
-          r.sortBy(({time}) => time.toISOString()),
+          r.sortBy(({ time }) => time.toISOString()),
           r.map(([version, time]) => ({ time: moment(time).utc(), version })),
           r.toPairs
         )(publishTimes).forEach(v => console.log(v))
         console.info()
       }
 
-      console.info(`${pkgStr} | ${countStr} versions`)
+      console.info(`${pkgStr} | ${countStr} versions ${registryStr}`)
       console.info()
       console.info(`  Oldest : ${formatVersion(oldest)}`)
       console.info(`  Latest : ${formatVersion(latest)}`)

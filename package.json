@@ -11,7 +11,7 @@
     "pretest": "npm run lint",
     "start": "node bin/ops.js",
     "proxy": "nodemon bin/ops.js proxy",
-    "test": "tap tests/unit/*.js"
+    "test": "tap tests/unit/*.js && tap tests/integration/*.js"
   },
   "bin": {
     "ops": "./bin/ops.js",
