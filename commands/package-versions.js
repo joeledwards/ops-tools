@@ -36,9 +36,15 @@ function builder (yargs) {
       default: false,
       alias: 't'
     })
+    .options('extended', {
+      type: 'boolean',
+      desc: 'output all versions',
+      default: false,
+      alias: 'x'
+    })
 }
 
-async function handler ({ pkg, json, height, width, days, timings }) {
+async function handler ({ pkg, json, height, width, days, timings, extended }) {
   try {
     const durations = require('durations')
     const watch = durations.stopwatch().start()
@@ -105,6 +111,7 @@ async function handler ({ pkg, json, height, width, days, timings }) {
 
     if (json) {
       const record = {
+        publish_times: extended ? publishTimes : undefined,
         name: pkg,
         versions: versionCount,
         latest: serializableVersion(latest),
@@ -131,6 +138,16 @@ async function handler ({ pkg, json, height, width, days, timings }) {
         const age = durations.millis(moment.utc().diff(time))
         const ageStr = c.orange(age)
         return `${versionStr} [${timeStr} | ${ageStr}]`
+      }
+
+      if (extended) {
+        r.compose(
+          r.map(formatVersion),
+          r.sortBy(({time}) => time.toISOString()),
+          r.map(([version, time]) => ({ time: moment(time).utc(), version })),
+          r.toPairs
+        )(publishTimes).forEach(v => console.log(v))
+        console.info()
       }
 
       console.info(`${pkgStr} | ${countStr} versions`)
