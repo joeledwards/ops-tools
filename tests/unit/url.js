@@ -29,4 +29,6 @@ tap.test('url.resolve should build a url from path components', async assert => 
   assert.same(url.resolve('http://host.tld/', 'path'), 'http://host.tld/path')
   assert.same(url.resolve('http://host.tld', '/path'), 'http://host.tld/path')
   assert.same(url.resolve('http://host.tld/', '/path'), 'http://host.tld/path')
+  assert.same(url.resolve('http://host.tld/', '/path', '/more'), 'http://host.tld/path')
+  assert.same(url.resolve('http://host.tld', 'path', 'more'), 'http://host.tld/path')
 })
