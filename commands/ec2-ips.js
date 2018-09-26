@@ -20,20 +20,18 @@ function builder (yargs) {
     })
 }
 
-async function handler ({json, quiet}) {
+async function handler ({ json, quiet }) {
   const buzJson = require('@buzuli/json')
   const c = require('@buzuli/color')
-  const moment = require('moment')
   const r = require('ramda')
 
-  const age = require('../lib/age')
   const ec2 = require('../lib/aws').ec2()
 
   try {
     const { Addresses: ips } = await ec2.listElasticIps()
     const count = 0
 
-    function summarize (ips) {
+    const summarize = (ips) => {
       return r.compose(
         r.join('\n'),
         r.map(ip => {
@@ -44,7 +42,7 @@ async function handler ({json, quiet}) {
             Tags: tags
           } = ip
 
-          const name = ((tags || []).find(({Key: k}) => k === 'Name') || {}).Value
+          const name = ((tags || []).find(({ Key: k }) => k === 'Name') || {}).Value
           const nicStr = nicId ? c.yellow(nicId) : c.grey('--')
           const pubStr = publicIp ? c.key('white').bold(publicIp) : c.grey('--')
           const nameStr = name ? c.orange(name) : c.grey('--')
