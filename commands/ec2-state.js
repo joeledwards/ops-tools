@@ -84,7 +84,7 @@ function handler ({ instance, restart, start, stop, terminate }) {
   ec2.findInstances({ awsOptions, fieldExtractor })
     .then(instances => {
       instances.forEach(({ id, name, state }) => {
-        console.log(`${c.yellow(id)} (${c.blue(name)}) : ${stateColor(state)}`)
+        console.log(`${c.yellow(id)} (${c.orange(name)}) : ${stateColor(state)}`)
       })
     })
     .catch(error => {
