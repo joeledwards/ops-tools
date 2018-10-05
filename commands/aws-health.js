@@ -27,7 +27,7 @@ function handler () {
       console.log(green(`Successfully fetched AWS health events.`))
     })
     .catch(error => {
-      if (error instanceof health.aws.SubscriptionRequiredException) {
+      if (error.code === 'SubscriptionRequiredException') {
         console.error(`Health API is only available for accounts with a support contract.`)
       } else {
         console.error(error)
