@@ -229,13 +229,14 @@ function handler ({
         const created = moment(launchTime).utc()
 
         const stateStr = stateColor(state)
+        const idStr = c.yellow(id)
         const nameStr = c.orange(name || '--')
         const keyStr = c.key('white').bold(sshKey)
         const typeStr = c.yellow(instanceType)
         const ageStr = c.blue(age(created, now))
         const azStr = `${c.key('white').bold(az)}`
 
-        return quiet ? name : `[${stateStr}] ${azStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
+        return quiet ? name : `[${stateStr}] ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
       })
     )(instances || [])
   }
