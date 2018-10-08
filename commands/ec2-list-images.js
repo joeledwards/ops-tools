@@ -31,6 +31,7 @@ async function handler ({ idsOnly, json, limit }) {
   const r = require('ramda')
   const age = require('../lib/age')
   const ec2 = require('../lib/aws').ec2()
+  const pad = require('../lib/pad')
   const moment = require('moment')
   const buzJson = require('@buzuli/json')
 
@@ -47,14 +48,15 @@ async function handler ({ idsOnly, json, limit }) {
         r.map(({ id, name, created }) => {
           const now = moment.utc()
           const time = moment(created)
-          const timeStr = c.gray(time.toISOString())
+          const timeStr = c.gray(time.format('YYYY-MM-DD HH:mm'))
+          const regionStr = c.green(ec2.aws.region)
           const idStr = c.yellow(id)
-          const ageStr = c.orange(age(time, now))
+          const ageStr = c.orange(pad(12, age(time, now).toString(), false))
           const nameStr = c.blue(name)
           if (idsOnly) {
             return id
           } else {
-            return `[${timeStr} | ${ageStr}] ${idStr} ${nameStr}`
+            return `[${timeStr} | ${ageStr}] ${regionStr}:${idStr} ${nameStr}`
           }
         }),
         r.sortBy(({ created }) => created),
