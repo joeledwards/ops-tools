@@ -1,34 +1,33 @@
 const durations = require('durations')
-const nsq = require('nsqjs')
+const { Subscriber } = require('squeaky')
 const { blue, green, red, yellow } = require('@buzuli/color')
 
 const log = require('../../lib/log')
 
-const options = {
-  nsqdTCPAddresses: ['nsqd:4150']
-}
-
 const topic = 'messages'
 const channel = 'consumer'
+const lookup = ['nsqd:4150']
+const autoConnect = false
 
 let count = 0
-const reader = new nsq.Reader(topic, channel, options)
+const watch = durations.stopwatch()
+const sub = new Subscriber({ topic, channel, lookup, autoConnect })
 
-reader.on('nsqd_connected', () => {
+sub.on('ready', () => {
   log.info('consumer -', green('connected'), `(${watch})`)
 })
 
-reader.on('nsqd_closed', () => {
+sub.on('close', () => {
   log.info('consumer -', yellow('disconnected'), `(${watch})`)
   process.exit(0)
 })
 
-reader.on('error', error => {
+sub.on('error', error => {
   log.error('consumer -', red('error'), ':', error)
   process.exit(1)
 })
 
-reader.on('message', msg => {
+sub.on('message', msg => {
   count++
   try {
     log.info('consumer -', blue(`received message #${count}`), ':', msg.json())
@@ -38,5 +37,5 @@ reader.on('message', msg => {
   msg.finish()
 })
 
-const watch = durations.stopwatch().start()
-reader.connect()
+watch.start()
+sub.connect()
