@@ -1,5 +1,5 @@
 module.exports = {
-  command: 'ec2-list-images',
+  command: 'ami-list',
   desc: 'list AMIs in the current region',
   builder,
   handler
@@ -24,9 +24,26 @@ function builder (yargs) {
       desc: 'limit to this number of responses',
       alias: 'l'
     })
+    .option('public', {
+      type: 'boolean',
+      desc: 'show only public AMIs',
+      alias: 'P'
+    })
+    .option('private', {
+      type: 'boolean',
+      desc: 'show only private AMIs',
+      conflicts: 'public',
+      alias: 'p'
+    })
 }
 
-async function handler ({ idsOnly, json, limit }) {
+async function handler ({
+  idsOnly,
+  json,
+  limit,
+  private: showPrivate,
+  public: showPublic
+}) {
   const c = require('@buzuli/color')
   const r = require('ramda')
   const age = require('../lib/age')
@@ -40,34 +57,38 @@ async function handler ({ idsOnly, json, limit }) {
     if (json) {
       console.info(buzJson(limit ? r.take(limit)(images) : images))
     } else {
+      const filtered = r.compose(
+          r.take(limit || images.length),
+          r.map(({ id, name, created, isPublic }) => {
+            const now = moment.utc()
+            const time = moment(created)
+            const timeStr = c.gray(time.format('YYYY-MM-DD HH:mm'))
+            const regionStr = c.green(ec2.aws.region)
+            const idStr = c.yellow(id)
+            const ageStr = c.orange(pad(12, age(time, now).toString(), false))
+            const nameStr = c.blue(name)
+            if (idsOnly) {
+              return id
+            } else {
+              return `[${timeStr} | ${ageStr}] ${regionStr}:${idStr} ${nameStr} ${isPublic ? '🌍' : '🔒'}`
+            }
+          }),
+          r.filter(({ isPublic }) => showPrivate ? !isPublic : showPublic ? isPublic : true),
+          r.sortBy(({ created }) => created),
+          r.map(
+            ({
+              ImageId: id,
+              Name: name,
+              CreationDate: created,
+              Public: isPublic
+            }) => ({ id, name, created, isPublic })
+          )
+        )(images)
+
       const total = images.length
-      const count = limit ? Math.min(total, limit) : total
-      console.info(r.compose(
-        r.join('\n'),
-        r.take(limit || total),
-        r.map(({ id, name, created }) => {
-          const now = moment.utc()
-          const time = moment(created)
-          const timeStr = c.gray(time.format('YYYY-MM-DD HH:mm'))
-          const regionStr = c.green(ec2.aws.region)
-          const idStr = c.yellow(id)
-          const ageStr = c.orange(pad(12, age(time, now).toString(), false))
-          const nameStr = c.blue(name)
-          if (idsOnly) {
-            return id
-          } else {
-            return `[${timeStr} | ${ageStr}] ${regionStr}:${idStr} ${nameStr}`
-          }
-        }),
-        r.sortBy(({ created }) => created),
-        r.map(
-          ({
-            ImageId: id,
-            Name: name,
-            CreationDate: created
-          }) => ({ id, name, created: created })
-        )
-      )(images))
+      const count = filtered.length
+
+      console.info(r.join('\n')(filtered))
 
       if (!idsOnly) {
         if (count !== total) {
