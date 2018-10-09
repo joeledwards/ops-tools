@@ -15,6 +15,9 @@ function builder (yargs) {
 }
 
 function handler ({ region, ami, simulate }) {
+  const c = require('@buzuli/color')
+  const { ec2: newEc2 } = require('../lib/aws')
+
   console.info(`Publishing image ${c.blue(ami)} from ${c.yellow(region)}`)
 
   let sim
@@ -69,7 +72,7 @@ function handler ({ region, ami, simulate }) {
             log.error(error)
             log.error(
               c.red(`Error publishing image ${c.yellow(ami)} in region ${c.yellow(region)}.`),
-              emoji.inject(`Details above :point_up:`)
+              c.emoji.inject(`Details above :point_up:`)
             )
 
             reject(error)

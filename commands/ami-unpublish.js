@@ -15,12 +15,8 @@ function builder (yargs) {
 }
 
 function handler ({ region, ami, simulate }) {
-  const async = require('async')
   const c = require('@buzuli/color')
-  const r = require('ramda')
-  const poller = require('promise-poller').default
-  const random = require('../lib/random')
-  const { regions, ec2: newEc2 } = require('../lib/aws')
+  const { ec2: newEc2 } = require('../lib/aws')
 
   console.info(`Un-publishing image ${c.blue(ami)} from ${c.yellow(region)}`)
 
@@ -76,7 +72,7 @@ function handler ({ region, ami, simulate }) {
             log.error(error)
             log.error(
               c.red(`Error un-publishing image ${c.yellow(ami)} in region ${c.yellow(region)}.`),
-              emoji.inject(`Details above :point_up:`)
+              c.emoji.inject(`Details above :point_up:`)
             )
 
             reject(error)
@@ -95,4 +91,3 @@ function handler ({ region, ami, simulate }) {
     })
   }
 }
-

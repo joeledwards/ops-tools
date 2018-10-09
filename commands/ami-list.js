@@ -58,32 +58,32 @@ async function handler ({
       console.info(buzJson(limit ? r.take(limit)(images) : images))
     } else {
       const filtered = r.compose(
-          r.take(limit || images.length),
-          r.map(({ id, name, created, isPublic }) => {
-            const now = moment.utc()
-            const time = moment(created)
-            const timeStr = c.gray(time.format('YYYY-MM-DD HH:mm'))
-            const regionStr = c.green(ec2.aws.region)
-            const idStr = c.yellow(id)
-            const ageStr = c.orange(pad(12, age(time, now).toString(), false))
-            const nameStr = c.blue(name)
-            if (idsOnly) {
-              return id
-            } else {
-              return `[${timeStr} | ${ageStr}] ${regionStr}:${idStr} ${nameStr} ${isPublic ? '🌍' : '🔒'}`
-            }
-          }),
-          r.filter(({ isPublic }) => showPrivate ? !isPublic : showPublic ? isPublic : true),
-          r.sortBy(({ created }) => created),
-          r.map(
-            ({
-              ImageId: id,
-              Name: name,
-              CreationDate: created,
-              Public: isPublic
-            }) => ({ id, name, created, isPublic })
-          )
-        )(images)
+        r.take(limit || images.length),
+        r.map(({ id, name, created, isPublic }) => {
+          const now = moment.utc()
+          const time = moment(created)
+          const timeStr = c.gray(time.format('YYYY-MM-DD HH:mm'))
+          const regionStr = c.green(ec2.aws.region)
+          const idStr = c.yellow(id)
+          const ageStr = c.orange(pad(12, age(time, now).toString(), false))
+          const nameStr = c.blue(name)
+          if (idsOnly) {
+            return id
+          } else {
+            return `[${timeStr} | ${ageStr}] ${regionStr}:${idStr} ${nameStr} ${isPublic ? '🌍' : '🔒'}`
+          }
+        }),
+        r.filter(({ isPublic }) => showPrivate ? !isPublic : showPublic ? isPublic : true),
+        r.sortBy(({ created }) => created),
+        r.map(
+          ({
+            ImageId: id,
+            Name: name,
+            CreationDate: created,
+            Public: isPublic
+          }) => ({ id, name, created, isPublic })
+        )
+      )(images)
 
       const total = images.length
       const count = filtered.length
