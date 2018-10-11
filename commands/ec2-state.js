@@ -13,7 +13,7 @@ function builder (yargs) {
     })
     .option('start', {
       type: 'boolean',
-      desc: 'starts the instance if it is not running',
+      desc: 'starts the instance if it is not running'
     })
     .option('stop', {
       type: 'boolean',
@@ -93,12 +93,9 @@ function handler ({ instance, start, stop, terminate }) {
   }
 
   function canTransition (state) {
-    if (state === 'running')
-      return stop || terminate
-    if (state === 'stopped')
-      return start || terminate
-    if (state === 'pending')
-      return terminate
+    if (state === 'running') { return stop || terminate }
+    if (state === 'stopped') { return start || terminate }
+    if (state === 'pending') { return terminate }
     return false
   }
 
@@ -106,7 +103,7 @@ function handler ({ instance, start, stop, terminate }) {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
-    });
+    })
 
     return new Promise(resolve => rl.question(question, answer => {
       rl.close()
@@ -127,7 +124,7 @@ function handler ({ instance, start, stop, terminate }) {
     }
   }
 
-  async function transitionInstance ({id, name, state}) {
+  async function transitionInstance ({ id, name, state }) {
     if (terminate) {
       try {
         await ec2.terminateInstances({ InstanceIds: [id] })
@@ -154,13 +151,13 @@ function handler ({ instance, start, stop, terminate }) {
 
   ec2.findInstances({ awsOptions, fieldExtractor })
     .then(async instances => {
-      for (let {id, name, state} of instances) {
+      for (let { id, name, state } of instances) {
         try {
           console.log(`${idColor(id)} (${nameColor(name)}) : ${stateColor(state)}`)
           if (transitionRequested) {
             if (canTransition(state)) {
               if (await confirmation(`Are you sure you wish to ${transitionName} the instance? `)) {
-                await transitionInstance({id, name, state})
+                await transitionInstance({ id, name, state })
               }
             } else {
               console.warn(`  Cannot ${transitionName} ${stateColor(state)} instance.`)
