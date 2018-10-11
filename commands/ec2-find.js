@@ -230,11 +230,11 @@ function handler ({
 
         const stateStr = stateColor(state)
         const idStr = c.yellow(id)
-        const nameStr = c.orange(name || '--')
+        const nameStr = c.blue(name || '--')
         const keyStr = c.key('white').bold(sshKey)
         const typeStr = c.yellow(instanceType)
-        const ageStr = c.blue(age(created, now))
-        const azStr = `${c.key('white').bold(az)}`
+        const ageStr = c.orange(age(created, now))
+        const azStr = c.green(az)
 
         return quiet ? name : `[${stateStr}] ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
       })
@@ -251,15 +251,15 @@ function handler ({
         console.log(json ? JSON.stringify(instances) : summarize(instances))
       } else {
         console.log(json ? buzJson(instances) : summarize(instances))
-        console.log(c.green(
-          `Listed ${c.orange(count)} instances for region ${c.yellow(ec2.aws.region)}`
-        ))
+        console.log(
+          `Listed ${c.orange(count)} instances for region ${c.green(ec2.aws.region)}`
+        )
       }
     })
     .catch(error => {
       console.error(error)
       console.error(c.red(c.emoji.inject(
-        `Error finding instances in ${c.yellow(ec2.aws.region)}: details above :point_up:`
+        `Error finding instances in ${c.green(ec2.aws.region)}: details above :point_up:`
       )))
       process.exit(1)
     })
