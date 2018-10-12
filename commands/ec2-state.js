@@ -130,21 +130,25 @@ function handler ({ instance, start, stop, terminate }) {
         await ec2.terminateInstances({ InstanceIds: [id] })
         console.info(`Terminating ${idColor(id)}`)
       } catch (error) {
-        console.error(`Error terminating instance ${idColor(id)}`)
+        if (error.code === 'OperationNotPermitted') {
+          console.warn(`Instance ${idColor(id)} has termination protection enabled 🛡`)
+        } else {
+          console.error(`Error terminating instance ${idColor(id)} [${c.red(error.code)}]`)
+        }
       }
     } else if (stop) {
       try {
         await ec2.stopInstances({ InstanceIds: [id] })
         console.info(`Stopping ${idColor(id)}`)
       } catch (error) {
-        console.error(`Error stopping instance ${idColor(id)}`)
+        console.error(`Error stopping instance ${idColor(id)} [${c.red(error.code)}]`)
       }
     } else if (start) {
       try {
         await ec2.startInstances({ InstanceIds: [id] })
         console.info(`Starting ${idColor(id)}`)
       } catch (error) {
-        console.error(`Error stopping instance ${idColor(id)}`)
+        console.error(`Error stopping instance ${idColor(id)} [${c.red(error.code)}]`)
       }
     }
   }
