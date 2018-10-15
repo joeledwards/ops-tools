@@ -164,7 +164,7 @@ function handler ({ instance, start, stop, terminate }) {
                 await transitionInstance({ id, name, state })
               }
             } else {
-              console.warn(`  Cannot ${transitionName} ${stateColor(state)} instance.`)
+              console.warn(`  Cannot ${transitionName} instance which is ${stateColor(state)}.`)
             }
           }
         } catch (error) {
