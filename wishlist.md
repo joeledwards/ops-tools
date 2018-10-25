@@ -1,8 +1,6 @@
 # Wish List
-* [ ] couch-follow : express server integrated which supports range queries from history leveldb based on seq or id)
-* [ ] couch-follow : option to configure the bind port for the express history server
-* [ ] couch-follow : option to resume following from the previous sequence
-* [ ] couch-follow : simplify keys in LevelDB (just seq:sequence, pkg:name:rev); want insertions to be idempotent
+* [ ] couch-follow : separate processes for express, follower, and database
+* [ ] couch-follow : resume from previous sequence in the history LevelDB
 * [ ] ec2-npme : provision an npmE instance on ec2 and configure it for use
 * [ ] ec2-terminate : terminate an ec2 instance by ID
 * [ ] ec2-create-ami : create an AMI from an ec2 instance
