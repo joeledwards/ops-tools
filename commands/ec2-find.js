@@ -19,6 +19,12 @@ function builder (yargs) {
       default: false,
       alias: 'c'
     })
+    .option('extended', {
+      type: 'boolean',
+      desc: 'show extended details',
+      default: false,
+      alias: 'x'
+    })
     .option('instance-id', {
       type: 'string',
       desc: 'id search regex',
@@ -69,6 +75,7 @@ function builder (yargs) {
 function handler ({
   id,
   caseSensitive,
+  extended,
   json,
   name,
   state,
@@ -215,12 +222,17 @@ function handler ({
       r.join('\n'),
       r.map(({
         id,
+        image,
         name,
         az,
         sshKey,
         state,
         launchTime,
         type: instanceType,
+        network: {
+          privateIp,
+          publicIp
+        },
         cpus: {
           cores,
           threads
@@ -228,6 +240,7 @@ function handler ({
       }) => {
         const created = moment(launchTime).utc()
 
+        const imgStr = c.key('white')(image)
         const stateStr = stateColor(state)
         const idStr = c.yellow(id)
         const nameStr = c.blue(name || '--')
@@ -235,8 +248,14 @@ function handler ({
         const typeStr = c.yellow(instanceType)
         const ageStr = c.orange(age(created, now))
         const azStr = c.green(az)
+        const pubIpStr = c.blue(publicIp)
+        const privIpStr = c.purple(privateIp)
 
-        return quiet ? name : `[${stateStr}] ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
+        return quiet ?
+          name :
+          extended ?
+          `[${stateStr}] ${imgStr} => ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr} | ${pubIpStr} => ${privIpStr})` :
+          `[${stateStr}] ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
       })
     )(instances || [])
   }
