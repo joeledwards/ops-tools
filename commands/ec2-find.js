@@ -93,6 +93,7 @@ function handler ({
 
   const age = require('../lib/age')
   const ec2 = require('../lib/aws').ec2()
+  const pad = require('../lib/pad')
 
   const regexFlags = caseSensitive ? undefined : 'i'
 
@@ -218,6 +219,16 @@ function handler ({
   function summarize (instances) {
     const now = moment.utc()
 
+    const maxPubIpLen = r.compose(
+      r.reduce(r.max, 0),
+      r.map(i => i.network.publicIp.length)
+    )(instances)
+
+    const maxPrivIpLen = r.compose(
+      r.reduce(r.max, 0),
+      r.map(i => i.network.privateIp.length)
+    )(instances)
+
     return r.compose(
       r.join('\n'),
       r.map(({
@@ -248,13 +259,13 @@ function handler ({
         const typeStr = c.yellow(instanceType)
         const ageStr = c.orange(age(created, now))
         const azStr = c.green(az)
-        const pubIpStr = c.blue(publicIp)
-        const privIpStr = c.purple(privateIp)
+        const pubIpStr = c.blue(pad(maxPubIpLen, publicIp, false))
+        const privIpStr = c.purple(pad(maxPrivIpLen, privateIp, false))
 
         return quiet ?
           name :
           extended ?
-          `[${stateStr}] ${imgStr} => ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr} | ${pubIpStr} => ${privIpStr})` :
+          `[${stateStr}] ${pubIpStr} => ${privIpStr} => ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr} | ${imgStr})` :
           `[${stateStr}] ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
       })
     )(instances || [])
