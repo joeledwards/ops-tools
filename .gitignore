@@ -3,4 +3,3 @@ node_modules
 /*.sh
 /.nyc_output
 /data
-/package-lock.json
