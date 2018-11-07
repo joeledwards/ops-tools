@@ -262,11 +262,11 @@ function handler ({
         const pubIpStr = c.blue(pad(maxPubIpLen, publicIp, false))
         const privIpStr = c.purple(pad(maxPrivIpLen, privateIp, false))
 
-        return quiet ?
-          name :
-          extended ?
-          `[${stateStr}] ${pubIpStr} => ${privIpStr} => ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr} | ${imgStr})` :
-          `[${stateStr}] ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
+        return quiet
+          ? name
+          : extended
+            ? `[${stateStr}] ${pubIpStr} => ${privIpStr} => ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr} | ${imgStr})`
+            : `[${stateStr}] ${azStr}:${idStr}:${nameStr} (${keyStr} | ${typeStr} | ${ageStr})`
       })
     )(instances || [])
   }
