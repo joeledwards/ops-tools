@@ -221,12 +221,24 @@ function handler ({
 
     const maxPubIpLen = r.compose(
       r.reduce(r.max, 0),
-      r.map(i => i.network.publicIp.length)
+      r.map(
+        ({
+          network: {
+            publicIp: ip = ''
+          } = {}
+        }) => ip.length
+      )
     )(instances)
 
     const maxPrivIpLen = r.compose(
       r.reduce(r.max, 0),
-      r.map(i => i.network.privateIp.length)
+      r.map(
+        ({
+          network: {
+            privateIp: ip = ''
+          } = {}
+        }) => ip.length
+      )
     )(instances)
 
     return r.compose(
@@ -259,8 +271,8 @@ function handler ({
         const typeStr = c.yellow(instanceType)
         const ageStr = c.orange(age(created, now))
         const azStr = c.green(az)
-        const pubIpStr = c.blue(pad(maxPubIpLen, publicIp, false))
-        const privIpStr = c.purple(pad(maxPrivIpLen, privateIp, false))
+        const pubIpStr = c.blue(pad(maxPubIpLen, publicIp || '', false))
+        const privIpStr = c.purple(pad(maxPrivIpLen, privateIp || '', false))
 
         return quiet ?
           name :
