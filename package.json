@@ -1,6 +1,6 @@
 {
   "name": "@buzuli/ops-tools",
-  "version": "8.3.1",
+  "version": "8.3.2",
   "description": "Miscellaneous ops tools to make my life easier.",
   "repository": "github:joeledwards/ops-tools",
   "scripts": {
@@ -28,9 +28,9 @@
     "@buzuli/throttle": "^2.0.2",
     "asciichart": "^1.5.7",
     "async": "^2.6.1",
-    "aws-sdk": "^2.348.0",
+    "aws-sdk": "^2.350.0",
     "axios": "^0.18.0",
-    "bluebird": "^3.5.2",
+    "bluebird": "^3.5.3",
     "bole": "^3.0.2",
     "changes-stream": "^2.2.0",
     "durations": "^3.4.1",
@@ -56,7 +56,7 @@
     "yargs": "^12.0.2"
   },
   "devDependencies": {
-    "nodemon": "^1.18.5",
+    "nodemon": "^1.18.6",
     "standard": "^12.0.1",
     "tap": "^12.0.1"
   }
