@@ -20,6 +20,11 @@ function builder (yargs) {
       desc: 'the ARN of the cert if you are replacing an existing ACM entry',
       alias: 'arn'
     })
+    .option('cert-chain', {
+      type: 'string',
+      desc: 'path to the the cert chain',
+      alias: 'chain'
+    })
 }
 
 async function handler (args) {
@@ -30,23 +35,30 @@ async function handler (args) {
     const {
       pemCert,
       privateKey,
-      certArn
+      certArn,
+      certChain
     } = args
 
     const certData = await getData(pemCert)
     const keyData = await getData(privateKey)
+    let chainData
+
+    if (certChain) {
+      chainData = await getData(certChain)
+    }
 
     const options = {
+      CertificateArn: certArn,
       Certificate: certData,
       PrivateKey: keyData,
-      CertificateArn: certArn
+      CertificateChain: chainData
     }
 
     const result = await acm.importCert(options)
 
     console.info(buzJson(result))
   } catch (error) {
-    console.error('Fatal error importing cert:', error)
+    console.error(`Could not import cert: ${error}`)
     process.exit(1)
   }
 }
