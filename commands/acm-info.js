@@ -38,15 +38,11 @@ async function handler (args) {
     } else {
       const {
         Certificate: {
-          CreatedAt: created,
           DomainName: name,
           FailureReason: failureReason,
-          ImportedAt: imported,
-          IssuedAt: issued,
           Issuer: issuer,
           KeyAlgorithm: algo,
           RevocationReason: revokeReason,
-          RevokedAt: revoked,
           Serial: serial,
           Status: status,
           Subject: subject,
@@ -61,23 +57,16 @@ async function handler (args) {
       console.info(`              issuer : ${c.green(issuer)}`)
       console.info(`       key algorithm : ${c.green(algo)}`)
       console.info(` signature algorithm : ${c.green(algo)}`)
-      console.info(`             created : ${timeColor(created)}`)
-      console.info(`              issued : ${timeColor(issued)}`)
-      console.info(`            imported : ${timeColor(imported)}`)
       if (status === 'REVOKED') {
-        console.info(`            revoked : ${timeColor(revoked)} => ${c.red(revokeReason)}`)
+        console.info(`             revoked : ${c.red(revokeReason)}`)
       }
       if (status === 'FAILED') {
-        console.info(`             failed : ${c.red(failureReason)}`)
+        console.info(`              failed : ${c.red(failureReason)}`)
       }
     }
   } catch (error) {
     console.error(`Could not detail cert: ${error}`)
     process.exit(1)
-  }
-
-  function timeColor (time) {
-    return c.key('white').bold(time.format('YYYY-MM-DD HH:mm:ss'))
   }
 
   function statusColor (status) {
