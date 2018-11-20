@@ -6,6 +6,11 @@ module.exports = {
 }
 
 function builder (yargs) {
+  yargs
+    .option('json', {
+      desc: 'output the raw JSON',
+      alias: 'j'
+    })
 }
 
 async function handler (args) {
@@ -15,14 +20,22 @@ async function handler (args) {
     const acm = require('../lib/aws').acm()
     const buzJson = require('@buzuli/json')
 
-    const certs = await acm.listCerts()
-    const summary = r.compose(
-      r.join('\n'),
-      r.map(({arn, name}) => `${c.yellow(arn)} : ${c.blue(name)}`),
-      r.map(({CertificateArn: arn, DomainName: name}) => ({arn, name}))
-    )(certs.CertificateSummaryList)
+    const {
+      json
+    } = args
 
-    console.info(summary)
+    const certs = await acm.listCerts()
+
+    if (json) {
+      console.info(buzJson(certs))
+    } else {
+      const summary = r.compose(
+        r.join('\n'),
+        r.map(({ arn, name }) => `${c.yellow(arn)} : ${c.blue(name)}`),
+        r.map(({ CertificateArn: arn, DomainName: name }) => ({ arn, name }))
+      )(certs.CertificateSummaryList)
+      console.info(summary)
+    }
   } catch (error) {
     console.error(`Error listing certificates: ${error}`)
   }

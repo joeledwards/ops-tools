@@ -25,18 +25,25 @@ function builder (yargs) {
       desc: 'path to the the cert chain',
       alias: 'chain'
     })
+    .option('json', {
+      type: 'boolean',
+      desc: 'output the raw JSON',
+      alias: 'j'
+    })
 }
 
 async function handler (args) {
   try {
+    const c = require('@buzuli/color')
     const acm = require('../lib/aws').acm()
     const buzJson = require('@buzuli/json')
 
     const {
-      pemCert,
-      privateKey,
       certArn,
-      certChain
+      certChain,
+      json,
+      pemCert,
+      privateKey
     } = args
 
     const certData = await getData(pemCert)
@@ -54,9 +61,17 @@ async function handler (args) {
       CertificateChain: chainData
     }
 
-    const result = await acm.importCert(options)
+    const cert = await acm.importCert(options)
 
-    console.info(buzJson(result))
+    if (json) {
+      console.info(buzJson(cert))
+    } else {
+      const {
+        CertificateArn: arn
+      } = cert
+      // TODO: lookup the ARN
+      console.info(c.yellow(arn))
+    }
   } catch (error) {
     console.error(`Could not import cert: ${error}`)
     process.exit(1)
