@@ -20,33 +20,60 @@ function builder (yargs) {
       desc: 'the ARN of the cert if you are replacing an existing ACM entry',
       alias: 'arn'
     })
+    .option('cert-chain', {
+      type: 'string',
+      desc: 'path to the the cert chain',
+      alias: 'chain'
+    })
+    .option('json', {
+      type: 'boolean',
+      desc: 'output the raw JSON',
+      alias: 'j'
+    })
 }
 
 async function handler (args) {
   try {
+    const c = require('@buzuli/color')
     const acm = require('../lib/aws').acm()
     const buzJson = require('@buzuli/json')
 
     const {
+      certArn,
+      certChain,
+      json,
       pemCert,
-      privateKey,
-      certArn
+      privateKey
     } = args
 
     const certData = await getData(pemCert)
     const keyData = await getData(privateKey)
+    let chainData
 
-    const options = {
-      Certificate: certData,
-      PrivateKey: keyData,
-      CertificateArn: certArn
+    if (certChain) {
+      chainData = await getData(certChain)
     }
 
-    const result = await acm.importCert(options)
+    const options = {
+      CertificateArn: certArn,
+      Certificate: certData,
+      PrivateKey: keyData,
+      CertificateChain: chainData
+    }
 
-    console.info(buzJson(result))
+    const cert = await acm.importCert(options)
+
+    if (json) {
+      console.info(buzJson(cert))
+    } else {
+      const {
+        CertificateArn: arn
+      } = cert
+      // TODO: lookup the ARN
+      console.info(c.yellow(arn))
+    }
   } catch (error) {
-    console.error('Fatal error importing cert:', error)
+    console.error(`Could not import cert: ${error}`)
     process.exit(1)
   }
 }
