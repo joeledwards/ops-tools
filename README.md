@@ -46,6 +46,8 @@ ops <command>
 
 Commands:
   ops acm-import <pem-cert> <private-key>  Imports a pem-format cert into ACM
+  ops acm-info <arn>                       show details for a certificate
+  ops acm-list                             list all ACM certificates
   ops alarms                               list configured cloudwatch alarms
   ops ami-list                             list AMIs in the current region
   ops ami-publish <region> <ami>           make the identified AMI public
