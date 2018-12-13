@@ -6,7 +6,6 @@ A suite of tools to help @buzuli be more productive at DevOps.
 
 ## Dependencies
 - Node.js >=8.0.0
-- npm >=5.0.0
 
 ## Installing
 ```
@@ -19,6 +18,26 @@ You can also invoke via `npx`:
 ```
 npx @buzuli/ops-tools <sub-command>
 ```
+
+## Configuration
+
+### AWS
+For AWS commands (`ec2-*`, `s3-*`, `emr-*`, etc.):
+- region - `AWS_REGION` | `AWS_DEFAULT_REGION`
+- key id - `AWS_ACCESS_KEY` | `AWS_ACCESS_KEY_ID`
+- secret key - `AWS_SECRET_KEY` | `AWS_SECRET_ACCESS_KEY`
+
+### Cloudflare
+For cloudflare commands (`cf-*`):
+- zone - `CLOUDFLARE_ZONE`
+- email - `CLOUDFLARE_EMAIL`
+- api key - `CLOUDFLARE_API_KEY`
+
+### Color
+Uses `@buzuli/color`, so you can adjust the color scheme using its config options:
+- `BUZULI_COLOR_LIGHT=yes` - for light terminal backgrounds
+- `BUZULI_COLOR_DARK=yes` - for dark terminal backgrounds
+- individual colors can also be configured (https://www.npmjs.com/package/@buzuli/color#configuration)
 
 ## Usage
 ```
