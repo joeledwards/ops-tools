@@ -1,6 +1,6 @@
 module.exports = {
-  command: 'package-versions <pkg>',
-  desc: 'provide a summary of package version info',
+  command: 'npm-versions <pkg>',
+  desc: 'provide a summary of package version info for an npm package',
   builder,
   handler
 }
