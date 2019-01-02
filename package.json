@@ -24,6 +24,7 @@
   "dependencies": {
     "@buzuli/color": "^2.1.0",
     "@buzuli/hexdump": "^1.1.0",
+    "@buzuli/http": "^1.0.1",
     "@buzuli/json": "^1.3.0",
     "@buzuli/throttle": "^2.0.2",
     "asciichart": "^1.5.7",
