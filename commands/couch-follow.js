@@ -85,8 +85,8 @@ async function followCouch (argv) {
   const axios = require('axios')
   const moment = require('moment')
   const durations = require('durations')
-  const ChangesStream = require('changes-stream')
 
+  const ChangesStream = require('@buzuli/changes-stream')
   const throttle = require('@buzuli/throttle')
   const buzJson = require('@buzuli/json')
 
