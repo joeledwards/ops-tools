@@ -12,47 +12,47 @@ function builder (yargs) {
       type: 'number',
       desc: 'the port on which the history server should listen',
       default: 31415,
-      alias: ['p']
+      alias: 'p'
     })
     .option('complete-doc', {
       type: 'boolean',
       desc: 'pull back and render the complete doc on each report (streams ALL content)',
       default: false,
-      alias: ['c']
+      alias: 'c'
     })
     .option('full-throttle', {
       type: 'boolean',
       desc: 'do not limit the report rate (overrides --min-delay and --max-delay)',
-      alias: ['F']
+      alias: 'F'
     })
     .option('info', {
       type: 'boolen',
       desc: 'report version, size, and age info (streams full packument)',
       default: false,
-      alias: ['i']
+      alias: 'i'
     })
     .option('all-info', {
       type: 'boolen',
       desc: 'report attachment size (WARNING: streams all data, including attachments)',
       default: false,
-      alias: ['I']
+      alias: 'I'
     })
     .option('leveldb', {
       type: 'string',
       desc: 'the LevelDB directory to which history should be written',
-      alias: ['L']
+      alias: 'L'
     })
     .option('min-delay', {
       type: 'number',
       desc: 'minimum delay between reports',
       default: 1000,
-      alias: ['d']
+      alias: 'd'
     })
     .option('max-delay', {
       type: 'number',
       desc: 'maximum delay between reports',
       default: null,
-      alias: ['D']
+      alias: 'D'
     })
     .option('secret', {
       type: 'string',
@@ -63,6 +63,11 @@ function builder (yargs) {
       desc: 'start scanning from this sequence (default is latest)',
       default: -1,
       alias: ['s', 'start']
+    })
+    .option('slow', {
+      type: 'boolean',
+      desc: 'use the slow changes parser',
+      default: false
     })
 }
 
@@ -106,7 +111,8 @@ async function followCouch (argv) {
     maxDelay,
     minDelay,
     secret,
-    since
+    since,
+    slow
   } = argv
 
   const db = await openDb(leveldb)
@@ -252,6 +258,7 @@ async function followCouch (argv) {
         changeHandler({ seq: seq - 1 })
 
         const followOptions = {
+          slow,
           db: url,
           since: seq - 1,
           include_docs: completeDoc || reportInfo || allInfo

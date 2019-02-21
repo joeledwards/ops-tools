@@ -1,6 +1,6 @@
 {
   "name": "@buzuli/ops-tools",
-  "version": "9.2.0",
+  "version": "9.3.0",
   "description": "Miscellaneous ops tools to make my life easier.",
   "repository": "github:joeledwards/ops-tools",
   "scripts": {
@@ -54,7 +54,7 @@
     "stream-counter": "^1.0.0",
     "update-notifier": "^2.5.0",
     "uuid": "^3.3.2",
-    "yargs": "^13.1.0"
+    "yargs": "^12.0.5"
   },
   "devDependencies": {
     "nodemon": "^1.18.10",
