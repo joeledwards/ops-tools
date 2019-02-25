@@ -100,6 +100,7 @@ async function followCouch (argv) {
   let lastDoc = null
   let lastSeq = 0
   let lastDel = false
+  let feed = null
 
   const {
     completeDoc,
@@ -122,6 +123,16 @@ async function followCouch (argv) {
   }
 
   console.log(`registry url: ${blue(url)}`)
+
+  const replaceFollower = () => {
+    if (feed) {
+      console.warn('Destroying the defunct changes-stream ...')
+      feed.destroy()
+    }
+
+    console.info('Creating new changes-stream ...')
+    setImmediate(() => followCouch({ ...argv, since: lastSeq || since }))
+  }
 
   const notify = throttle({
     reportFunc: () => {
@@ -244,6 +255,11 @@ async function followCouch (argv) {
             red(`${fatal ? 'Fatal e' : 'E'}rror tracking offset from leader ${blue(url)}.`),
             emoji.inject('Details above :point_up:')
           )
+
+          if (!fatal) {
+            console.info('Replacing the follower ...')
+            replaceFollower()
+          }
         }
       })
     }
@@ -268,8 +284,7 @@ async function followCouch (argv) {
           followOptions.query_params = { sharedFetchSecret: secret }
         }
 
-        const feed = new ChangesStream(followOptions)
-
+        feed = new ChangesStream(followOptions)
         feed.on('readable', () => changeHandler(feed.read()))
         feed.on('error', reportError)
       })
