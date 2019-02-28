@@ -22,7 +22,7 @@
   "author": "Joel Edwards <joeledwards@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "@buzuli/changes-stream": "^1.0.0",
+    "@buzuli/changes-stream": "^1.1.0",
     "@buzuli/color": "^2.1.0",
     "@buzuli/hexdump": "^1.1.0",
     "@buzuli/http": "^1.0.1",
@@ -30,7 +30,7 @@
     "@buzuli/throttle": "^2.0.2",
     "asciichart": "^1.5.7",
     "async": "^2.6.2",
-    "aws-sdk": "^2.401.0",
+    "aws-sdk": "^2.411.0",
     "axios": "^0.18.0",
     "bluebird": "^3.5.3",
     "bole": "^3.0.2",
@@ -59,6 +59,6 @@
   "devDependencies": {
     "nodemon": "^1.18.10",
     "standard": "^12.0.1",
-    "tap": "^12.5.2"
+    "tap": "^12.5.3"
   }
 }
