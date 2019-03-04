@@ -95,6 +95,8 @@ async function followCouch (argv) {
   const throttle = require('@buzuli/throttle')
   const buzJson = require('@buzuli/json')
 
+  const replaceDelay = durations.seconds(5)
+
   let lastRev = null
   let lastId = null
   let lastDoc = null
@@ -130,8 +132,12 @@ async function followCouch (argv) {
       feed.destroy()
     }
 
-    console.info('Creating new changes-stream ...')
-    setImmediate(() => followCouch({ ...argv, since: lastSeq || since }))
+    console.info(`Delaying ${replaceDelay} before replacing the changes stream.`)
+
+    setTimeout(() => {
+      console.info('Creating new changes-stream ...')
+      followCouch({ ...argv, since: lastSeq || since })
+    }, replaceDelay.millis())
   }
 
   const notify = throttle({
