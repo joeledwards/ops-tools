@@ -1,6 +1,6 @@
 {
   "name": "@buzuli/ops-tools",
-  "version": "9.5.1",
+  "version": "9.6.0",
   "description": "Miscellaneous ops tools to make my life easier.",
   "repository": "github:joeledwards/ops-tools",
   "scripts": {
@@ -40,6 +40,7 @@
     "ioredis": "^4.6.2",
     "leveldown": "^4.0.1",
     "levelup": "^3.1.1",
+    "lodash": "^4.17.11",
     "log-a-log": "^6.1.0",
     "mem": "^4.1.0",
     "moment": "^2.24.0",
