@@ -118,18 +118,31 @@ async function followCouch (argv) {
     slow
   } = argv
 
+  let apiServer
   const db = await openDb(leveldb)
 
   if (leveldb) {
-    await historyServer(db, argv)
+    apiServer = await historyServer(db, argv)
   }
 
   console.log(`registry url: ${blue(url)}`)
 
   const replaceFollower = () => {
+    // Shutdown the changes feed
     if (feed) {
       console.warn('Destroying the defunct changes-stream ...')
       feed.destroy()
+    }
+
+    // Close the database
+    if (db) {
+      console.warn('Closing the changes database ...')
+      db.close()
+    }
+
+    // Halt the API server
+    if (apiServer) {
+      apiServer.halt()
     }
 
     console.info(`Delaying ${replaceDelay} before replacing the changes stream.`)
@@ -549,9 +562,15 @@ function historyServer (db, argv) {
       return qs ? ('?' + qs) : ''
     }
 
-    app.listen(bindPort, () => {
+    const server = require('http').createServer(app)
+
+    function halt () {
+      server.close()
+    }
+
+    server.listen(bindPort, () => {
       log(`History HTTP server is listening on port ${orange(bindPort)}`)
-      resolve()
+      resolve({ halt })
     })
   })
 }
