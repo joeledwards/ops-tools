@@ -7,35 +7,52 @@ module.exports = {
 
 function builder (yargs) {
   yargs
+    .env('CLOUDFLARE')
     .option('quiet', {
       type: 'boolean',
       desc: 'only show the field names (no descriptions)',
       default: false,
       alias: ['q']
     })
+    .option('email', {
+      type: 'string',
+      desc: 'the e-mail address associated with your Cloudflare account',
+      alias: 'e'
+    })
+    .option('api-key', {
+      type: 'string',
+      desc: 'the API key associated with your Cloudflare account',
+      alias: ['k', 'key', 'token', 't']
+    })
     .option('zone', {
       type: 'string',
-      desc: 'the zone for which stats should be pulled (defaults to all zones)',
+      desc: 'the Cloudflare zone for which stats should be pulled (defaults to all zones)',
       alias: ['z']
     })
 }
 
 const CF_API_URL = 'https://api.cloudflare.com/client/v4'
 
-function handler ({ quiet, zone }) {
+function handler (args) {
+  const {
+    quiet,
+    email: cloudflareEmail,
+    apiKey: cloudflareApiKey,
+    zone: cloudflareZone
+  } = args
+
   const c = require('@buzuli/color')
   const buzJson = require('@buzuli/json')
-  const cfZone = zone || process.env.CLOUDFLARE_ZONE
 
   const axios = require('axios')
   const qs = require('qs')
   const r = require('ramda')
 
-  if (cfZone) {
-    getZoneInfo(cfZone)
+  if (cloudflareZone) {
+    getZoneInfo(cloudflareZone)
       .then(async ({ name }) => {
         try {
-          await summarizeZoneStats({ id: cfZone, name })
+          await summarizeZoneStats({ id: cloudflareZone, name })
         } catch (error) {
           console.error(error)
           process.exit(1)
@@ -61,10 +78,10 @@ function handler ({ quiet, zone }) {
       })
   }
 
-  async function summarizeZoneStats ({ id, name = 'unknown' }) {
-    console.log(`${c.blue(name)} [${c.yellow(id)}]:`)
+  async function summarizeZoneStats ({ id: zoneId, name = 'unknown' }) {
+    console.log(`${c.blue(name)} [${c.yellow(zoneId)}]:`)
 
-    const fields = await cfApiCall(`/zones/${id}/logs/received/fields`)
+    const fields = await cfApiCall(`/zones/${zoneId}/logs/received/fields`)
 
     if (quiet) {
       console.log(buzJson(Object.keys(fields)))
@@ -109,11 +126,9 @@ function handler ({ quiet, zone }) {
     const queryString = query ? `?${qs.stringify(query)}` : ''
     const url = `${CF_API_URL}${path}${queryString}`
 
-    const email = process.env.CLOUDFLARE_EMAIL
-    const key = process.env.CLOUDFLARE_API_KEY
     const headers = {
-      'X-Auth-Email': email,
-      'X-Auth-Key': key,
+      'X-Auth-Email': cloudflareEmail,
+      'X-Auth-Key': cloudflareApiKey,
       'Content-Type': 'application/json'
     }
 
