@@ -66,7 +66,7 @@ function handler ({ cluster, json }) {
       const up = upTime ? upTime.toISOString() : 'n/a'
       const ready = readyTime ? readyTime.toISOString() : 'n/a'
       const down = downTime ? downTime.toISOString() : 'n/a'
-      const end = moment(downTime || new Date())
+      const end = moment.utc(downTime || new Date())
       const age = durations.millis(end.diff(upTime))
 
       if (json) {

@@ -101,7 +101,7 @@ async function handler (options) {
       r.head,
       r.sortBy(({ time }) => time.valueOf()),
       r.filter(({ version }) => !['created', 'modified'].includes(version)),
-      r.map(([version, time]) => ({ time: moment(time).utc(), version })),
+      r.map(([version, time]) => ({ time: moment.utc(time), version })),
       r.toPairs
     )(publishTimes)
 
@@ -109,7 +109,7 @@ async function handler (options) {
       r.last,
       r.sortBy(({ time }) => time.valueOf()),
       r.filter(({ version }) => !['created', 'modified'].includes(version)),
-      r.map(([version, time]) => ({ time: moment(time).utc(), version })),
+      r.map(([version, time]) => ({ time: moment.utc(time), version })),
       r.toPairs
     )(publishTimes)
 
@@ -118,7 +118,7 @@ async function handler (options) {
       r.head,
       r.filter(({ version }) => version === latestVersion),
       r.filter(({ version }) => !['created', 'modified'].includes(version)),
-      r.map(([version, time]) => ({ time: moment(time).utc(), version })),
+      r.map(([version, time]) => ({ time: moment.utc(time), version })),
       r.toPairs
     )(publishTimes)
 
@@ -165,7 +165,7 @@ async function handler (options) {
         r.compose(
           r.map(formatVersion),
           r.sortBy(({ time }) => time.toISOString()),
-          r.map(([version, time]) => ({ time: moment(time).utc(), version })),
+          r.map(([version, time]) => ({ time: moment.utc(time), version })),
           r.toPairs
         )(publishTimes).forEach(v => console.log(v))
         console.info()

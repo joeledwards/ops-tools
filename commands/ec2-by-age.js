@@ -18,7 +18,7 @@ function handler () {
 
   ec2.listInstances()
     .then(({ Reservations }) => {
-      const now = moment()
+      const now = moment.utc()
 
       const fieldExtractor = ({
         InstanceId: id,
@@ -35,7 +35,7 @@ function handler () {
           r.map(({ Value }) => Value),
           r.filter(({ Key }) => r.toLower(Key) === 'name')
         )(tags))
-        const age = durations.millis(now.diff(moment(launchTime)))
+        const age = durations.millis(now.diff(moment.utc(launchTime)))
         const created = launchTime.toISOString()
 
         return { id, name, type, created, age, state, hv, vt }

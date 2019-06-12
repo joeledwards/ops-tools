@@ -58,7 +58,7 @@ function handler ({ full }) {
           const [cat, ...rest] = name.split('-').reverse()
           const catStr = c.orange(cat)
           const nameStr = c.yellow(rest.reverse().join('-'))
-          const updateStr = c.grey(moment(updated).utc().format('YYYY-MM-DD HH:mm:ss'))
+          const updateStr = c.grey(moment.utc(updated).format('YYYY-MM-DD HH:mm:ss'))
 
           return `${updateStr} ${pad(name)}${nameStr}-${catStr} : ${c.blue(desc)}`
         }),

@@ -180,7 +180,7 @@ function handler ({
         cores,
         threads: cores * threads
       },
-      launchTime: moment(launchTime).utc().toISOString(),
+      launchTime: moment.utc(launchTime).toISOString(),
       state,
       name: findName(instance),
       tags,
@@ -261,7 +261,7 @@ function handler ({
           threads
         }
       }) => {
-        const created = moment(launchTime).utc()
+        const created = moment.utc(launchTime)
 
         const imgStr = c.key('white')(image)
         const stateStr = stateColor(state)

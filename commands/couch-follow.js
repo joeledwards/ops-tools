@@ -171,7 +171,7 @@ async function followCouch (argv) {
       let docInfo = ''
       if (lastDoc) {
         const latestVersion = (lastDoc['dist-tags'] || {}).latest
-        const created = moment(((lastDoc.time) || {}).created)
+        const created = moment.utc(((lastDoc.time) || {}).created)
         const lastVersion = r.compose(
           r.head,
           r.reduce(([accTag, accTime], [nextTag, nextTime]) => {
@@ -180,7 +180,7 @@ async function followCouch (argv) {
               : [accTag, accTime]
           }, [latestVersion, created]),
           r.filter(([tag, time]) => tag !== 'created' && tag !== 'modified'),
-          r.map(([tag, time]) => [tag, moment(time)]),
+          r.map(([tag, time]) => [tag, moment.utc(time)]),
           r.toPairs
         )(lastDoc.time)
         const version = lastVersion ? `@${green(lastVersion)} ` : ' '
@@ -190,15 +190,15 @@ async function followCouch (argv) {
         const size = (reportInfo || allInfo) ? `${pkgSizeColor(pkgSize.toLocaleString())} b -` : ''
         const lastModified = ((lastDoc.time) || {}).modified
         const rev = allInfo ? ` [${formatRev(lastRev)}]` : ''
-        const age = lastModified ? ` ${blue(durations.millis(moment(now).diff(moment(lastModified))))}` : ''
+        const age = lastModified ? ` ${blue(durations.millis(moment.utc(now).diff(moment.utc(lastModified))))}` : ''
         const doc = (completeDoc && lastDoc) ? `\n${buzJson(lastDoc)}` : ''
         const del = lastDel ? red(' DELETED') : ''
         const took = allInfo ? ` ${grey(reportWatch)}` : ''
         docInfo = `${version}${latest}(${size}${age}${del})${rev}${took}${doc}`
 
         if (db) {
-          dbRecord.createdTime = created ? moment(created).toISOString() : undefined
-          dbRecord.updateTime = lastModified ? moment(lastModified).toISOString() : undefined
+          dbRecord.createdTime = created ? moment.utc(created).toISOString() : undefined
+          dbRecord.updateTime = lastModified ? moment.utc(lastModified).toISOString() : undefined
           dbRecord.newestVersion = lastVersion
           dbRecord.latestVersion = latestVersion
           dbRecord.packumentSize = pkgSize

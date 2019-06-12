@@ -61,7 +61,7 @@ async function handler ({
         r.take(limit || images.length),
         r.map(({ id, name, created, isPublic }) => {
           const now = moment.utc()
-          const time = moment(created)
+          const time = moment.utc(created)
           const timeStr = c.gray(time.format('YYYY-MM-DD HH:mm'))
           const regionStr = c.green(ec2.aws.region)
           const idStr = c.yellow(id)

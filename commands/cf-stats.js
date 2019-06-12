@@ -218,7 +218,7 @@ function handler ({ full, bc, rc, zone }) {
     } else {
       return r.compose(
         r.last,
-        r.sortBy(({ until }) => moment(until))
+        r.sortBy(({ until }) => moment.utc(until))
       )(timeseries)
     }
   }

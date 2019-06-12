@@ -12,7 +12,7 @@ function builder (yargs) {
     .option('date', {
       type: 'string',
       desc: 'fetch counts for this date',
-      coerce: date => moment(date).utc().format('YYYY-MM-DD'),
+      coerce: date => moment.utc(date).format('YYYY-MM-DD'),
       alias: 'd'
     })
     .option('package', {
