@@ -67,7 +67,16 @@ async function handler (options) {
 }
 
 function validateTimeWindow (timeWindow) {
-  if (['last-day', 'last-week', 'last-month', 'last-year'].contains(timeWindow)) {
+  try {
+    return _validateTimeWindow(timeWindow)
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
+
+function _validateTimeWindow (timeWindow) {
+  if (['last-day', 'last-week', 'last-month', 'last-year'].includes(timeWindow)) {
     return timeWindow
   }
 
