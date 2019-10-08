@@ -78,7 +78,7 @@ async function handler (argv) {
     await followCouch(argv)
   } catch (error) {
     console.error(error)
-    console.error(red(emoji.inject(`Fatal error! Details above :point_up:`)))
+    console.error(red(emoji.inject('Fatal error! Details above :point_up:')))
   }
 }
 
@@ -335,7 +335,7 @@ function historyServer (db, argv) {
 
   const log = msg => console.info(`[${yellow(new Date().toISOString())}] ${msg}`)
 
-  log(`Starting history server...`)
+  log('Starting history server...')
 
   return new Promise((resolve, reject) => {
     const express = require('express')

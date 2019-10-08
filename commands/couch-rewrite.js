@@ -152,7 +152,7 @@ async function handler (args) {
       case 'undef':
       case 'undefined':
         updateValue = undefined
-        updateType = `undefined`
+        updateType = 'undefined'
         break
     }
 
@@ -160,49 +160,41 @@ async function handler (args) {
   }
 
   async function getDoc () {
-    try {
-      console.info(`Fetching document ${idColor(doc)} from ${urlColor(couch)}/${idColor(docId)}`)
-      const { data, status } = await axios.get(`${couch}/${docId}`, {
-        validateStatus: status => [200, 404].includes(status)
-      })
+    console.info(`Fetching document ${idColor(doc)} from ${urlColor(couch)}/${idColor(docId)}`)
+    const { data, status } = await axios.get(`${couch}/${docId}`, {
+      validateStatus: status => [200, 404].includes(status)
+    })
 
-      if (status === 200) {
-        console.info(`Document ${idColor(doc)} found [_rev:${idColor(data._rev)}].`)
-      } else {
-        throw new Error(`Document ${idColor(doc)} was not found in CouchDB`)
-      }
-
-      return data
-    } catch (error) {
-      throw error
+    if (status === 200) {
+      console.info(`Document ${idColor(doc)} found [_rev:${idColor(data._rev)}].`)
+    } else {
+      throw new Error(`Document ${idColor(doc)} was not found in CouchDB`)
     }
+
+    return data
   }
 
   async function getUpdatedDoc () {
-    try {
-      const { updateValue, updateType } = getUpdate()
+    const { updateValue, updateType } = getUpdate()
 
-      if (debug) {
-        console.info(`Update => ${updateColor(updateType)}`)
-      }
-
-      const updatedDoc = await getDoc()
-      const oldValue = _.get(updatedDoc, path)
-
-      const noPriorValue = oldValue === undefined
-      const priorIsObject = oldValue !== null && typeof oldValue === 'object'
-      const hasExistingValue = !(noPriorValue || priorIsObject)
-
-      if (!force && !hasExistingValue) {
-        throw new Error(`Value not found at path ${pathColor(path)} in document ${idColor(doc)}`)
-      }
-
-      _.set(updatedDoc, path, updateValue)
-
-      return JSON.stringify(updatedDoc)
-    } catch (error) {
-      throw error
+    if (debug) {
+      console.info(`Update => ${updateColor(updateType)}`)
     }
+
+    const updatedDoc = await getDoc()
+    const oldValue = _.get(updatedDoc, path)
+
+    const noPriorValue = oldValue === undefined
+    const priorIsObject = oldValue !== null && typeof oldValue === 'object'
+    const hasExistingValue = !(noPriorValue || priorIsObject)
+
+    if (!force && !hasExistingValue) {
+      throw new Error(`Value not found at path ${pathColor(path)} in document ${idColor(doc)}`)
+    }
+
+    _.set(updatedDoc, path, updateValue)
+
+    return JSON.stringify(updatedDoc)
   }
 
   async function updateDoc () {

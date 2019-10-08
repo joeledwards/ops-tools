@@ -64,7 +64,7 @@ function handler ({ full, bc, rc, zone }) {
     listZones()
       .then(async zones => {
         try {
-          for (let zone in zones.values) {
+          for (const zone in zones.values) {
             await summarizeZoneStats(zone)
           }
         } catch (error) {
@@ -82,19 +82,19 @@ function handler ({ full, bc, rc, zone }) {
 
     const stats = await getStats(id, full)
 
-    console.log(`  status:`)
+    console.log('  status:')
     formatCounts(stats, 'http_status', ordering, decorateStatusKey)
       .forEach(p => console.log(`  ${p}`))
 
     console.log()
 
-    console.log(`  content-type:`)
+    console.log('  content-type:')
     formatCounts(stats, 'content_type', ordering)
       .forEach(p => console.log(`  ${p}`))
 
     console.log()
 
-    console.log(`  ssl:`)
+    console.log('  ssl:')
     formatCounts(stats, 'ssl', ordering, decorateSslKey)
       .forEach(p => console.log(`  ${p}`))
   }

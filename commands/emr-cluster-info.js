@@ -82,7 +82,7 @@ function handler ({ cluster, json }) {
         console.log(`      age : ${blue(age)}`)
         console.log(`    hours : ${orange(hours)}`)
         console.log(`     poof : ${purple(autoTerminate)}`)
-        console.log(`     apps :`, apps)
+        console.log('     apps :', apps)
         console.log(`   master : ${master}`)
         console.log(`     core : ${core}`)
         console.log(`     task : ${task}`)

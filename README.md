@@ -41,55 +41,66 @@ Uses `@buzuli/color`, so you can adjust the color scheme using its config option
 
 ## Usage
 ```
-$ ops
 ops <command>
 
 Commands:
-  ops acm-import <pem-cert> <private-key>  Imports a pem-format cert into ACM
-  ops acm-info <arn>                       show details for a certificate
-  ops acm-list                             list all ACM certificates
-  ops alarms                               list configured cloudwatch alarms
-  ops ami-list                             list AMIs in the current region
-  ops ami-publish <region> <ami>           make the identified AMI public
-  ops ami-replicate <region> <ami>         replicate an AMI from one region to
-                                           all others
-  ops ami-unpublish <region> <ami>         make the identified AMI private
-  ops aws-health                           list aws health events
-  ops aws-regions                          List out the AWS regions
-  ops cf-log-fields                        CloudFlare log fields
-  ops cf-stats                             CloudFlare stats
-  ops couch-follow <url>                   follow a CouchDB change feed
-  ops docker-tags <image>                  fetch the list of tags for an image
-                                           from docker hub
-  ops ec2-by-age                           list all AWS instances in a region by
-                                           age
-  ops ec2-can-run                          test if a particular EC2
-                                           configuration will run
-  ops ec2-find                             find an EC2 instance
-  ops ec2-ips                              List elastic IPs for the region
-  ops ec2-limits                           EC2 limits applied for this account
-  ops ec2-new-docker-swarm                 create a docker swarm cluster
-  ops ec2-state <instance>                 Check or alter the state of an EC2
-                                           instance
-  ops ec2-uptimes                          list AWS instances in a region by
-                                           uptime
-  ops emr-cluster-info <cluster>           Get details on a single EMR cluster
-  ops emr-clusters                         List out EMR clusters for a region
-  ops http-get <url>                       simple http GET against a URL
-  ops lambda-functions                     list out an account's AWS Lambda
-                                           functions
-  ops micro-monitor <url>                  check the status of a server running
-                                           micro-monitor
-  ops nsq-peek <topic>                     peek at messages in the named topic
-  ops nsq-send <topic> <message>           send a message to an NSQ topic
-  ops package-versions <pkg>               provide a summary of package version
-                                           info
-  ops proxy <url>                          proxies to a remote URL and logs
-                                           traffic for debugging
-  ops s3-buckets                           list out region S3 buckets
-  ops s3-info <bucket> <key>               Get metadata for an S3 object
-  ops s3-list <bucket>                     List keys in an s3 bucket
-  ops site-poll <url>                      Check on the status of a site
+  ops acm-import <pem-cert> <private-key>   Imports a pem-format cert into ACM
+  ops acm-info <arn>                        show details for a certificate
+  ops acm-list                              list all ACM certificates
+  ops alarms                                list configured cloudwatch alarms
+  ops ami-list                              list AMIs in the current region
+  ops ami-publish <region> <ami>            make the identified AMI public
+  ops ami-replicate <region> <ami>          replicate an AMI from one region to
+                                            all others
+  ops ami-unpublish <region> <ami>          make the identified AMI private
+  ops aws-health                            list aws health events
+  ops aws-ip-ranges                         IP ranges owned by AWS
+  ops aws-regions                           List out the AWS regions
+  ops cf-log-fields                         CloudFlare log fields
+  ops cf-ray <ray-id>                       fetch the Cloudflare log record for
+                                            the supplied Ray ID
+  ops cf-stats                              CloudFlare stats
+  ops couch-follow <url>                    follow a CouchDB change feed
+  ops couch-replicate <document> [dst-doc]  replicate a document from one
+                                            CouchDB to another, replacing (new
+                                            _rev) if the document already exists
+  ops couch-rewrite <document> <path>       rewrite a single key within a
+  [value]                                   CouchDB document
+  ops docker-tags <image>                   fetch the list of tags for an image
+                                            from docker hub
+  ops ec2-by-age                            list all AWS instances in a region
+                                            by age
+  ops ec2-can-run                           test if a particular EC2
+                                            configuration will run
+  ops ec2-find                              find an EC2 instance
+  ops ec2-ips                               List elastic IPs for the region
+  ops ec2-limits                            EC2 limits applied for this account
+  ops ec2-new-docker-swarm                  create a docker swarm cluster
+  ops ec2-state <instance>                  Check or alter the state of an EC2
+                                            instance
+  ops ec2-uptimes                           list AWS instances in a region by
+                                            uptime
+  ops emr-cluster-info <cluster>            Get details on a single EMR cluster
+  ops emr-clusters                          List out EMR clusters for a region
+  ops http-get <url>                        simple http GET against a URL
+  ops lambda-functions                      list out an account's AWS Lambda
+                                            functions
+  ops micro-monitor <url>                   check the status of a server running
+                                            micro-monitor
+  ops npm-downloads [time-window]           fetch download count data from
+  [...options]                              api.npmjs.org
+  ops npm-versions <pkg>                    provide a summary of package version
+                                            info for an npm package
+  ops nsq-peek <topic>                      peek at messages in the named topic
+  ops nsq-send <topic> <message>            send a message to an NSQ topic
+  ops proxy <url>                           proxies to a remote URL and logs
+                                            traffic for debugging
+  ops s3-buckets                            list out region S3 buckets
+  ops s3-info <bucket> <key>                Get metadata for an S3 object
+  ops s3-list <bucket>                      List keys in an s3 bucket
+  ops salt                                  generate a url-safe, base64 encoded
+                                            salt for use in sharing resources
+  ops site-poll <url>                       Check on the status of a site
 
 Options:
   --help     Show help                                                 [boolean]

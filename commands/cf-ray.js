@@ -45,7 +45,7 @@ async function handler (args) {
 
     const { status, data } = await axios.get(url, {
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'X-Auth-Email': email,
         'X-Auth-Key': apiKey
       }
@@ -71,7 +71,7 @@ async function getLogFields (args) {
     data: fields
   } = await axios.get(url, {
     headers: {
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'X-Auth-Email': email,
       'X-Auth-Key': apiKey
     }

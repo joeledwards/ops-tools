@@ -75,10 +75,10 @@ function handler ({
     const swarmId = uuid()
     const { primaryInfo: { token, ip } } = await launchManagers({ swarmId, zones })
 
-    console.info(`All managers launched.`)
+    console.info('All managers launched.')
 
     if (workerCount < 1) {
-      console.log(`No workers requested.`)
+      console.log('No workers requested.')
     } else {
       await launchWorkers({ primaryIp: ip, token, zones })
       console.log(`All ${orange(workerCount)} workers attached.`)
@@ -125,11 +125,11 @@ function handler ({
     let token
     if (primaryInfo) {
       // If this is not the primary, connect to the primary
-      console.info(`Attaching manager to primary...`)
+      console.info('Attaching manager to primary...')
       token = primaryInfo.token
     } else {
       // Otherwise fetch the primary's token
-      console.info(`Fetching token from primary...`)
+      console.info('Fetching token from primary...')
       token = await random.hex(32)
     }
 

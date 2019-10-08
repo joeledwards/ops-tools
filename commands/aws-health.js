@@ -24,15 +24,15 @@ function handler () {
         }) => `[${service}] ${region}:${zone}:${arn} (${status}) => ${start} - ${end}`),
         sortBy(({ service }) => service)
       )(data.events).forEach(summary => console.log(summary))
-      console.log(green(`Successfully fetched AWS health events.`))
+      console.log(green('Successfully fetched AWS health events.'))
     })
     .catch(error => {
       if (error.code === 'SubscriptionRequiredException') {
-        console.error(`Health API is only available for accounts with a support contract.`)
+        console.error('Health API is only available for accounts with a support contract.')
       } else {
         console.error(error)
         console.error(
-          red(`Error listing AWS health events.`),
+          red('Error listing AWS health events.'),
           emoji.inject('Details above :point_up:')
         )
       }

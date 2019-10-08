@@ -14,10 +14,10 @@ function handler () {
       const { MetricAlarms: alarms } = result
 
       if (alarms.length > 0) {
-        console.log(c.yellow(`Alarms:`))
+        console.log(c.yellow('Alarms:'))
         console.log(buzJson(alarms))
       } else {
-        console.log(c.green(`No alarms.`))
+        console.log(c.green('No alarms.'))
       }
     })
     .catch(error => {

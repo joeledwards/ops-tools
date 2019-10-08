@@ -65,7 +65,7 @@ function handler (args) {
     listZones()
       .then(async zones => {
         try {
-          for (let zone in zones.values) {
+          for (const zone in zones.values) {
             await summarizeZoneStats(zone)
           }
         } catch (error) {

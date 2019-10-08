@@ -71,7 +71,7 @@ function handler () {
     })
     .catch(error => {
       console.error(error)
-      console.error(c.red(`Error listing instances by age. Details above ☝🏼`))
+      console.error(c.red('Error listing instances by age. Details above ☝🏼'))
       process.exit(1)
     })
 }

@@ -29,21 +29,22 @@ function listDir (dir) {
   })
 }
 
-function testCmd (t, cmd, { status = 0 } = {}) {
-  return new Promise(async (resolve, reject) => {
-    const watch = sw()
-    const outcome = await exec(cmd)
-    const { code, stdout, stderr } = outcome
-    t.ok(watch.duration().millis() < 1000, `[${cmd}] should execute in less than 1 second`)
-    t.equal(code, status, `[${cmd}] should exit with ${status} status code`)
-    if (status === 0) {
-      t.ok(stdout.length > 0, `[${cmd}] stdout should be populated`)
-      t.ok(stderr.length === 0, `[${cmd}] stderr should be empty`)
-    } else {
-      t.ok(stderr.length > 0, `[${cmd}] stderr should be populated`)
-    }
-    resolve(outcome)
-  })
+async function testCmd (t, cmd, { status = 0 } = {}) {
+  const watch = sw()
+  const outcome = await exec(cmd)
+  const { code, stdout, stderr } = outcome
+
+  t.ok(watch.duration().millis() < 1000, `[${cmd}] should execute in less than 1 second`)
+  t.equal(code, status, `[${cmd}] should exit with ${status} status code`)
+
+  if (status === 0) {
+    t.ok(stdout.length > 0, `[${cmd}] stdout should be populated`)
+    t.ok(stderr.length === 0, `[${cmd}] stderr should be empty`)
+  } else {
+    t.ok(stderr.length > 0, `[${cmd}] stderr should be populated`)
+  }
+
+  return outcome
 }
 
 tap.test(async t => {

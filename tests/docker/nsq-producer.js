@@ -16,7 +16,7 @@ const watch = durations.stopwatch()
 const pub = new Publisher({ host, port, autoConnect })
 
 function publish () {
-  let index = count++
+  const index = count++
 
   const message = {
     index,

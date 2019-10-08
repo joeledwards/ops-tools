@@ -63,7 +63,7 @@ function handler ({ pollInterval, statusCode, timeout, url }) {
       .catch(error => {
         if (error.code) {
           console.error(
-            red(`Error connecting:`),
+            red('Error connecting:'),
             yellow(error.code),
             `: ${error.message}`,
             error.message.includes('timeout')

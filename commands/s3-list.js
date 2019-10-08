@@ -32,7 +32,7 @@ function builder (yargs) {
 
 function handler ({ after, bucket, limit, prefix }) {
   if (limit > 1000) {
-    console.error(`Maximum limit of 1000 for now.`)
+    console.error('Maximum limit of 1000 for now.')
     process.exit(1)
   }
 

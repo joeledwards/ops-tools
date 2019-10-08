@@ -66,7 +66,7 @@ function handler ({
     logFunc(...args)
   }
 
-  let log = {
+  const log = {
     debug: logWarp(console.debug.bind(console)),
     error: logWarp(console.error.bind(console)),
     info: logWarp(console.info.bind(console)),
@@ -292,7 +292,7 @@ function handler ({
             log.error(error)
             log.error(
               c.red(`Error publishing image ${c.yellow(ami)} in region ${c.yellow(region)}.`),
-              c.emoji.inject(`Details above :point_up:`)
+              c.emoji.inject('Details above :point_up:')
             )
 
             reject(error)

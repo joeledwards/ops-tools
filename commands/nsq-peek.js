@@ -106,7 +106,7 @@ function handler (argv) {
   }
 
   if (!isNil(authSecret)) {
-    log.info(`  auth-secret: ***`)
+    log.info('  auth-secret: ***')
     options.authSecret = authSecret
   }
 
@@ -117,7 +117,7 @@ function handler (argv) {
     log.info(`lookupd-hosts: ${lookupdHost}`)
     options.lookupdHTTPAddresses = lookupdHost
   } else {
-    log.error(`You must specify at least one host (--nsqdHost > --lookupdHost).`)
+    log.error('You must specify at least one host (--nsqdHost > --lookupdHost).')
     process.exit(1)
   }
 
@@ -146,14 +146,14 @@ function handler (argv) {
     if (!halting) {
       const delay = 1000
       const termTime = new Date(new Date().getTime() + delay).toISOString()
-      log.info(yellow(`scheduling connection to terminate at`), termTime)
+      log.info(yellow('scheduling connection to terminate at'), termTime)
       halting = true
       setTimeout(closer, 1000)
     }
   }
 
   function closer () {
-    log.info(yellow(`closing connection now`))
+    log.info(yellow('closing connection now'))
     reader.close()
   }
 

@@ -113,8 +113,8 @@ async function handler (options) {
       r.toPairs
     )(publishTimes)
 
-    let latestVersion = tags.latest
-    let latest = r.compose(
+    const latestVersion = tags.latest
+    const latest = r.compose(
       r.head,
       r.filter(({ version }) => version === latestVersion),
       r.filter(({ version }) => !['created', 'modified'].includes(version)),
@@ -122,7 +122,7 @@ async function handler (options) {
       r.toPairs
     )(publishTimes)
 
-    let versionCount = Object.keys(versions).length
+    const versionCount = Object.keys(versions).length
     const serializableVersion = ({ version, time }) => ({
       version,
       time: time.toISOString()
@@ -212,7 +212,7 @@ async function handler (options) {
 
       if (timings) {
         console.info()
-        console.info(`=== Times ⏱  ==============`)
+        console.info('=== Times ⏱  ==============')
         console.info(`  fetch : ${c.orange(fetchWatch)}`)
         console.info(`   data : ${c.orange(dataWatch)}`)
         console.info(`  chart : ${c.orange(chartWatch)}`)

@@ -1,6 +1,6 @@
 module.exports = {
   command: 'lambda-functions',
-  desc: `list out an account's AWS Lambda functions`,
+  desc: 'list out an account\'s AWS Lambda functions',
   builder,
   handler
 }

@@ -71,7 +71,7 @@ function handler () {
 
       async.series(uptimeTasks, error => {
         if (error) {
-          console.error(`Error checking uptimes:`, error)
+          console.error('Error checking uptimes:', error)
         } else {
           const summaries = r.compose(
             r.reverse,

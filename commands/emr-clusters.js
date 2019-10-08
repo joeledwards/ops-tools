@@ -109,7 +109,7 @@ function handler ({ any, all, state, limit }) {
       console.log(`Listed ${orange(clusterCount)} of ${orange(clusters.length)} clusters.`)
     })
     .catch(error => {
-      console.error(`Error listing EMR clusters:`, error)
+      console.error('Error listing EMR clusters:', error)
       process.exit(1)
     })
 

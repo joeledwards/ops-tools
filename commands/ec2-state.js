@@ -155,7 +155,7 @@ function handler ({ instance, start, stop, terminate }) {
 
   ec2.findInstances({ awsOptions, fieldExtractor })
     .then(async instances => {
-      for (let { id, name, state } of instances) {
+      for (const { id, name, state } of instances) {
         try {
           console.log(`${idColor(id)} (${nameColor(name)}) : ${stateColor(state)}`)
           if (transitionRequested) {
