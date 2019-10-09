@@ -51,10 +51,14 @@ async function handler (args) {
       }
     })
 
-    console.info(`[${status}] ${buzJson(data)}`)
+    try {
+      console.info(`[${status}] ${buzJson(data)}`)
+    } catch (error) {
+      console.info(`[${status}]`, data)
+    }
   } catch (error) {
     console.error(error)
-    console.error('Error happened ^')
+    console.error(`Error fetching access log record for ray ${rayId}. Details above ^`)
   }
 }
 
