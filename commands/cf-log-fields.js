@@ -11,7 +11,6 @@ function builder (yargs) {
     .option('quiet', {
       type: 'boolean',
       desc: 'only show the field names (no descriptions)',
-      default: false,
       alias: ['q']
     })
     .option('email', {

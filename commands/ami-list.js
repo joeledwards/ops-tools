@@ -10,13 +10,11 @@ function builder (yargs) {
     .option('ids-only', {
       type: 'boolean',
       desc: 'only list AMI IDs',
-      default: false,
       alias: 'i'
     })
     .options('json', {
       type: 'boolean',
       desc: 'display raw JSON region records from EC2 API call',
-      default: false,
       alias: 'j'
     })
     .option('limit', {

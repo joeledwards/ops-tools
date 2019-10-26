@@ -10,7 +10,6 @@ function builder (yargs) {
     .option('json', {
       type: 'boolean',
       desc: 'print raw JSON data instead of the summary',
-      default: false,
       alias: ['j']
     })
 }

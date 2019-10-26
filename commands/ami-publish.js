@@ -9,7 +9,6 @@ function builder (yargs) {
   return yargs
     .option('simulate', {
       type: 'boolean',
-      default: false,
       desc: 'perform a dry run of the operation'
     })
 }

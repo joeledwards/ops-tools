@@ -15,7 +15,6 @@ function builder (yargs) {
     })
     .option('allow-non-ephemeral', {
       type: 'boolean',
-      default: false,
       desc: 'prevents coercion to ephemeral channels'
     })
     .option('auth-secret', {
@@ -48,17 +47,14 @@ function builder (yargs) {
       default: 100
     })
     .option('tls', {
-      type: 'boolean',
-      default: false
+      type: 'boolean'
     })
     .option('tls-verify', {
-      type: 'boolean',
-      default: false
+      type: 'boolean'
     })
     .option('unlimited', {
       alias: 'u',
-      type: 'boolean',
-      default: false
+      type: 'boolean'
     })
 }
 

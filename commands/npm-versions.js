@@ -10,13 +10,11 @@ function builder (yargs) {
     .options('extended', {
       type: 'boolean',
       desc: 'output all versions',
-      default: false,
       alias: 'x'
     })
     .option('json', {
       type: 'boolean',
       desc: 'output summary as json',
-      default: false,
       alias: 'j'
     })
     .option('registry', {
@@ -39,13 +37,11 @@ function builder (yargs) {
     .option('days', {
       type: 'boolean',
       desc: 'chart each day individually, showing multiple lines of plots if necessary',
-      default: false,
       alias: 'd'
     })
     .options('timings', {
       type: 'boolean',
       desc: 'report timing metadata (how long did fetch and report generation)',
-      default: false,
       alias: 't'
     })
 }

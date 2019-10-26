@@ -10,19 +10,16 @@ function builder (yargs) {
     .option('quiet', {
       type: 'boolean',
       desc: 'only output server list (no progress, summary, JSON formatting)',
-      default: false,
       alias: 'q'
     })
     .option('case-sensitive', {
       type: 'boolean',
       desc: 'make filter expressions case sensitive',
-      default: false,
       alias: 'c'
     })
     .option('extended', {
       type: 'boolean',
       desc: 'show extended details',
-      default: false,
       alias: 'x'
     })
     .option('instance-id', {

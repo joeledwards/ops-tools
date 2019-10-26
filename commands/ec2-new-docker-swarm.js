@@ -33,7 +33,6 @@ function builder (yargs) {
     .options('simulate', {
       tpe: 'boolean',
       desc: 'simulate the swarm setup without provisioning any resources',
-      default: false,
       alias: ['s']
     })
 }

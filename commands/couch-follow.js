@@ -17,7 +17,6 @@ function builder (yargs) {
     .option('complete-doc', {
       type: 'boolean',
       desc: 'pull back and render the complete doc on each report (streams ALL content)',
-      default: false,
       alias: 'c'
     })
     .option('full-throttle', {
@@ -28,13 +27,11 @@ function builder (yargs) {
     .option('info', {
       type: 'boolen',
       desc: 'report version, size, and age info (streams full packument)',
-      default: false,
       alias: 'i'
     })
     .option('all-info', {
       type: 'boolen',
       desc: 'report attachment size (WARNING: streams all data, including attachments)',
-      default: false,
       alias: 'I'
     })
     .option('leveldb', {
@@ -66,8 +63,7 @@ function builder (yargs) {
     })
     .option('slow', {
       type: 'boolean',
-      desc: 'use the slow changes parser',
-      default: false
+      desc: 'use the slow changes parser'
     })
 }
 
@@ -94,6 +90,8 @@ async function followCouch (argv) {
   const ChangesStream = require('@buzuli/changes-stream')
   const throttle = require('@buzuli/throttle')
   const buzJson = require('@buzuli/json')
+
+  console.info(buzJson(argv))
 
   const replaceDelay = durations.seconds(5)
 

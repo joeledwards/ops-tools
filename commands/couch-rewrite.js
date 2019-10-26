@@ -35,19 +35,16 @@ function builder (yargs) {
     .option('force', {
       type: 'boolean',
       desc: 'write the new value even if no prior, non-structural value existed at the path',
-      default: false,
       alias: 'F'
     })
     .option('dry-run', {
       type: 'boolean',
       desc: 'do everything except actually updating the document',
-      default: false,
       alias: 'dry'
     })
     .option('debug', {
       type: 'boolean',
       desc: 'output additional debug info',
-      default: false,
       alias: 'D'
     })
 }

@@ -10,19 +10,16 @@ function builder (yargs) {
     .option('full-interval', {
       type: 'boolean',
       desc: 'get values from the full time interval',
-      default: false,
       alias: ['full', 'f']
     })
     .option('sort-by-byte-count', {
       type: 'boolean',
       desc: 'order by byte count, descending [overrides -b]',
-      default: false,
       alias: ['bc', 'b']
     })
     .option('sort-by-request-count', {
       type: 'boolean',
       desc: 'order by request count, descending',
-      default: false,
       alias: ['rc', 'r']
     })
     .option('zone', {

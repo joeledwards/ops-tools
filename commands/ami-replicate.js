@@ -19,12 +19,10 @@ function builder (yargs) {
     })
     .option('publish', {
       type: 'boolean',
-      default: false,
       desc: 'make the AMI publicly available'
     })
     .option('simulate', {
       type: 'boolean',
-      default: false,
       desc: 'perform a dry run of the operation'
     })
 }

@@ -10,7 +10,6 @@ function builder (yargs) {
     .option('full', {
       type: 'boolean',
       desc: 'List all function output supplied by the Lambda API',
-      default: false,
       alias: 'f'
     })
 }

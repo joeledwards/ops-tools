@@ -30,7 +30,6 @@ function builder (yargs) {
     .option('dry-run', {
       type: 'boolean',
       desc: 'do everything except actually updating the document',
-      default: false,
       alias: 'dry'
     })
 }

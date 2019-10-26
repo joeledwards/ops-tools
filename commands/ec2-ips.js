@@ -15,7 +15,6 @@ function builder (yargs) {
     .option('quiet', {
       type: 'boolean',
       desc: 'only output IP list (no progress, summary, JSON formatting)',
-      default: false,
       alias: 'q'
     })
 }
