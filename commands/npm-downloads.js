@@ -5,6 +5,7 @@ module.exports = {
   handler
 }
 
+const chart = require('../lib/chart')
 const moment = require('moment')
 
 function builder (yargs) {
@@ -25,6 +26,15 @@ function builder (yargs) {
       desc: 'Perform a range query (instead of a point query).',
       alias: 'r'
     })
+    .option('csv', {
+      type: 'boolean',
+      desc: 'Format download counts as CSV.'
+    })
+    .option('graph', {
+      type: 'boolean',
+      desc: 'Graph the downloads.',
+      alias: 'g'
+    })
 }
 
 async function handler (options) {
@@ -35,7 +45,9 @@ async function handler (options) {
     const {
       packages,
       range,
-      timeWindow
+      timeWindow,
+      graph,
+      csv
     } = options
 
     let url = 'https://api.npmjs.org/downloads'
@@ -46,7 +58,9 @@ async function handler (options) {
       url = `${url}/${packages.join(',')}`
     }
 
-    console.info(`GET ${url}`)
+    if (!csv) {
+      console.info(`GET ${url}`)
+    }
 
     const { status, data } = await axios({
       method: 'GET',
@@ -55,7 +69,20 @@ async function handler (options) {
     })
 
     if (status === 200) {
-      console.info(buzJson(data))
+      if (graph && range) {
+        console.info(
+          chart.plot({
+            values: Object.values(data.downloads).map(({ downloads: d }) => d)
+          })
+        )
+      } else if (csv && range) {
+        console.info('"date","downloads"')
+        Object.values(data.downloads).forEach(({ day, downloads }) => {
+          console.info(`"${day}","${downloads}"`)
+        })
+      } else {
+        console.info(buzJson(data))
+      }
     } else {
       console.error(`[${status}]\n${buzJson(data)}`)
       process.exit(1)

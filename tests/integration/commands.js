@@ -47,7 +47,7 @@ async function testCmd (t, cmd, { status = 0 } = {}) {
   return outcome
 }
 
-tap.test(async t => {
+tap.test({ timeout: 120000 }, async t => {
   const bin = './bin/ops.js'
   const cmdDir = './commands'
   const { stdout: helpOut } = await testCmd(t, `${bin} --help`)
