@@ -9,8 +9,6 @@ function builder (yargs) {
   yargs
     .option('raw', {
       type: 'boolean',
-
-      default: 'false',
       alias: ['r']
     })
 }

@@ -32,13 +32,11 @@ function builder (yargs) {
     .option('all', {
       type: 'boolean',
       desc: `show all clusters (normally limited to ${DEFAULT_LIMIT}; overrides --limit)`,
-      default: 'false',
       alias: ['all-states', 'a']
     })
     .option('any', {
       type: 'boolean',
       desc: 'show clusters in any state (terminated states exclued by default; overrides --state)',
-      default: 'false',
       alias: ['any-state', 'A']
     })
     .option('limit', {

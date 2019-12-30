@@ -15,6 +15,14 @@
     "test:unit": "tap tests/unit/*.js",
     "test:integration": "tap tests/integration/*.js"
   },
+  "files": [
+    "package.json",
+    "README.md",
+    "bin/*",
+    "commands/*",
+    "lib/**/*.js",
+    "docker-compose.yml"
+  ],
   "bin": {
     "ops": "./bin/ops.js",
     "ops-tools": "./bin/ops.js"
