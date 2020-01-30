@@ -5,26 +5,44 @@ module.exports = {
 }
 
 function handler () {
-  const { red, green, emoji } = require('@buzuli/color')
+  const c = require('@buzuli/color')
+  const moment = require('moment')
+  const durations = require('durations')
   const { compose, map, sortBy } = require('ramda')
 
+  const time = require('../lib/time')
   const health = require('../lib/aws').health()
 
   health.listEvents()
     .then(data => {
+      console.info(data.events[0])
+
       compose(
-        map(({
-          arn,
-          service,
-          region,
-          availabilityZone: zone,
-          statusCode: status,
-          startTime: start,
-          endTime: end
-        }) => `[${service}] ${region}:${zone}:${arn} (${status}) => ${start} - ${end}`),
-        sortBy(({ service }) => service)
-      )(data.events).forEach(summary => console.log(summary))
-      console.log(green('Successfully fetched AWS health events.'))
+        sortBy(({ service, statusCode }) => [statusCode, service])
+      )(data.events).forEach(({
+        arn,
+        service,
+        region,
+        availabilityZone: zone,
+        statusCode: status,
+        startTime: start,
+        endTime: end,
+        eventTypeCategory: category,
+        eventTypeCode: code
+      }) => {
+        console.info(` service : ${service}`)
+        console.info(`  region : ${c.blue(region)}`)
+        console.info(`    zone : ${c.orange(zone)}`)
+        console.info(`     arn : ${c.yellow(arn)}`)
+        console.info(`  status : ${(status === 'closed') ? c.grey(status) : c.red.bold(status)}`)
+        console.info(`  detail : ${c.purple(category)} => ${code}`)
+        console.info(` elapsed : ${c.blue(time.diff(start, end))}`)
+        console.info(`   start : ${time.color(start)}`)
+        console.info(`     end : ${time.color(end)}`)
+        console.info(``)
+      })
+
+      console.log('Successfully fetched AWS health events.')
     })
     .catch(error => {
       if (error.code === 'SubscriptionRequiredException') {
@@ -32,8 +50,7 @@ function handler () {
       } else {
         console.error(error)
         console.error(
-          red('Error listing AWS health events.'),
-          emoji.inject('Details above :point_up:')
+          c.red(`Error listing AWS health events. Details above ${c.yellow('^')}`)
         )
       }
       process.exit(1)
