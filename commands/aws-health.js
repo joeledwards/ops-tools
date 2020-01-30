@@ -6,9 +6,7 @@ module.exports = {
 
 function handler () {
   const c = require('@buzuli/color')
-  const moment = require('moment')
-  const durations = require('durations')
-  const { compose, map, sortBy } = require('ramda')
+  const { compose, sortBy } = require('ramda')
 
   const time = require('../lib/time')
   const health = require('../lib/aws').health()
@@ -39,7 +37,7 @@ function handler () {
         console.info(` elapsed : ${c.blue(time.diff(start, end))}`)
         console.info(`   start : ${time.color(start)}`)
         console.info(`     end : ${time.color(end)}`)
-        console.info(``)
+        console.info('')
       })
 
       console.log('Successfully fetched AWS health events.')
