@@ -72,7 +72,8 @@ async function handler (options) {
       if (graph && range) {
         console.info(
           chart.plot({
-            values: Object.values(data.downloads).map(({ downloads: d }) => d)
+            values: Object.values(data.downloads).map(({ downloads: d }) => d),
+            padding: 15
           })
         )
       } else if (csv && range) {
