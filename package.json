@@ -38,7 +38,7 @@
     "@buzuli/throttle": "^2.0.2",
     "@buzuli/url": "^1.0.0",
     "asciichart": "^1.5.9",
-    "async": "^2.6.3",
+    "async": "^3.0.0",
     "aws-sdk": "^2.578.0",
     "axios": "^0.19.0",
     "bluebird": "^3.7.1",
