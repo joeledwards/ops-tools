@@ -39,6 +39,7 @@ function builder (yargs) {
 
 async function handler (options) {
   try {
+    const c = require('@buzuli/color')
     const axios = require('axios')
     const buzJson = require('@buzuli/json')
 
@@ -50,21 +51,26 @@ async function handler (options) {
       csv
     } = options
 
-    let url = 'https://api.npmjs.org/downloads'
+    const url = (customPath, { color = false } = {}) => {
+      const colorize = cc => text => color ? cc(text) : text
+      const scheme = colorize(c.green)('https')
+      const address = colorize(c.blue)('api.npmjs.org')
+      const path = colorize(c.yellow)(`downloads/${customPath}`)
 
-    url = `${url}/${range ? 'range' : 'point'}/${timeWindow}`
-
-    if (packages) {
-      url = `${url}/${packages.join(',')}`
+      return `${scheme}://${address}/${path}`
     }
 
+    const path = packages
+      ? `${packages.join(',')}`
+      : `${range ? 'range' : 'point'}/${timeWindow}`
+
     if (!csv) {
-      console.info(`GET ${url}`)
+      console.info(`GET ${url(path, { color: true })}`)
     }
 
     const { status, data } = await axios({
       method: 'GET',
-      url,
+      url: url(path),
       validateStatus: () => true
     })
 
