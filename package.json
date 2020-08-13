@@ -33,26 +33,26 @@
     "@buzuli/changes-stream": "^1.1.0",
     "@buzuli/color": "^2.2.2",
     "@buzuli/hexdump": "^1.1.0",
-    "@buzuli/http": "^1.0.2",
+    "@buzuli/http": "^1.0.3",
     "@buzuli/json": "^2.1.0",
     "@buzuli/throttle": "^2.0.2",
     "@buzuli/url": "^1.0.1",
-    "asciichart": "^1.5.17",
+    "asciichart": "^1.5.24",
     "async": "^2.6.3",
-    "aws-sdk": "^2.670.0",
+    "aws-sdk": "^2.733.0",
     "axios": "^0.19.2",
     "bluebird": "^3.7.2",
     "bole": "^3.0.2",
     "durations": "^3.4.2",
     "express": "^4.17.1",
-    "http-proxy": "^1.18.0",
-    "ioredis": "^4.16.3",
+    "http-proxy": "^1.18.1",
+    "ioredis": "^4.17.3",
     "leveldown": "^4.0.2",
     "levelup": "^3.1.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.20",
     "log-a-log": "^6.1.0",
     "mem": "^4.3.0",
-    "moment": "^2.25.3",
+    "moment": "^2.27.0",
     "node-ssh": "^5.1.2",
     "nsqjs": "^0.12.1",
     "oboe": "^2.1.5",
@@ -64,11 +64,11 @@
     "stream-counter": "^1.0.0",
     "update-notifier": "^2.5.0",
     "uuid": "^3.4.0",
-    "yargs": "^15.3.1"
+    "yargs": "^15.4.1"
   },
   "devDependencies": {
     "nodemon": "^1.19.4",
-    "standard": "^14.3.3",
-    "tap": "^14.10.7"
+    "standard": "^14.3.4",
+    "tap": "^14.10.8"
   }
 }

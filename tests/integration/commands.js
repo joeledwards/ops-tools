@@ -34,7 +34,7 @@ async function testCmd (t, cmd, { status = 0 } = {}) {
   const outcome = await exec(cmd)
   const { code, stdout, stderr } = outcome
 
-  t.ok(watch.duration().millis() < 2000, `[${cmd}] should execute in less than 2 seconds`)
+  t.ok(watch.duration().millis() < 5000, `[${cmd}] should execute in less than 5 seconds`)
   t.equal(code, status, `[${cmd}] should exit with ${status} status code`)
 
   if (status === 0) {
