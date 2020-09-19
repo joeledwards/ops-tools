@@ -315,7 +315,7 @@ async function followCouch (argv) {
     if (leveldb) {
       console.log(`db: ${blue(leveldb)}`)
       const level = require('level')
-      db = level(leveldb)
+      const db = level(leveldb)
       await db.open()
       return db
     }
