@@ -38,9 +38,12 @@ async function redisTest ({
   const Redis = require('ioredis')
   const { stopwatch } = require('durations')
 
-  const redis = new Redis({ host, port })
-
   console.info(`Testing redis server ${c.blue(host)}:${c.orange(port)}`)
+
+  const watch = stopwatch().start()
+  const redis = newClient({ host, port })
+  await redis.connect()
+  console.info(`Connected in ${c.blue(watch)}`)
 
   await testInfo({ redis })
   await testString({ redis })
@@ -53,7 +56,7 @@ async function redisTest ({
     const watch = stopwatch().start()
     await redis.info()
     watch.stop()
-    console.info(`Fetched info (warm-up) in ${c.blue(watch)}`)
+    console.info(`Fetched info in ${c.blue(watch)}`)
   }
 
   async function testString ({ redis }) {
@@ -75,7 +78,9 @@ async function redisTest ({
   }
 
   async function testPubSub ({ redis: pub, host, port }) {
-    const sub = new Redis({ host, port })
+    const sub = newClient({ host, port })
+    await sub.connect()
+    await sub.info()
 
     const watch = stopwatch().start()
     await sub.subscribe('notices')
@@ -105,6 +110,15 @@ async function redisTest ({
     d.promise = promise
 
     return d
+  }
+
+  function newClient (options = {}) {
+    const client = new Redis({
+      reconnecOnError: () => false,
+      lazyConnect: true,
+      ...options
+    })
+    return client
   }
 
   function closeClient (redis) {
