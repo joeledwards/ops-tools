@@ -5,7 +5,7 @@ module.exports = {
 }
 
 function handler () {
-  const uuid = require('uuid/v4')
-  const salt = Buffer.from(`${uuid()}${uuid()}`).toString('base64').replace('+', '-').replace('/', '_')
+  const uuid = require('uuid')
+  const salt = Buffer.from(`${uuid.v4()}${uuid.v4()}`).toString('base64').replace('+', '-').replace('/', '_')
   console.info(salt)
 }

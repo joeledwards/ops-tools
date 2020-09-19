@@ -27,8 +27,28 @@ function builder (yargs) {
     })
 }
 
+async function handler (options) {
+  const c = require('@buzuli/color')
+
+  try {
+    await replicateAmi(options)
+    console.info(c.green('AMI replicated to all target regions'))
+  } catch (error) {
+    const {
+      srcRegion,
+      srcAmi
+    } = options
+    console.error(error)
+    console.error(
+      c.red(`Error replicating image ${c.blue(srcRegion)}:${c.yellow(srcAmi)}.`),
+      c.emoji.inject('Details above :point-up:')
+    )
+    process.exit(1)
+  }
+}
+
 // Run through all regions
-function handler ({
+async function replicateAmi ({
   region: srcRegion,
   ami: srcAmi,
   simulate,
@@ -45,7 +65,6 @@ function handler ({
     description
   }
 
-  const async = require('async')
   const c = require('@buzuli/color')
   const r = require('ramda')
   const poller = require('promise-poller').default
@@ -73,53 +92,24 @@ function handler ({
 
   setSimulate(simulate)
 
-  log.info(`Replicating image ${c.blue(srcAmi)} from ${c.yellow(srcRegion)} to all regions`)
+  log.info(`Replicating image ${c.yellow(srcAmi)} from ${c.blue(srcRegion)} to all regions`)
   log.info(`   visibility: ${publish ? 'public' : 'private'}`)
   log.info(`   simulation: ${simulate}`)
   log.info(`         name: ${name || 'use source AMI name'}`)
   log.info(`  description: ${description || 'use source AMI description'}`)
   log.info()
 
-  // Map each region to a replicator function.
-  const actions = regions.general
-    .filter(region => region !== srcRegion)
-    .map(dstRegion => {
-      return next => {
-        log.info(`Replicating ${c.blue(srcAmi)} from ${c.yellow(srcRegion)} to ${c.yellow(dstRegion)}`)
+  for (const dstRegion of regions.general) {
+    if (dstRegion !== srcRegion) {
+      log.info(`Replicating ${c.yellow(srcAmi)} from ${c.blue(srcRegion)} to ${c.blue(dstRegion)}`)
 
-        replicateImage({ dstRegion, ...options })
-          .then(
-            ({ published, ami }) => {
-              const action = published ? 'published' : 'copied'
-              const icon = c.emoji.inject(published ? ':gift:' : ':lock:')
-              log.info(`Successfully ${action} to ${c.yellow(dstRegion)} as ${c.green(ami)} ${icon}`)
-              next()
-            },
-            error => {
-              log.error(error)
-              log.error(
-                c.red(`Error replicating to ${c.yellow(dstRegion)}.`),
-                c.emoji.inject('Details above :point_up:')
-              )
+      const { published, ami } = await replicateImage({ dstRegion, ...options })
+      const action = published ? 'published' : 'copied'
+      const icon = c.emoji.inject(published ? ':gift:' : ':lock:')
 
-              next(error)
-            }
-          )
-      }
-    })
-
-  // Process the regions in sequence.
-  async.series(actions, error => {
-    if (error) {
-      log.error(error)
-      log.error(
-        c.red(`Error replicating image ${srcRegion}:${srcAmi}.`),
-        c.emoji.inject('Details above :point_up:')
-      )
-    } else {
-      log.info(c.green('AMI replicated to all target regions'))
+      log.info(`Successfully ${action} to ${c.blue(dstRegion)} as ${c.green(ami)} ${icon}`)
     }
-  })
+  }
 
   // Fetch AMI details
   function getImageInfo ({ region, ami, simulate }) {
@@ -215,12 +205,12 @@ function handler ({
           log.error(c.red(`Error polling state of ${c.yellow(ami)} :`), `${cause}`)
         } else {
           if (value.state === 'available') {
-            log.info(c.emoji.inject(`Image ${c.yellow(region)}:${c.green(ami)} is available :tada:`))
+            log.info(c.emoji.inject(`Image ${c.blue(region)}:${c.yellow(ami)} is available :tada:`))
             return false
           } else if (value.state === 'pending') {
-            log.info(`Image ${c.yellow(region)}:${c.green(ami)} is not ready [state=${c.red(value.state)}]`)
+            log.info(`Image ${c.blue(region)}:${c.yellow(ami)} is not ready [state=${c.red(value.state)}]`)
           } else {
-            log.error(`Bad state (${c.red(value.state)}) for image ${c.yellow(region)}:${c.green(ami)}`)
+            log.error(`Bad state (${c.red(value.state)}) for image ${c.blue(region)}:${c.yellow(ami)}`)
             bail = true
             return true
           }
@@ -277,7 +267,7 @@ function handler ({
       }
 
       if (simulate) {
-        log.debug(c.green(`Published image ${c.yellow(ami)} in region ${c.yellow(region)}`))
+        log.debug(c.green(`Published image ${c.yellow(ami)} in region ${c.blue(region)}`))
 
         resolve({
           ami,
@@ -289,14 +279,14 @@ function handler ({
           if (error) {
             log.error(error)
             log.error(
-              c.red(`Error publishing image ${c.yellow(ami)} in region ${c.yellow(region)}.`),
-              c.emoji.inject('Details above :point_up:')
+              c.red(`Error publishing image ${c.yellow(ami)} in region ${c.blue(region)}.`),
+              c.emoji.inject('Details above :point-up:')
             )
 
             reject(error)
           } else {
             log.debug(data)
-            log.debug(c.green(`Updated image ${c.yellow(ami)} in region ${c.yellow(region)}`))
+            log.debug(c.green(`Updated image ${c.yellow(ami)} in region ${c.blue(region)}`))
 
             resolve({
               ami,

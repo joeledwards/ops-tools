@@ -1,6 +1,6 @@
 const durations = require('durations')
 const { Publisher } = require('squeaky')
-const v1uuid = require('uuid/v1')
+const uuid = require('uuid')
 const { blue, green, red, yellow } = require('@buzuli/color')
 
 const log = require('../../lib/log')
@@ -20,7 +20,7 @@ function publish () {
 
   const message = {
     index,
-    id: v1uuid(),
+    id: uuid.v1(),
     timestamp: new Date().toISOString()
   }
 

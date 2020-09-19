@@ -53,7 +53,7 @@ function handler ({
   } = require('@buzuli/color')
   const r = require('ramda')
   const P = require('bluebird')
-  const uuid = require('uuid/v4')
+  const uuid = require('uuid')
   const ec2 = require('../lib/aws').ec2()
   const random = require('../lib/random')
 
@@ -71,7 +71,7 @@ function handler ({
 
   async function spawnSwarm () {
     const zones = await ec2.listZones()
-    const swarmId = uuid()
+    const swarmId = uuid.v4()
     const { primaryInfo: { token, ip } } = await launchManagers({ swarmId, zones })
 
     console.info('All managers launched.')
