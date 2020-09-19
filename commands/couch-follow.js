@@ -311,18 +311,14 @@ async function followCouch (argv) {
       })
   }
 
-  function openDb (leveldb) {
-    if (!leveldb) {
-      return Promise.resolve(undefined)
-    }
-
-    return new Promise((resolve, reject) => {
+  async function openDb (leveldb) {
+    if (leveldb) {
       console.log(`db: ${blue(leveldb)}`)
-      const leveldown = require('leveldown')
-      const levelup = require('levelup')
-
-      levelup(leveldown(leveldb), (error, db) => error ? reject(error) : resolve(db))
-    })
+      const level = require('level')
+      db = level(leveldb)
+      await db.open()
+      return db
+    }
   }
 }
 

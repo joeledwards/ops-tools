@@ -4,7 +4,8 @@ const yargs = require('yargs')
 function updateCheck () {
   const updateNotifier = require('update-notifier')
   const pkg = require('../package.json')
-  const notifier = updateNotifier({ pkg, updateCheckInterval: 3600000 })
+  const oneDay = 24 * 60 * 60 * 1000
+  const notifier = updateNotifier({ pkg, updateCheckInterval: oneDay })
 
   if (notifier.update) {
     notifier.notify()
