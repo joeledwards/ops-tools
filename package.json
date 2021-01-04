@@ -39,7 +39,7 @@
     "@buzuli/url": "^1.0.1",
     "asciichart": "^1.5.25",
     "aws-sdk": "^2.756.0",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "bluebird": "^3.7.2",
     "durations": "^3.4.2",
     "express": "^4.17.1",
